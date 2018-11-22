@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <bean id="fasp2datasource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="fasp2datasource"/>
+	</bean>
+	<bean id="fasp2logDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="fasp2logDataSource"/>
+	</bean>
+	<bean id="bpmn_test" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName">
+				<value>bendi</value>
+			</property>
+		</bean>
+</beans>

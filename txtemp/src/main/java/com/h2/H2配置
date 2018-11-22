@@ -1,0 +1,34 @@
+<!-- h2 -->  web  xml配置
+    <listener>  
+        <listener-class>org.h2.server.web.DbStarter</listener-class>  
+    </listener>  
+    <context-param>  
+        <param-name>db.url</param-name>  
+        <param-value>jdbc:h2:tcp://localhost/mem:gacl</param-value>  
+    </context-param>  
+    <context-param>  
+        <param-name>db.user</param-name>  
+        <param-value>sa</param-value>  
+    </context-param>  
+    <context-param>  
+        <param-name>db.password</param-name>  
+        <param-value>sa</param-value>  
+    </context-param>  
+    <context-param>  
+        <param-name>db.tcpServer</param-name>  
+        <param-value>-tcpAllowOthers</param-value>  
+    </context-param>  
+    
+    
+    spring 配置
+    <bean id="dataSource" class="org.h2.jdbcx.JdbcConnectionPool"  
+        destroy-method="dispose">  
+        <constructor-arg>  
+            <bean class="org.h2.jdbcx.JdbcDataSource">  
+                <!-- 文件方式：必须与web.xml中配置的h2db文件名一致 -->  
+                <property name="URL" value="jdbc:h2:tcp://localhost/mem:gacl" />  
+                <property name="user" value="sa" />  
+                <property name="password" value="sa" />  
+            </bean>  
+        </constructor-arg>  
+    </bean>  

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.bd.docbd.business.dao.IDocBatchRelationDao">
+
+	<resultMap type="java.util.Map" id="relationResult">
+		<id property="datakey" column="datakey"/>
+		<result property="docId" column="docId"/>
+		<result property="batchId" column="batchId"/>
+		<result property="taskId" column="taskId"/>
+		<result property="busiParam" column="busiParam"/>
+		<result property="nodeId" column="nodeId"/>
+		<result property="nodeName" column="nodeName"/>
+		<result property="directionType" column="directionType"/>
+		<result property="status" column="status"/>
+		<result property="createTime" column="createTime" jdbcType="TIMESTAMP" javaType="String"/>
+		<result property="busiTypeId" column="busiTypeId"/>
+		<result property="currentDocId" column="currentDocId"/>
+		<result property="operationType" column="operationType"/>
+		<result property="state" column="state"/>
+	</resultMap>
+
+	<select id="queryDocBatchRelationById" parameterType="java.util.Map" resultMap="relationResult">
+		select * from bd_t_docbatchrelation t
+		<where> 1=1
+			and t.datakey = #{datakey,jdbcType=VARCHAR}
+		</where>
+	</select>
+	
+	<select id="queryDocBatchRelations" parameterType="java.util.Map" resultMap="relationResult">
+		select * from bd_t_docbatchrelation t
+		<where> 1=1
+			<if test="docId != null and docId != ''">
+				and t.docId = #{docId,jdbcType=VARCHAR}
+			</if>
+			<if test="batchId != null and batchId != ''">
+				and t.batchId = #{batchId,jdbcType=VARCHAR}
+			</if>
+			<if test="taskId != null and taskId != ''">
+				and t.taskId = #{taskId,jdbcType=VARCHAR}
+			</if>
+			<if test="busiParam != null and busiParam != ''">
+				and t.busiParam = #{busiParam,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeId != null and nodeId != ''">
+				and t.nodeId = #{nodeId,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeName != null and nodeName != ''">
+				and t.nodeName = #{nodeName,jdbcType=VARCHAR}
+			</if>
+			<if test="directionType != null and directionType != ''">
+				and t.directionType = #{directionType,jdbcType=VARCHAR}
+			</if>
+			<if test="busiTypeId != null and busiTypeId != ''">
+				and t.busiTypeId = #{busiTypeId,jdbcType=VARCHAR}
+			</if>
+			<if test="state != null and state != ''">
+				and t.state = #{state,jdbcType=VARCHAR}
+			</if>
+			<if test="currentDocId != null and currentDocId != ''">
+				and t.currentDocId = #{currentDocId,jdbcType=VARCHAR}
+			</if>
+			<if test="operationType != null and operationType != ''">
+				and t.operationType = #{operationType,jdbcType=VARCHAR}
+			</if>
+			<if test="currentDocIds != null and currentDocIds != ''">
+				and currentDocId in (
+				<foreach collection="currentDocIds" item="docId" separator=",">
+					#{docId}
+				</foreach>
+				)
+			</if>
+		</where>
+		order by t.createtime desc
+	</select>
+	<select id="queryDocBatchRelationsOne" parameterType="java.util.Map" resultMap="relationResult">
+		select * from(select * from bd_t_docbatchrelation t
+		<where> 1=1
+			<if test="docId != null and docId != ''">
+				and t.docId = #{docId,jdbcType=VARCHAR}
+			</if>
+			<if test="batchId != null and batchId != ''">
+				and t.batchId = #{batchId,jdbcType=VARCHAR}
+			</if>
+			<if test="taskId != null and taskId != ''">
+				and t.taskId = #{taskId,jdbcType=VARCHAR}
+			</if>
+			<if test="busiParam != null and busiParam != ''">
+				and t.busiParam = #{busiParam,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeId != null and nodeId != ''">
+				and t.nodeId = #{nodeId,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeName != null and nodeName != ''">
+				and t.nodeName = #{nodeName,jdbcType=VARCHAR}
+			</if>
+			<if test="directionType != null and directionType != ''">
+				and t.directionType = #{directionType,jdbcType=VARCHAR}
+			</if>
+			<if test="busiTypeId != null and busiTypeId != ''">
+				and t.busiTypeId = #{busiTypeId,jdbcType=VARCHAR}
+			</if>
+			<if test="state != null and state != ''">
+				and t.state = #{state,jdbcType=VARCHAR}
+			</if>
+			<if test="currentDocId != null and currentDocId != ''">
+				and t.currentDocId = #{currentDocId,jdbcType=VARCHAR}
+			</if>
+			<if test="operationType != null and operationType != ''">
+				and t.operationType = #{operationType,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by t.createtime desc) where rownum=1
+	</select>
+	
+	<insert id="insertAllDocBatchRelation" parameterType="java.util.List">
+		insert into bd_t_docbatchrelation(datakey,docId,batchId,taskId,busiParam,nodeId,nodeName,
+			directionType,createTime,busiTypeId,currentDocId,operationType,status,state)
+		select t.*, '1', '1' from (
+		<foreach collection="list" item="item" index="index" separator="union all">
+			select 
+				#{item.datakey},
+				#{item.docId},
+				#{item.batchId},
+				#{item.taskId},
+				#{item.busiParam},
+				#{item.nodeId},
+				#{item.nodeName},
+				#{item.directionType},
+				#{item.createTime},
+				#{item.busiTypeId},
+				#{item.currentDocId},
+				#{item.operationType}
+			from dual
+		</foreach>
+		) t
+	</insert>
+
+	<insert id="insertDocBatchRelation" parameterType="java.util.Map">
+		insert into bd_t_docbatchrelation (
+			datakey,
+			docId,
+			batchId,
+			taskId,
+			busiParam,
+			nodeId,
+			nodeName,
+			directionType,
+			status,
+			createTime,
+			busiTypeId,
+			currentDocId,
+			operationType,
+			state
+		) values (
+			#{datakey, jdbcType=VARCHAR},
+			#{docId, jdbcType=VARCHAR},
+			#{batchId, jdbcType=VARCHAR},
+			#{taskId, jdbcType=VARCHAR},
+			#{busiParam, jdbcType=VARCHAR},
+			#{nodeId, jdbcType=VARCHAR},
+			#{nodeName, jdbcType=VARCHAR},
+			#{directionType, jdbcType=VARCHAR},
+			'1',
+			#{createTime, jdbcType=TIMESTAMP},
+			#{busiTypeId, jdbcType=VARCHAR},
+			#{currentDocId, jdbcType=VARCHAR},
+			#{operationType, jdbcType=VARCHAR},
+			'1'
+		)
+	</insert>
+	
+	<insert id="insertRelationParam" parameterType="java.util.Map">
+		insert into bd_t_relationparam (
+			datakey,
+			relationIds,
+			docId,
+			currentDocId,
+			busiTypeId,
+			currentNodeId,
+			processDefId,
+			currentUserCode,
+			tragetDocParams,
+			parentNodeId,
+			extendParam,
+			saveTime
+		) values (
+			#{datakey, jdbcType=VARCHAR},
+			#{relationIds, jdbcType=VARCHAR},
+			#{docId, jdbcType=VARCHAR},
+			#{currentDocId, jdbcType=VARCHAR},
+			#{busiTypeId, jdbcType=VARCHAR},
+			#{currentNodeId, jdbcType=VARCHAR},
+			#{processDefId, jdbcType=VARCHAR},
+			#{currentUserCode, jdbcType=VARCHAR},
+			#{tragetDocParams, jdbcType=VARCHAR},
+			#{parentNodeId, jdbcType=VARCHAR},
+			#{extendParam, jdbcType=VARCHAR},
+			#{saveTime, jdbcType=TIMESTAMP}
+		)
+	</insert>
+
+	<update id="updateDocBatchRelation" parameterType="java.util.Map">
+		update bd_t_docbatchrelation t
+		<set>
+			datakey = #{datakey, jdbcType=VARCHAR}
+			<if test="createTime != null and createTime != ''">
+				, t.createTime = #{createTime, jdbcType=TIMESTAMP}
+			</if>
+			<if test="docId != null and docId != ''">
+				, t.docId = #{docId,jdbcType=VARCHAR}
+			</if>
+			<if test="batchId != null and batchId != ''">
+				, t.batchId = #{batchId,jdbcType=VARCHAR}
+			</if>
+			<if test="taskId != null and taskId != ''">
+				, t.taskId = #{taskId,jdbcType=VARCHAR}
+			</if>
+			<if test="busiParam != null and busiParam != ''">
+				, t.busiParam = #{busiParam,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeId != null and nodeId != ''">
+				, t.nodeId = #{nodeId,jdbcType=VARCHAR}
+			</if>
+			<if test="nodeName != null and nodeName != ''">
+				, t.nodeName = #{nodeName,jdbcType=VARCHAR}
+			</if>
+			<if test="directionType != null and directionType != ''">
+				, t.directionType = #{directionType,jdbcType=VARCHAR}
+			</if>
+			<if test="busiTypeId != null and busiTypeId != ''">
+				, t.busiTypeId = #{busiTypeId,jdbcType=VARCHAR}
+			</if>
+			<if test="currentDocId != null and currentDocId != ''">
+				, t.currentDocId = #{currentDocId,jdbcType=VARCHAR}
+			</if>
+			<if test="state != null and state != ''">
+				, t.state = #{state,jdbcType=VARCHAR}
+			</if>
+			<if test="operationType != null and operationType != ''">
+				, t.operationType = #{operationType,jdbcType=VARCHAR}
+			</if>
+		</set>
+		<where> 1=1
+			and t.datakey = #{datakey, jdbcType=VARCHAR}
+		</where>
+	</update>
+
+	<delete id="deleteDocBatchRelation" parameterType="java.util.Map">
+		delete from bd_t_docbatchrelation 
+		<where> 1=1
+			and datakey in('${datakey }')
+		</where>
+	</delete>
+
+</mapper>

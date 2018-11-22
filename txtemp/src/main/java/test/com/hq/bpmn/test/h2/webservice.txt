@@ -1,0 +1,22 @@
+http://127.0.0.1:9001/test3/webservice/common/bpmn?wsdl
+
+访问wsdl文档
+
+
+wsimport -s E:\eclipse_workspace\test3\src -p client -keep http://localhost:9001/test3/webservice/common/efmis?wsdl
+
+
+wsimport -s E:\eclipse_workspace\test3\src\demo3 -p client -keep http://localhost:9001/test3/webservice/common/efmis?wsdl
+
+wsimport -s F:\eclipse\program\busitemp\src\com -p com.client -keep http://127.0.0.1:9001/test3/webservice/common/bpmn?wsdl
+
+
+
+
+
+ <bean id="efmisCommonService" class="com.webservice.IEfmisCommonService"></bean>
+	<jaxws:endpoint id="iEfmisCommonService" implementorClass="com.webservice.impl.EfmisCommonService" address="/efmis">
+		<jaxws:implementor>
+			<ref bean="efmisCommonService" />
+		</jaxws:implementor>
+	</jaxws:endpoint>

@@ -1,0 +1,23 @@
+http://127.0.0.1:8008/hqbpmn/webservice/common/bpmn?wsdl
+
+访问wsdl文档
+
+
+
+
+wsimport -s C:\Users\pc\Desktop\client -verbose -p com.hq.bpmn.h2.client -keep http://127.0.0.1:8888/busitemp/webservice/common/bpmn?wsdl
+wsimport -s C:\Users\pc\Desktop\client -verbose -p com.hq.bpmn.h2.client -keep http://127.0.0.1:7008/hqbpmn/webservice/common/bpmn?wsdl
+wsimport -s C:\Users\pc\Desktop\client -verbose -p com.hq.bpmn.h2.client -keep http://127.0.0.1:7008/hqbpmn/webservice/common/service/bpmn?wsdl
+
+
+wsdl2java  -autoNameResolution  http://127.0.0.1:8888/busitemp/webservice/common/bpmn?wsdl
+
+E:\eclipse_workspace\hqbpmn_trunk\src\com\hq\bpmn\h2  
+
+
+ <bean id="efmisCommonService" class="com.webservice.IEfmisCommonService"></bean>
+	<jaxws:endpoint id="iEfmisCommonService" implementorClass="com.webservice.impl.EfmisCommonService" address="/efmis">
+		<jaxws:implementor>
+			<ref bean="efmisCommonService" />
+		</jaxws:implementor>
+	</jaxws:endpoint>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bendi.BpmnTemplateDefDao" >
+	<resultMap id="bpmnTemplateDefMap" type="com.hq.bpmn.templatedef.bean.BpmnTemplateDef" >
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="NAME" property="name" jdbcType="VARCHAR" />
+		<result column="CATEGORY" property="category" jdbcType="VARCHAR"/>
+		<result column="VERSION" property="version" jdbcType="INTEGER" />
+		<result column="CREATE_BY" property="createBy" jdbcType="VARCHAR"/>
+		<result column="MODIFY_BY" property="modifyBy" jdbcType="VARCHAR"/>
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+		<result column="CREATE_TIME_STR" property="createTimeStr" jdbcType="VARCHAR"/>
+		<result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+		<result column="MODIFY_TIME_STR" property="modifyTimeStr" jdbcType="VARCHAR"/>
+		<result column="DEPLOY_STATE" property="deployState" jdbcType="INTEGER"/>
+		<result column="DEPLOY_STATE_STR" property="deployStateStr" jdbcType="VARCHAR"/>
+		<result column="VERSION_STATE" property="versionState" jdbcType="INTEGER"/>
+		<result column="VERSION_STATE_STR" property="versionStateStr" jdbcType="VARCHAR"/>
+		<result column="DEPLOYMENT_ID" property="deploymentId" jdbcType="VARCHAR"/>
+		<result column="CONTENT_BYTES" property="contentBytes" jdbcType="BLOB"  typeHandler="org.apache.ibatis.type.BlobTypeHandler"/> 
+		<result column="CONTENT_BYTES_STR" property="contentBytesStr"  jdbcType="VARCHAR" /> 
+		<result column="INIT_NUM" property="initNum" jdbcType="INTEGER"/>
+		<result column="CANVASWIDTH" property="canvasWidth" jdbcType="VARCHAR"/>
+		<result column="CANVASHEIGHT" property="canvasHeight" jdbcType="VARCHAR"/>
+		<result column="TABLE_IDS" property="tableIds" jdbcType="VARCHAR"/>
+		<result column="TABLE_NAMES" property="tableNames" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<resultMap id="bpmnCodeMap" type="com.hq.bpmn.templatedef.bean.BpmnCode" >
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="CODE_KEY" property="codeKey" jdbcType="VARCHAR" />
+		<result column="CODE_NAME" property="codeName" jdbcType="VARCHAR"/>
+		<result column="SUPER_ID" property="superId" jdbcType="VARCHAR" />
+		<result column="CODE_TYPE" property="codeType" jdbcType="VARCHAR" />
+		<result column="ORDER_ID" property="orderId" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<resultMap id="customButtonInBpmnCodeMap" type="com.hq.bpmn.templatedef.bean.BpmnCode" >
+		<id column="ID" property="id" jdbcType="VARCHAR" />
+		<result column="BUTTON_KEY" property="codeKey" jdbcType="VARCHAR" />
+		<result column="BUTTON_NAME" property="codeName" jdbcType="VARCHAR"/>
+		<result column="BUTTON_ORDER" property="orderId" jdbcType="INTEGER" />
+	</resultMap>
+
+	<!--<select id="selectCustomButtonInBpmnCodeResult" resultMap="customButtonInBpmnCodeMap">
+		select ID,BUTTON_KEY,BUTTON_NAME,BUTTON_ORDER from ACT_HQ_CUSTOM_BUTTON
+	</select>-->
+	<select id="selectCustomButtonInBpmnCodeResult" parameterType="map" resultMap="customButtonInBpmnCodeMap">
+		select ID,BUTTON_KEY,BUTTON_NAME,BUTTON_ORDER,BUTTON_TYPE from ACT_HQ_CUSTOM_BUTTON t
+		<where>
+			<if test="buttonType1 != null">
+				    t.BUTTON_TYPE = #{buttonType1}
+			</if>
+			<if test="buttonType2 != null">
+				   or t.BUTTON_TYPE=#{buttonType2}
+			</if>
+			<if test="buttonType3 != null">
+				   or t.BUTTON_TYPE=#{buttonType3}
+			</if>
+			<if test="buttonType4 != null">
+				   or t.BUTTON_TYPE=#{buttonType4}
+			</if>
+		</where>
+		order by t.button_order asc
+	</select>
+	
+	<select id="selectTemplateDef" resultMap="bpmnTemplateDefMap">
+		 select * from ACT_HQ_TEM_DEF
+	</select>
+  <select id="selectTemplateDefByQueryCondition" parameterType="map" resultMap="bpmnTemplateDefMap">
+		select * from (select x.id,category,name,version,createby,modifyby,createtimestr,modifytimestr,deploystatestr,versionstatestr from (select m.id,category,m.name,version,createtimestr,modifytimestr,deploystatestr,versionstatestr from (select distinct t.id as id,c.name as category,t.name as name,version,to_char(create_time,'yyyy-mm-dd HH24:mi:ss') as createtimestr, to_char(modify_time,'yyyy-mm-dd HH24:mi:ss') as modifytimestr,deploy_state as deploystate,version_state as versionstate from ACT_HQ_TEM_DEF t left join ACT_HQ_TEM_CATEGORY c on t.category = c.category
+		<where>
+      	        <if test="name != null">
+				    t.name like #{name}
+				</if>
+		        <if test="versionstate != null ">
+		            and t.version_state = #{versionstate}
+		        </if>
+	            <if test="deploystate != null">
+		           and t.deploy_state = #{deploystate}
+		        </if>
+		        <if test="category != null">
+		           and c.category = #{category}
+		        </if>
+		</where>
+		) m
+      left join (select g.id, deploystatestr, versionstatestr from 
+      (select t.id,code.code_name as deploystatestr from act_hq_tem_def t left join act_hq_code code on code.code_type = 'deploystate' and t.deploy_state = code.code_key) g ,
+      (select t.id,code.code_name as versionstatestr from act_hq_tem_def t left join act_hq_code code on code.code_type = 'versionstate' and t.version_state = code.code_key) h
+      where g.id = h.id) n on m.id = n.id) x 
+      left join (select r.id,createby, modifyby from (select t.id,first_ as createby from act_hq_tem_def t left join act_id_user u on t.create_by = u.id_) r,
+      (select t.id,first_ as modifyby from act_hq_tem_def t left join act_id_user u on t.modify_by = u.id_) s
+      where r.id = s.id) y on x.id = y.id ) p order by createtimestr desc
+  </select>
+  
+  <select id="selectTemplateDefByCategory" parameterType="string" resultMap="bpmnTemplateDefMap" >
+		select x.id,category,name,version,createby,modifyby,createtimestr,modifytimestr,deploystatestr,versionstatestr from (select m.id,category,m.name,version,createtimestr,modifytimestr,deploystatestr,versionstatestr from (select distinct t.id as id,c.name as category,t.name as name,version,to_char(create_time,'yyyy-mm-dd HH24:mi:ss') as createtimestr, to_char(modify_time,'yyyy-mm-dd HH24:mi:ss') as modifytimestr,deploy_state as deploystate,version_state as versionstate from ACT_HQ_TEM_DEF t left join ACT_HQ_TEM_CATEGORY c on t.category = c.category where c.category=#{category}) m
+			left join (select g.id, deploystatestr, versionstatestr from 
+			(select t.id,code.code_name as deploystatestr from act_hq_tem_def t left join act_hq_code code on code.code_type = 'deploystate' and t.deploy_state = code.code_key) g ,
+			(select t.id,code.code_name as versionstatestr from act_hq_tem_def t left join act_hq_code code on code.code_type = 'versionstate' and t.version_state = code.code_key) h
+			where g.id = h.id) n on m.id = n.id) x 
+			left join (select r.id,createby, modifyby from (select t.id,first_ as createby from act_hq_tem_def t left join act_id_user u on t.create_by = u.id_) r,
+			(select t.id,first_ as modifyby from act_hq_tem_def t left join act_id_user u on t.modify_by = u.id_) s
+			where r.id = s.id) y on x.id = y.id order by createtimestr desc
+  </select>
+  
+  <select id="selectTemplateDefById" parameterType="string" resultMap="bpmnTemplateDefMap" >  
+	    select * from ACT_HQ_TEM_DEF where id = #{id}
+  </select>
+  <select id="selectBpmnCodeByType" parameterType="string" resultMap="bpmnCodeMap" >
+	    select * from ACT_HQ_CODE where CODE_TYPE = #{codeType}	
+  </select>
+  
+  <select id="queryProcessFormInfo" parameterType="string" resultType="map">
+  		select hqtd.table_ids as formIds,hqtd.table_names as formIdNames from act_hq_tem_def hqtd where hqtd.deployment_id = #{depId }
+  </select>
+  
+  <insert id="insertBpmnTemplateDef" parameterType="com.hq.bpmn.templatedef.bean.BpmnTemplateDef">  
+        INSERT INTO ACT_HQ_TEM_DEF(ID, NAME, CATEGORY, VERSION, CREATE_BY, CREATE_TIME, DEPLOY_STATE, VERSION_STATE, DEPLOYMENT_ID, INIT_NUM, CONTENT_BYTES, CANVASWIDTH, CANVASHEIGHT, TABLE_IDS, TABLE_NAMES)   
+                 VALUES(#{id},#{name,jdbcType=VARCHAR},#{category,jdbcType=VARCHAR},#{version,jdbcType=NUMERIC},#{createBy,jdbcType=VARCHAR},#{createTime},#{deployState,jdbcType=NUMERIC},#{versionState,jdbcType=NUMERIC},#{deploymentId,jdbcType=VARCHAR},#{initNum,jdbcType=NUMERIC},#{contentBytes},#{canvasWidth,jdbcType=VARCHAR},#{canvasHeight,jdbcType=VARCHAR},#{tableIds,jdbcType=VARCHAR},#{tableNames,jdbcType=VARCHAR})  
+  </insert>
+  
+  <select id="selectTempCountByCategory" parameterType="string" resultType="int">
+  		select count(*) from ACT_HQ_TEM_DEF where category = #{category}
+  </select>
+  
+  <select id="selectSysId" resultType="string">
+  		select sys_guid() from DUAL 
+  </select>
+  
+  <select id="selectMaxVersionByCategory" parameterType="string" resultType="int">
+  		select case when max(version) is null then 0 else   max(version) end  as from act_hq_tem_def where category=#{category}
+  </select>
+  
+  <update id="updateBpmnTempDef" parameterType="com.hq.bpmn.templatedef.bean.BpmnTemplateDef">  
+        update ACT_HQ_TEM_DEF set name = #{name,jdbcType=VARCHAR}, category = #{category,jdbcType=VARCHAR}, version_state = #{versionState,jdbcType=NUMERIC},version = #{version,jdbcType=NUMERIC}, modify_by = #{modifyBy,jdbcType=VARCHAR}, modify_time = #{modifyTime,jdbcType=TIMESTAMP},deploy_state=#{deployState,jdbcType=NUMERIC}, DEPLOYMENT_ID=#{deploymentId,jdbcType=VARCHAR},content_Bytes= #{contentBytes},CANVASWIDTH = #{canvasWidth,jdbcType=VARCHAR},CANVASHEIGHT = #{canvasHeight,jdbcType=VARCHAR},TABLE_IDS = #{tableIds,jdbcType=VARCHAR},TABLE_NAMES = #{tableNames,jdbcType=VARCHAR} where id = #{id}
+  </update>
+  
+  <delete id="deleteTempDefById" parameterType="string" >
+		delete from ACT_HQ_TEM_DEF where id = #{id}
+  </delete>
+  
+  <update id="updateDeployStateById" parameterType="map">  
+        update ACT_HQ_TEM_DEF set deploy_state = #{deploystate} where id = #{id}
+  </update>
+  
+  <update id="updateVersionStateById" parameterType="com.hq.bpmn.templatedef.bean.BpmnTemplateDef">  
+        update ACT_HQ_TEM_DEF set version_state = #{versionState} where id = #{id}
+  </update>
+  
+  <update id="updateVersionStateByCategory" parameterType="map">  
+        update ACT_HQ_TEM_DEF set version_state = #{versionstate} where category = #{category} and version_state = #{oldVersionstate}
+  </update>
+  
+  <select id='selectCategoryValidateByCategory' resultMap="bpmnTemplateDefMap"  parameterType="string" >
+  	 SELECT d.name as name FROM act_hq_tem_def d, act_hq_tem_category ca WHERE d.category=ca.category and ca.Category=#{category}
+  </select>
+  
+  <!--<select id="selectTemplateDefByCategoryAndState" parameterType="map" resultMap="bpmnTemplateDefMap" >
+		select * from act_hq_tem_def where category=#{category} and deploy_state=1 and version_state=#{versionState}
+  </select>-->
+  
+  <select id="selectTemplateDefByCategoryAndState" parameterType="map" resultMap="bpmnTemplateDefMap" >
+		select * from act_hq_tem_def where category=#{category} and deploy_state=1
+  </select>
+  
+  <select id="queryTemplateDefByCategory" parameterType="map" resultMap="bpmnTemplateDefMap" >
+		select id,name,category,version,create_by,create_time,modify_by,modify_time,deploy_state,version_state,deployment_ID 
+		from act_hq_tem_def where category=#{category}  
+  </select>
+   <update id="updateBpmnTempDefWithDep" parameterType="map">  
+        update ACT_HQ_TEM_DEF set name = #{name,jdbcType=VARCHAR},modify_by = #{modifyBy,jdbcType=VARCHAR}, modify_time = #{modifyTime,jdbcType=TIMESTAMP}, content_Bytes= #{contentBytes},CANVASWIDTH = #{canvasWidth,jdbcType=VARCHAR},CANVASHEIGHT = #{canvasHeight,jdbcType=VARCHAR},TABLE_IDS = #{tableIds,jdbcType=VARCHAR},TABLE_NAMES = #{tableNames,jdbcType=VARCHAR} where id = #{id}
+  </update>
+  <select id="selectTemplateDefByTickAndCategory" parameterType="com.hq.bpmn.processinstance.bean.BpmnTicket" resultMap="bpmnTemplateDefMap" >  
+	    select * from act_hq_tem_def d
+    where d.deployment_id =
+       (select b.deployment_id_
+          from act_re_procdef b
+         where b.category_ = #{bpmnType}
+           and b.id_ in (select c.proc_def_id_
+                           from act_ru_execution c
+                          where c.business_key_ = #{ticketId}))
+  </select>
+  <select id="selectProcessIds"  resultType="map" >
+  	select 
+       pdc.parentid as pId, pdc.name as bpmnTypeName ,pdc.category as bpmnType,pdc.key_ as processId
+	from (    
+          select
+             distinct hqc.parentId, hqc.name, hqc.category,pd.key_
+          from 
+              ACT_RE_PROCDEF pd
+              left join
+              ACT_HQ_TEM_CATEGORY hqc
+              on pd.category_ = hqc.category 
+          where 
+              not exists (select hqc2.parentid from ACT_HQ_TEM_CATEGORY hqc2 where hqc.category = hqc2.parentid)
+              and
+              hqc.category is not null
+      union   
+          select 
+              hqc.parentId, hqc.name, hqc.category,pd.key_ 
+          from 
+          	  ACT_HQ_TEM_CATEGORY hqc
+              left join
+              ACT_RE_PROCDEF pd 
+              on hqc.category = pd.category_
+          where exists (select hqc2.parentid from ACT_HQ_TEM_CATEGORY hqc2 where hqc.category = hqc2.parentid)
+     )  pdc
+  </select>
+  
+  
+  
+    <select id="selectTemplateDefBydeploymentId" parameterType="string" resultMap="bpmnTemplateDefMap" >  
+	    select * from ACT_HQ_TEM_DEF where deployment_id = #{deploymentId}
+  </select>
+  
+</mapper>
