@@ -44,8 +44,8 @@
         <property name="xaDataSourceClassName" value="oracle.jdbc.xa.client.OracleXADataSource" />
         <property name="xaProperties">
             <props>
-                <prop key="user">test</prop>
-                <prop key="password">test</prop>
+                <prop key="user">zyzf_c</prop>
+                <prop key="password">zyzf_c</prop>
                 <prop key="URL">jdbc:oracle:thin:@127.0.0.1:1521:orcl</prop>
             </props>
         </property>     
@@ -63,8 +63,8 @@
         </property>
         <property name="xaProperties">
             <props>
-                <prop key="user">test</prop>
-                <prop key="password">test</prop>
+                <prop key="user">zyzf_s</prop>
+                <prop key="password">1</prop>
                 <prop key="URL">jdbc:oracle:thin:@127.0.0.1:1521:orcl2</prop>
             </props>
         </property>       
