@@ -23,11 +23,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.hq.bpmn.common.bean.ProcessResult;
-import com.hq.bpmn.common.util.JsonUtil;
-import com.hq.bpmn.common.util.WfBeanFactory;
-import com.hq.bpmn.exception.BpmnException;
-import com.hq.bpmn.h2.service.impl.BpmnTempLateDefH2Service;
+//import com.hq.bpmn.common.bean.ProcessResult;
+//import com.hq.bpmn.common.util.JsonUtil;
+//import com.hq.bpmn.common.util.WfBeanFactory;
+//import com.hq.bpmn.exception.BpmnException;
+//import com.hq.bpmn.h2.service.impl.BpmnTempLateDefH2Service;
 
  
 /**
@@ -44,11 +44,10 @@ public class SqlFileExecutorController {
 	 * 
 	 * @param request
 	 * @param response
-	 * @throws BpmnException
 	 */
 	@RequestMapping(value = "/initSqlScriptSource")     
 	public void initSqlScriptSource(HttpServletRequest request,
-			HttpServletResponse response) throws BpmnException {
+			HttpServletResponse response) throws Exception {
 		URL resource = this.getClass().getResource("");
 		String dataPath = resource.getPath().substring(0, resource.getPath().lastIndexOf("/",resource.getPath().length()-2))+"/";
 		List<String> sqlFilePath  = new ArrayList<String>();
@@ -75,10 +74,10 @@ public class SqlFileExecutorController {
 		}
 		
 		
-		ProcessResult<String> pr = new ProcessResult<String>();
-		pr.setSuccess(true);
-		pr.setMessage("升级成功！");
-		JsonUtil.outPutPRToJSON(pr, response);
+//		ProcessResult<String> pr = new ProcessResult<String>();
+//		pr.setSuccess(true);
+//		pr.setMessage("升级成功！");
+//		JsonUtil.outPutPRToJSON(pr, response);
 	}
 	public void sortFiles(List<String> sqlFilePath) throws Exception{
 		
@@ -139,22 +138,22 @@ public class SqlFileExecutorController {
 	  } 
 	 } 
 	private void executeSource(String sqlSource) throws Exception {
-		 DataSource  source = (DataSource) WfBeanFactory.getBean("busiDataSource");
-		 Connection conn = null;
-		 Statement stmt = null;
-		 try {
-			 conn=source.getConnection();
-				conn.setAutoCommit(false);
-				stmt = conn.createStatement();
-					stmt.execute(sqlSource);
-				conn.commit();
-			} catch (Exception ex) {
-				conn.rollback();
-				throw ex;
-			} finally {
-				conn.close();
-				stmt.close();
-			}
+//		 DataSource  source = (DataSource) WfBeanFactory.getBean("busiDataSource");
+//		 Connection conn = null;
+//		 Statement stmt = null;
+//		 try {
+//			 conn=source.getConnection();
+//				conn.setAutoCommit(false);
+//				stmt = conn.createStatement();
+//					stmt.execute(sqlSource);
+//				conn.commit();
+//			} catch (Exception ex) {
+//				conn.rollback();
+//				throw ex;
+//			} finally {
+//				conn.close();
+//				stmt.close();
+//			}
 	}
 	private String loadSqlSource(String sqlFile) throws Exception {
 		InputStream sqlFileIn = null;
