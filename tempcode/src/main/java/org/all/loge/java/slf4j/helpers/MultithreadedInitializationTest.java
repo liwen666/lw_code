@@ -1,4 +1,4 @@
-package org.slf4j.helpers;
+package org.all.loge.java.slf4j.helpers;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -11,11 +11,13 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.all.loge.java.slf4j.LoggerAccessingThread;
 import org.junit.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerAccessingThread;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.EventRecodingLogger;
+import org.slf4j.helpers.SubstituteLogger;
 
 abstract public class MultithreadedInitializationTest {
     final protected static int THREAD_COUNT = 4 + Runtime.getRuntime().availableProcessors() * 2;
@@ -56,7 +58,7 @@ abstract public class MultithreadedInitializationTest {
         for (Logger logger : createdLoggers) {
             if (logger instanceof SubstituteLogger) {
                 SubstituteLogger substLogger = (SubstituteLogger) logger;
-                if (substLogger.delegate() instanceof EventRecodingLogger)
+//                if (substLogger.delegate() instanceof EventRecodingLogger)
                     fail("substLogger " + substLogger.getName() + " has a delegate of type EventRecodingLogger");
             }
         }

@@ -12,14 +12,14 @@ public class TestController extends BaseController {
 
 
     @RequestMapping(value="", method= RequestMethod.POST)
-    public ResponseEntity postTest(@RequestParam(name = "accessToken") String accessToken) {
+    public ResponseEntity postTest(@RequestParam("accessToken") String accessToken) {
         ResponseEntity responseEntity = new ResponseEntity(null);
 
         return responseEntity;
     }
 
-    @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseEntity deleteTest(@RequestParam(name = "accessToken") String accessToken) {
+    @RequestMapping(value = "/delete/", method = RequestMethod.POST)
+    public ResponseEntity deleteTest(@RequestParam("accessToken") String accessToken) {
         ResponseEntity responseEntity = new ResponseEntity(null);
 
         return responseEntity;
@@ -30,7 +30,7 @@ public class TestController extends BaseController {
     */
     @IgnorePermission
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    public ResponseEntity getTestList(@RequestParam(name = "accessToken") String accessToken) {
+    public ResponseEntity getTestList(@RequestParam("accessToken") String accessToken) {
 
         ResponseEntity responseEntity = new ResponseEntity(null);
 

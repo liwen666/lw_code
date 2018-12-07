@@ -57,7 +57,7 @@ abstract public class MultithreadedInitializationTest {
         for (Logger logger : createdLoggers) {
             if (logger instanceof SubstituteLogger) {
                 SubstituteLogger substLogger = (SubstituteLogger) logger;
-                if (substLogger.delegate() instanceof EventRecodingLogger)
+//                if (substLogger.delegate() instanceof EventRecodingLogger)
                     fail("substLogger " + substLogger.getName() + " has a delegate of type EventRecodingLogger");
             }
         }

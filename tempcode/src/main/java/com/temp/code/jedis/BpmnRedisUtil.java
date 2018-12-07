@@ -45,7 +45,6 @@ public class BpmnRedisUtil {
     {
         // 池基本配置
         JedisPoolConfig config = new JedisPoolConfig();
-
         config.setMaxTotal(20);
         config.setMaxIdle(5);
         config.setMaxWaitMillis(1000l);
@@ -67,6 +66,7 @@ public class BpmnRedisUtil {
         // slave链接
         List<JedisShardInfo> shards = new ArrayList<JedisShardInfo>();
         shards.add(new JedisShardInfo("192.168.100.109", 6379, "master"));
+        shards.add(new JedisShardInfo("192.168.100.109", 6380, "master"));
 
         // 构造池
         shardedJedisPool = new ShardedJedisPool(config, shards);
@@ -75,20 +75,17 @@ public class BpmnRedisUtil {
 
 
     private void KeyOperate() {
-        Set<String> keysddd = jedis.keys("*");
-
         System.out.println("======================key==========================");
         // 清空数据
-//        System.out.println("清空库中所有数据："+jedis.flushDB());
-//        jedis.select(10);
+        System.out.println("清空库中所有数据："+jedis.flushDB());
 
         System.out.println("key10："+jedis.exists("key10"));
         // 判断key否存在
         System.out.println("判断key999键是否存在："+shardedJedis.exists("key999"));
-        System.out.println("新增key001,value001键值对："+shardedJedis.set("key001", "value001"));
-        System.out.println("判断key001是否存在："+shardedJedis.exists("key001"));
+        System.out.println("新增key00001,value001键值对："+shardedJedis.set("key00001", "value001"));
+        System.out.println("判断key00001是否存在："+shardedJedis.exists("key00001"));
         // 输出系统中所有的key
-        System.out.println("新增key002,value002键值对："+shardedJedis.set("key002", "value002"));
+        System.out.println("新增key00002,value00002键值对："+shardedJedis.set("key00002", "value002"));
         System.out.println("系统中所有键如下：");
         Set<String> keys = jedis.keys("*");
         Iterator<String> it=keys.iterator() ;
@@ -97,26 +94,27 @@ public class BpmnRedisUtil {
             System.out.println("=="+key+"==");
         }
         // 删除某个key,若key不存在，则忽略该命令。
-        System.out.println("系统中删除key002: "+jedis.del("key002"));
-        System.out.println("判断key002是否存在："+shardedJedis.exists("key002"));
+        System.out.println("系统中删除key00002: "+jedis.del("key00002"));
+        System.out.println("判断key00002是否存在："+shardedJedis.exists("key00002"));
         // 设置 key001的过期时间
-        System.out.println("设置 key001的过期时间为5秒:"+jedis.expire("key001", 5));
+        System.out.println("设置 key00001的过期时间为5秒:"+jedis.expire("key00001", 5));
         try{
             Thread.sleep(2000);
         }
         catch (InterruptedException e){
         }
         // 查看某个key的剩余生存时间,单位【秒】.永久生存或者不存在的都返回-1
-        System.out.println("查看key001的剩余生存时间："+jedis.ttl("key001"));
+        System.out.println("查看key00001的剩余生存时间："+jedis.ttl("key00001"));
         // 移除某个key的生存时间
-        System.out.println("移除key001的生存时间："+jedis.persist("key001"));
-        System.out.println("查看key001的剩余生存时间："+jedis.ttl("key001"));
+        System.out.println("移除key00001的生存时间："+jedis.persist("key00001"));
+        System.out.println("查看key00001的剩余生存时间："+jedis.ttl("key00001"));
         // 查看key所储存的值的类型
-        System.out.println("查看key所储存的值的类型："+jedis.type("key001"));
+        System.out.println("查看key所储存的值的类型："+jedis.type("key00001"));
         /*
          * 一些其他方法：1、修改键名：jedis.rename("key6", "key0");
          *             2、将当前db的key移动到给定的db当中：jedis.move("foo", 1)
          */
+
     }
 
     private void StringOperate() {
@@ -362,14 +360,26 @@ public class BpmnRedisUtil {
         System.out.println();
     }
     public void show() {
-        KeyOperate();
-//        StringOperate();
+//        KeyOperate();
+        StringOperate();
 //        ListOperate();
 //        SetOperate();
 //        SortedSetOperate();
 //        HashOperate();
 //        jedisPool.returnResource(jedis);
 //        shardedJedisPool.returnResource(shardedJedis);
+        if(shardedJedis!=null) {
+            shardedJedis.close();
+        }
+        if(jedis!=null) {
+            jedis.close();
+        }
+        if(jedisPool!=null){
+            jedisPool.close();
+        }
+        if(shardedJedisPool!=null){
+            shardedJedisPool.close();
+        }
     }
 
 

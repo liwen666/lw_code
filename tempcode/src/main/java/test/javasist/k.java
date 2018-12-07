@@ -32,7 +32,7 @@ public class k {
 
    //取得需要反编译的jar文件，设定路径
 
-   pool.insertClassPath("E:""crack""chart.ext.jar");
+   pool.insertClassPath("E:"+"crack"+"chart.ext.jar");
 
    //取得需要反编译修改的文件，注意是完整路径
 
