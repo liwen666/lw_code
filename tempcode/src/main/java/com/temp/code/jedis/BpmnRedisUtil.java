@@ -49,7 +49,7 @@ public class BpmnRedisUtil {
         config.setMaxIdle(5);
         config.setMaxWaitMillis(1000l);
         config.setTestOnBorrow(false);
-        jedisPool = new JedisPool(config,"192.168.100.109",6379);
+        jedisPool = new JedisPool(config,"192.168.100.109",6380);
     }
 
     /**
@@ -296,6 +296,7 @@ public class BpmnRedisUtil {
         System.out.println("sets1和sets2交集："+jedis.sinter("sets1", "sets2"));
         System.out.println("sets1和sets2并集："+jedis.sunion("sets1", "sets2"));
         System.out.println("sets1和sets2差集："+jedis.sdiff("sets1", "sets2"));//差集：set1中有，set2中没有的元素
+        System.out.println("sets1和sets2差集："+jedis.sdiff("sets2", "sets1"));//差集：set2中有，set1中没有的元素
     }
 
     private void SortedSetOperate() {
@@ -337,7 +338,7 @@ public class BpmnRedisUtil {
         System.out.println("hashs中添加key001和value001键值对："+shardedJedis.hset("hashs", "key001", "value001"));
         System.out.println("hashs中添加key002和value002键值对："+shardedJedis.hset("hashs", "key002", "value002"));
         System.out.println("hashs中添加key003和value003键值对："+shardedJedis.hset("hashs", "key003", "value003"));
-        System.out.println("新增key004和4的整型键值对："+shardedJedis.hincrBy("hashs", "key004", 4l));
+        System.out.println("新增key004和4的整型键值对："+shardedJedis.hincrBy("hashs", "key004", 4L));
         System.out.println("hashs中的所有值："+shardedJedis.hvals("hashs"));
         System.out.println();
 
@@ -347,7 +348,7 @@ public class BpmnRedisUtil {
         System.out.println();
 
         System.out.println("=============改=============");
-        System.out.println("key004整型键值的值增加100："+shardedJedis.hincrBy("hashs", "key004", 100l));
+        System.out.println("key004整型键值的值增加100："+shardedJedis.hincrBy("hashs", "key004", 100L));
         System.out.println("hashs中的所有值："+shardedJedis.hvals("hashs"));
         System.out.println();
 
@@ -361,9 +362,9 @@ public class BpmnRedisUtil {
     }
     public void show() {
 //        KeyOperate();
-        StringOperate();
+//        StringOperate();
 //        ListOperate();
-//        SetOperate();
+        SetOperate();
 //        SortedSetOperate();
 //        HashOperate();
 //        jedisPool.returnResource(jedis);
@@ -390,6 +391,7 @@ class Main {
     public static void main(String[] args) {
         // TODO Auto-generated method stub
         new BpmnRedisUtil().show();
+
     }
 
 }

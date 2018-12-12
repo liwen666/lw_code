@@ -175,3 +175,13 @@ class DeclareRedis{
 
     }
 }
+
+class TestByte{
+    public static void main(String[] args) {
+        ShardedJedisTest shardedJesisTest = new ShardedJedisTest();
+        Jedis jedis = shardedJesisTest.getJedis();
+
+//        jedis.h
+
+    }
+}
