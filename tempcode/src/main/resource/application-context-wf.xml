@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+
+    <!--1、引入property配置-->
+    <context:property-placeholder ignore-unresolvable="true" location="classpath*:/application.properties"/>
+    <!-- H2非内存模式数据库配置  查看客户端h2内存数据库使用-->
+
+   
+    <!--2、扫描注解，不扫描@Controller注解的类-->
+    <context:component-scan base-package="com.hq.bpmn">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+    <!--3、上传组件配置-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="1024000"/>
+    </bean>
+
+    <!--4、activiti集成spring-->
+    <bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">
+        <property name="dataSource" ref="busiDataSource"/>
+        <property name="transactionManager" ref="wfTransactionManager"/>
+        <property name="databaseSchemaUpdate" value="true"/>
+        <property name="jobExecutorActivate" value="false"/>
+        <property name="jpaHandleTransaction" value="true"/>
+        <property name="jpaCloseEntityManager" value="true"/>
+        <property name="dbIdentityUsed" value="false"/>
+        <property name="history" value="audit"/>
+        <!-- 发布流程生成图片是正常显示中文 -->
+        <property name="activityFontName" value="微软雅黑"/>
+        <property name="labelFontName" value="微软雅黑"/>
+    </bean>
+
+    <bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration"/>
+    </bean>
+
+
+    <import resource="classpath:spring-mybatis-wf.xml"/>
+    <import resource="classpath:spring-ws-wf.xml"/>
+    <import resource="classpath:spring-quartz-wf.xml"/>
+
+
+</beans>

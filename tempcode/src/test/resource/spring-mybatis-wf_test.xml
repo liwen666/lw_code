@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    
+     <bean id="wfSqlSessionFactory" class="com.hq.bpmn.common.bean.WfSqlSessionFactoryBean">
+        <property name="dataSource" ref="busiDataSource"/>
+<!--         <property name="dataSource" ref="busiDataSource"/> -->
+        <property name="configLocation" value="classpath:mybatis-config-wf_test.xml"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:com/hq/bpmn/extras/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/processinstance/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/schedule/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/bpmnanalysis/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/templatedef/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/unify/**/mappers/**/*_WfSqlMapper.xml</value>
+                <value>classpath*:com/hq/bpmn/model/**/mappers/**/*_WfSqlMapper.xml</value>
+                <!--业务系统扩展的develop模块-->
+                <value>classpath*:com/hq/bpmn/develop/**/mappers/**/*_WfSqlMapper.xml</value>
+            </list>
+        </property>
+    </bean>
+    
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage"
+                  value="com.hq.bpmn.test.context.dao,com.hq.bpmn.extras.dao,com.hq.bpmn.processinstance.dao,com.hq.bpmn.schedule.dao,com.hq.bpmn.bpmnanalysis.dao,com.hq.bpmn.templatedef.dao,com.hq.bpmn.unify.dao,com.hq.bpmn.model.dao,com.hq.bpmn.develop.unify.dao">
+        </property>
+        <property name="sqlSessionFactoryBeanName" value="wfSqlSessionFactory"/>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.hq.bpmn.h2.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="wfH2SqlSessionFactory"/>
+    </bean>
+    <bean id="wfTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="busiDataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="wfTransactionManager"/>
+
+</beans>

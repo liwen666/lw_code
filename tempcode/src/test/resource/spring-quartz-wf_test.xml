@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+       
+
+    <!--
+        MethodInvokingJobDetailFactoryBean,implements Job,extends QuartzJobBean
+        1、定义工作任务的JobDetail
+            MethodInvokingJobDetailFactoryBean与JobDetailFactoryBean
+        2、定义触发器Trigger，并将工作任务与触发器绑定
+            一个触发器只能绑定一个任务，一个任务可以被多个触发器绑定
+        3、定义调度器Scheduler，并将trigger注册到Scheduler
+    -->
+    <bean id="mainTask" class="com.hq.bpmn.schedule.service.BusiLogSchedulService"/>
+    <!-- 你要执行的任务类 -->
+    <bean id="mainJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="mainTask"/>
+        <property name="targetMethod" value="addLocalLog"/>
+    </bean>
+    <bean id="timeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="mainJob"/>
+<!--         <property name="cronExpression" value="0/5 * 0-23 * * ?"/> -->
+        <property name="cronExpression" value="0 0-59 17 * * ? 2060"/>
+    </bean>
+
+    <bean id="mainTask2" class="com.hq.bpmn.schedule.service.BusiLogSchedulService"/>
+    <bean id="mainJob2" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="mainTask2"/>
+        <property name="targetMethod" value="sendBusiLogId"/>
+    </bean>
+    <bean id="timeTrigger2" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail" ref="mainJob2"/>
+<!--         <property name="cronExpression" value="0 0-59 17 * * ? 2020"/> -->
+         <property name="cronExpression" value="0/30 * 0-23 * * ?"/>
+<!--          <property name="cronExpression" value="0/20 * 0-23 * * ?"/> -->
+    </bean>
+    <bean id="sfb" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref local="timeTrigger"/>
+                <ref local="timeTrigger2"/>
+            </list>
+        </property>
+    </bean>
+</beans>

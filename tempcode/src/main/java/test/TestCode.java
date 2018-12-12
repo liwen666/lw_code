@@ -3,19 +3,21 @@ package test;
 import org.junit.Test;
 
 /**
- * @author  ×÷Õß :lw E-mail:
- * @date ´´½¨Ê±¼ä£º2016Äê11ÔÂ29ÈÕ ÏÂÎç12:19:38
+ * @author  ï¿½ï¿½ï¿½ï¿½ :lw E-mail:
+ * @date ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£º2016ï¿½ï¿½11ï¿½ï¿½29ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½12:19:38
  * @version 1.0 * @parameter 
  * @since 
  * @return 
  */
 public class TestCode {
    public static void main(String[] args) {
+
+       System.out.println(Integer.parseInt("010"));
 	
 }
    /**
-    * junit ²âÊÔÐèÒª·½·¨ÊÇpublic void
-    * ²»ÄÜÔÚmain·½·¨ÉÏ²âÊÔ
+    * junit ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½public void
+    * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mainï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½ï¿½ï¿½
     * 
     * @see
     */
