@@ -8,7 +8,7 @@ $().ready(function(){
     var sp = new Spinner({
         lines: 60, 			// 花瓣数目
         length: 20, 		// 花瓣长度
-        width: 5, 			// 花瓣宽度
+        width: 2, 			// 花瓣宽度
         radius: 150, 		// 花瓣距中心半径
         corners: 1, 		// 花瓣圆滑度 (0-1)
         rotate: 0, 			// 花瓣旋转角度
@@ -28,7 +28,7 @@ $().ready(function(){
     setInterval(function(){
         sp.opts.color=getRandomColor();
         sp.spin(target)
-    },2000)
+    },3000)
     $("#abc").click(function(){
         sp.spin();
     })
@@ -42,7 +42,7 @@ $().ready(function(){
         rotate: 0, 			// 花瓣旋转角度
         direction: 1, 		// 花瓣旋转方向 1: 顺时针, -1: 逆时针
         color: '#6f91f3', 	// 花瓣颜色
-        speed: 1,			// 花瓣旋转速度
+        speed: 0.5,			// 花瓣旋转速度
         trail: 80, 			// 花瓣旋转时的拖影(百分比)
         shadow: false, 		// 花瓣是否显示阴影
         hwaccel: false, 	//spinner 是否启用硬件加速及高速旋转
@@ -57,9 +57,11 @@ $().ready(function(){
 
     // setTimeout(function(){sp.spin(target);alert("打开花");$(".loading").show()},2000)
     // setInterval(function(){sp.spin(target);alert("打开花");$(".loading").show()},2000)
+// setInterval()
 
 
 });
+
 
 
 
