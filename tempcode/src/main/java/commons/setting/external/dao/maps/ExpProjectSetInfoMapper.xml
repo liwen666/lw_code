@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.external.dao.ExpProjectSetInfoMapper">
+	
+	<!-- 录入表列表显示 -->
+	<select id="getProjTabList"  parameterType="java.lang.String" resultType="com.tjhq.commons.setting.external.po.ProjTabPO">
+			select a.OBJECTID,
+			a.TYPEFLAG,
+			a.guid as ID,
+			a.ORDERID,
+			a.TABLEID,
+			a.ISRESERVE,
+			a.ISMAINTABLE,
+			a.ISREADONLY,
+		  	a.PROCESSID,
+		  	a.ISOPENED
+			from (select a1.*,'0' flag
+			from spf_t_setprojtab a1
+			where a1.OBJECTID = #{objectid}
+			and a1.TYPEFLAG = #{typeflag}
+			and a1.PROCESSID= #{processId}
+			union all
+			select a2.*,'1' flag
+			from spf_t_setprojtab a2
+			where a2.TYPEFLAG = #{typeflag}
+			and a2.PROCESSID = #{processId}
+			and a2.OBJECTID = (select b.projtypeid
+			from spf_t_fbaseinfo b
+			where b.spfid = #{objectid})
+			<if test="spfType!=null">
+			 and a2.ISRESERVE=1
+			</if>
+			and a2.TABLEID not in (select c.TABLEID
+			from spf_t_setprojtab c
+			where c.OBJECTID = #{objectid}
+			and c.TYPEFLAG = #{typeflag} and c.PROCESSID=#{processId})) a,dict_t_model m
+      		where a.TABLEID=m.TABLEID
+			order by a.ORDERID
+	</select>
+	
+	<!-- 获取专项资金本身设置的报表数 -->
+	<select id="getTabCount" parameterType="map" resultType="int">
+		select count(*) from spf_t_setprojtab a, dict_t_model b where a.TABLEID=b.TABLEID and a.OBJECTID=#{objectid} and a.TYPEFLAG=#{typeflag} and a.PROCESSID=#{processId}	
+	</select>
+	<!-- 单页面整体设置 -->
+	<select id="getSetRECList"  parameterType="string" resultType="com.tjhq.commons.setting.external.po.RECPO">  
+		select OBJECTID,TABLEID,RECID,SHOWCOLS,TITLEWIDTH,REMARK from dict_t_setrec 
+		where objectid =#{objectid} and tableid =#{tableid}
+		<if test="processId!=null">
+		  and PROCESSID=#{processId}
+		</if>
+		
+	</select>
+	
+	<!-- 单页面明细设置 -->
+	<select id="getSetRECDetailList"  parameterType="string" resultType="com.tjhq.commons.setting.external.po.RECDetailPO">
+		SELECT *
+			  FROM (SELECT T.RECID,
+			               T.CTRLID,
+			               DECODE(T.CTRLNAME, '', D.NAME, T.CTRLNAME) CTRLNAME,
+			               T.SUPERID,
+			               T.ISLEAF,
+			               T.LEVELNO,
+			               T.ORDERID,
+			               T.ISTEXT,
+			               T.COLSPAN,
+			               T.ROWSPAN,
+			               T.ISGROUPCTRL,
+			               T.ISSHOW
+			          FROM DICT_T_SETRECDETAIL T, DICT_T_FACTOR D
+			         WHERE RECID = #{recid}
+			           AND T.CTRLID = D.COLUMNID(+)) A
+			 WHERE EXISTS
+			 (SELECT 1 FROM DICT_T_FACTOR FACTR WHERE A.CTRLID = FACTR.COLUMNID)
+			    OR A.ISGROUPCTRL = '1'
+			 ORDER BY ORDERID
+	</select>
+	
+	<select id="getProjTypeId" parameterType="string" resultType="string">
+	select a.PROJTYPEID from spf_t_fbaseinfo a where a.SPFID=#{objectid}	
+	</select>
+	
+</mapper>

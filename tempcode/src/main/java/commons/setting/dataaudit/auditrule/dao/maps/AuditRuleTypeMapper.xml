@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.auditrule.dao.AuditRuleTypeDAO">
+
+	<select id="getAuditCategoryTree" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select CHECKSORTID,CHECKSORTNAME,LVLID,SUPERID,ENDFLAG  from bgt_t_checksort 
+	</select>
+	
+	<select id="getNewAuditCategoryTree" resultType="com.tjhq.commons.inputcomponent.po.TreePO" parameterType="java.util.HashMap">
+		SELECT CHECKSORTID AS id,CHECKSORTNAME AS name,to_number(LVLID) as LVLID,decode(SUPERID,null,'0',SUPERID) AS pId  FROM bgt_t_checksort
+		 where 1=1 
+		 <if test="appId!=null and appId!=''">
+		   and appid=#{appId}
+		 </if>
+		 start with  SUPERID is null
+         connect by prior CHECKSORTID=SUPERID
+         order  siblings by LVLID 
+	</select>
+
+	<update id="updateEndFlag"  parameterType="java.util.HashMap">
+		update bgt_t_checksort s set s.endflag =(select decode(count(0),0,1,0) from bgt_t_checksort d where d.superid=#{checkSortId})
+	  	where s.checksortid =#{checkSortId}
+	</update>
+	
+	<delete id="delCheckType" parameterType="java.util.HashMap">
+		delete from bgt_t_checksort ss
+		 where ss.checksortid in
+		       (select s.checksortid
+		          from bgt_t_checksort s
+		         start with s.checksortid in (${checkSortIds})
+		        connect by prior s.checksortid = s.superid)
+	</delete>
+	
+	<select id="getAuditCategoryNameById" parameterType="String"  resultType="String">
+	   select nvl(t.checksortname,'') from bgt_t_checksort t where t.checksortid = #{typeId}
+	</select>
+	
+
+	<select id="checkLvUnique" parameterType="Map" resultType="java.lang.Integer">
+		select count(0) from  bgt_t_checksort  t where t.LVLID=#{LVLID} 
+		<if test="null!=CHECKSORTID and CHECKSORTID!=''">
+	  		and t.CHECKSORTID !=#{CHECKSORTID}
+		</if>
+		<if test="null!=APPID and APPID!=''">
+		 	 and t.appID =#{APPID}
+		</if>
+		<choose>
+		   <when test="null!=SUPERID and SUPERID!=''">
+		    	and superid = #{SUPERID}
+		   </when>
+		   <otherwise>
+		   		and superid is null
+		   </otherwise>
+	   </choose>
+	</select>
+	
+	<select id="findAuditSortNameCount" parameterType="Map" resultType="java.lang.Integer">
+		select count(0) from bgt_t_checksort
+	   where appid = #{APPID}
+	   and checksortname = #{CHECKSORTNAME}
+	   <if test="null!=CHECKSORTID and CHECKSORTID!=''">
+	    and checksortid !=#{CHECKSORTID}
+	   </if>
+	   <choose>
+	   <when test="null!=SUPERID and SUPERID!=''">
+	    and superid = #{SUPERID}
+	   </when>
+	   <otherwise>
+	   and superid is null
+	   </otherwise>
+	   </choose>
+	</select>
+	
+	<select id="findAuditSortSuperID" parameterType="Map" resultType="String">
+		 select bb.SUPERID from bgt_t_checksort bb where bb.appid=#{APPID} and bb.CHECKSORTID=#{CHECKSORTID}
+	</select>
+	
+	<select id="getCheckDefTypeNum" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+	    select count(0)
+	    from bgt_t_checkdef t
+	    where t.checksortid in
+	       (select s.checksortid
+	          from bgt_t_checksort s
+	         start with s.checksortid in (${checkSortIds})
+	        connect by prior s.checksortid = s.superid)
+    
+    </select>	
+	
+	<select id="checkRelationBySuperId" resultType="java.lang.Integer" parameterType="java.lang.String">
+	    select count(0)
+	    from bgt_t_checkdef t
+	    where t.checksortid=#{superId}
+    </select>
+	
+</mapper>

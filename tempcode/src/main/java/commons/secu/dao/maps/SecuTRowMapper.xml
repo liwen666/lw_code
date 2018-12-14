@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTRowMapper">
+
+<resultMap id="secutrow" type="com.tjhq.commons.secu.po.SecuTRowPO">
+		<result property="tableId" column="tableId" />
+		<result property="sqlWhere" column="sqlWhere" />
+		<result property="manId" column="manId" />
+		<result property="manType" column="manType" />
+		<result property="baseSecu" column="baseSecu" />
+		<result property="showWhere" column="showWhere" />
+</resultMap>
+
+<select id="getRowLimitListByTableId" parameterType="java.util.Map"
+		resultMap="secutrow">
+	select t.TABLEID,t.MANID,t.MANTYPE,t.BASESECU,t.SQLWHERE,t.SHOWWHERE from Secu_t_Row t where t.TABLEId=#{tableId} and t.MANID=#{roleId} and mantype='1'
+</select>
+
+
+<select id="getRole2TableRowLimitLists" parameterType="java.util.Map" resultMap="secutrow"> 
+	select t.TABLEID,t.MANID,t.MANTYPE,t.BASESECU,t.SQLWHERE,t.SHOWWHERE from Secu_t_Row t where t.TABLEId=#{tableId} and t.MANID in 
+	<foreach item="roleId" index="index" collection="roleIds"
+			open="(" separator="," close=")"> 
+			#{roleId.ROLEID}
+		</foreach>
+	and mantype='1'
+</select>
+
+<select id="getTableRowSecuSql" parameterType="java.util.Map"
+		resultType="java.lang.String">  
+	select PK_BGT_SECU.f_Secu_Row('${appId}','${userId}','1','${tableID}','','${rightflag}') from dual 
+</select>   
+
+
+<insert id="saveTableRowLimit" parameterType="java.util.Map">
+  	insert into secu_t_row(tableId,manId,basesecu,sqlwhere,showwhere,MANTYPE) values(#{tableId},#{roleId},#{baseSecu},#{sqlWhere},#{showWhere},'1')
+</insert>
+
+<insert id="updateTableRowLimit" parameterType="java.util.Map">
+  	update secu_t_row set sqlWhere=#{sqlWhere},showWhere=#{showWhere} where tableId=#{tableId} and manId=#{roleId} and basesecu=#{baseSecu} and mantype='1'
+</insert>
+
+<delete id="cancelTableRowLimitLimit" parameterType="java.util.Map">
+  	delete from secu_t_row where tableId=#{tableId} and manId=#{roleId} and basesecu=#{baseSecu} and mantype='1'
+</delete>
+
+<delete id="deleteRowSecuLimit" parameterType="java.util.Map">
+		delete from secu_t_row t where t.TABLEID=#{tableId} and t.MANID=#{roleId} and t.MANTYPE='1'
+</delete>
+
+<select id="getUserRoleCount" parameterType="string" resultType="int">
+	SELECT COUNT(1) FROM Secu_t_Userrole WHERE userID = #{userID}
+</select>
+
+<select id="getTableRowSecu" parameterType="string" resultType="string">
+	WITH T_USER_ROLES AS (
+	   SELECT ROLEID FROM Secu_t_Userrole WHERE userID = #{userID}
+	)
+	SELECT TAB.SQLWHERE
+	  FROM SECU_T_ROW TAB
+	 WHERE TAB.TABLEID = #{tableID}
+	   AND TAB.BASESECU = #{baseSecu}
+	   AND TAB.MANID IN (SELECT ROLEID FROM T_USER_ROLES)
+</select>
+
+</mapper>

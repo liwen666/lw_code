@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.formula.dao.IFormulaXmlDAO">
+	<resultMap type="Map" id="ClobMap">
+		<result property="ORDERID" column="ORDERID" jdbcType="NUMERIC"
+			javaType="String" />
+		<result property="FORMULADEF" column="FORMULADEF" jdbcType="CLOB"
+			javaType="String" />
+		<result property="FORMULADEFCHI" column="FORMULADEFCHI"
+			jdbcType="CLOB" javaType="String" />
+		<result property="FORMULADEFENG" column="FORMULADEFENG"
+			jdbcType="CLOB" javaType="String" />
+	</resultMap>
+	<select id="getAllFormulaCols" parameterType="Map" resultMap="ClobMap">
+		SELECT F.DEFTYPE, F.FORCOMCOL, F.FORMULADEF, F.FORMULADEFCHI,
+		F.FORMULADEFENG, F.FORMULAID,
+		F.FORMULALVL, F.FORMULANAME,
+		F.FORMULATYPE, F.FORPARMCOL, F.FORWHERE, F.ISEDIT, F.ISPUBLIC,
+		F.ORDERID, F.REFCOLUMN, F.RELAID, F.TABLEID
+		FROM FORMULA_T_FORMULADEF F
+		WHERE F.FORMULAID IN (${formulaIDs})
+	</select>
+	<insert id="insertFormulaByXml" parameterType="Map">
+		insert into FORMULA_T_FORMULADEF(FORMULAID,
+
+		<if test="FORMULANAME !=null">
+			FORMULANAME,
+		</if>
+		<if test="DEFTYPE !=null">
+			DEFTYPE,
+		</if>
+		<if test="FORCOMCOL !=null">
+			FORCOMCOL,
+		</if>
+		<if test="FORMULALVL !=null">
+			FORMULALVL,
+		</if>
+		<if test="FORMULATYPE !=null">
+			FORMULATYPE,
+		</if>
+		<if test="FORPARMCOL !=null">
+			FORPARMCOL,
+		</if>
+		<if test="FORWHERE !=null">
+			FORWHERE,
+		</if>
+		<if test="ISEDIT !=null">
+			ISEDIT,
+		</if>
+		<if test="ISPUBLIC !=null">
+			ISPUBLIC,
+		</if>
+		<if test="ORDERID !=null">
+			ORDERID,
+		</if>
+		<if test="REFCOLUMN !=null">
+			REFCOLUMN,
+		</if>
+		<if test="RELAID!=null ">
+			RELAID,
+		</if>
+		FORMULADEFCHI,FORMULADEFENG,FORMULADEF, TABLEID) values(#{FORMULAID},
+		<if test="FORMULANAME !=null">
+			#{FORMULANAME},
+		</if>
+		<if test="DEFTYPE !=null">
+			#{DEFTYPE},
+		</if>
+		<if test="FORCOMCOL !=null">
+			#{FORCOMCOL},
+		</if>
+		<if test="FORMULALVL !=null">
+			#{FORMULALVL},
+		</if>
+		<if test="FORMULATYPE !=null">
+			#{FORMULATYPE},
+		</if>
+		<if test="FORPARMCOL !=null">
+			#{FORPARMCOL},
+		</if>
+		<if test="FORWHERE !=null">
+			#{FORWHERE},
+		</if>
+		<if test="ISEDIT !=null">
+			#{ISEDIT},
+		</if>
+		<if test="ISPUBLIC !=null">
+			#{ISPUBLIC},
+		</if>
+		<if test="ORDERID !=null">
+			#{ORDERID},
+		</if>
+		<if test="REFCOLUMN !=null">
+			#{REFCOLUMN},
+		</if>
+		<if test="RELAID !=null">
+			#{RELAID},
+		</if>
+		#{FORMULADEFCHI,jdbcType = CLOB},#{FORMULADEFENG,jdbcType = CLOB},#{FORMULADEF,jdbcType = CLOB},#{TABLEID})
+	
+	</insert>
+	<update id="updateFormulaByXml">
+		update FORMULA_T_FORMULADEF
+		<set>
+			<if test="FORMULANAME !=null">
+				FORMULANAME=#{FORMULANAME},
+		</if>
+			<if test="DEFTYPE !=null">
+				DEFTYPE=#{DEFTYPE},
+		</if>
+			<if test="FORCOMCOL !=null">
+				FORCOMCOL=#{FORCOMCOL},
+		</if>
+			<if test="FORMULALVL !=null">
+				FORMULALVL=#{FORMULALVL},
+		</if>
+			<if test="FORMULATYPE !=null">
+				FORMULATYPE=#{FORMULATYPE},
+		</if>
+			<if test="FORPARMCOL !=null">
+				FORPARMCOL=#{FORPARMCOL},
+		</if>
+			<if test="FORWHERE !=null">
+				FORWHERE=#{FORWHERE},
+		</if>
+			<if test="ISEDIT !=null">
+				ISEDIT=#{ISEDIT},
+		</if>
+			<if test="ISPUBLIC !=null">
+				ISPUBLIC=#{ISPUBLIC},
+		</if>
+			<if test="ORDERID !=null">
+				ORDERID=#{ORDERID},
+		</if>
+			<if test="REFCOLUMN !=null">
+				REFCOLUMN=#{REFCOLUMN},
+		</if>
+			<if test="RELAID !=null">
+				RELAID =#{RELAID},
+		</if>
+			FORMULADEFCHI =
+			#{FORMULADEFCHI,jdbcType = CLOB},FORMULADEFENG=#{FORMULADEFENG,jdbcType = CLOB},FORMULADEF=#{FORMULADEF,jdbcType = CLOB},TABLEID=#{TABLEID}
+		</set>
+		where FORMULAID=#{FORMULAID}
+	</update>
+	<select id="getSysDate" resultType="String">
+		select to_char(sysdate,'yyyy-MM-DD hh24:mi:ss') from dual
+	</select>
+	<select id="tableCount" parameterType="String" resultType="Integer">
+		SELECT COUNT(1) FROM DICT_T_MODEL WHERE TABLEID=#{tableID}
+	</select>
+	<select id="formulaCountByFormulaID" parameterType="String"
+		resultType="Integer">
+		SELECT COUNT(1) FROM FORMULA_T_FORMULADEF WHERE FORMULAID = #{formulaID}
+	</select>
+	<update id="clearFormulaData"  statementType="CALLABLE">
+		{call  P_FORMULA_CLEARDATA()}
+	</update>
+	<select id="getFloatRowByTemplateid" parameterType="String" resultType="map">
+	   SELECT CFG.CELLSECU,CFG.DATAKEY FROM ${dbTableName}_CFG CFG WHERE TEMPLATEID=#{templateID}
+	</select>
+</mapper>

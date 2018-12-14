@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictDBExecuteMapper">
+  
+  
+  
+  <!-- 获取数据库状态位-->
+  <select id="getGlobalIsmultdb" statementType="CALLABLE"  parameterType="java.util.Map" >
+  <![CDATA[  
+         {CALL GET_GLOBAL_ISMULTDB_VAL(#{s,mode=OUT,jdbcType=CHAR})}  
+   ]]>
+   </select>
+   
+   
+<!-- 执行sql-->
+	<select id="callExecDllLong" statementType="CALLABLE" parameterType="java.lang.String">  
+	<![CDATA[  
+	    {call EXECDLL_LONG (#{dbSql})}  
+	]]>  
+	
+	</select>
+	
+	<!-- 执行sql 附带错误信息-->
+	<select id="callExecDllLongForParam" statementType="CALLABLE" parameterType="java.util.Map">  
+	<![CDATA[  
+	    {CALL EXECDLL_LONG_PARAM (#{errorMessage,mode=OUT,jdbcType=VARCHAR},#{dbSql,mode=IN,jdbcType=VARCHAR})}  
+	]]>  
+	
+	</select>
+	<!-- 动态在factor 表中添加区域的分区表权限-->
+	<select id="addPartition" statementType="CALLABLE" parameterType="java.util.Map">  
+	<![CDATA[  
+	    {CALL SYS_P_ADDPARTITION(#{tablename,mode=IN,jdbcType=VARCHAR},#{code,mode=IN,jdbcType=VARCHAR})}
+	]]>  
+	
+	</select>
+	
+	
+	 <!-- 查看数据库是否存在     0 不存在    1 存在 -->
+  <select id="getIfExistsInDB" statementType="CALLABLE"  parameterType="java.util.Map"  flushCache="true" useCache="false">
+  <![CDATA[  
+         {CALL GET_IF_EXISTS(#{v,mode=OUT,jdbcType=INTEGER},#{v_sql,mode=IN,jdbcType=VARCHAR})}  
+   ]]>
+   </select>
+   
+   
+   
+   
+   
+   
+   
+   <!-- 查询视图的字段 -->
+   	<select id="getColumnByViewName" parameterType="java.lang.String" resultType="map">
+   	<![CDATA[  
+		SELECT TABLE_NAME,
+		       COLUMN_NAME,
+		       DATA_TYPE,
+		       DATA_LENGTH,
+		       DATA_PRECISION,
+		       DATA_SCALE,
+		       NULLABLE,
+		       DATA_DEFAULT
+		  FROM USER_TAB_COLUMNS
+		  WHERE TABLE_NAME = UPPER(#{viewName})  AND COLUMN_NAME NOT IN('DBVERSION')
+		     ]]> 
+	</select>
+	<select id="getNeedRecoverColsForBakTable" parameterType="java.lang.String" resultType="map">
+   	<![CDATA[  
+select SUBSTR(t2.TABLE_NAME,3,length(t2.TABLE_NAME)) as TABLE_NAME, t2.COLUMN_NAME, t2.DATA_TYPE, t2.DATA_LENGTH,(select TABLEID from Dict_t_Model t5 where t5.DBTABLENAME=SUBSTR(t2.TABLE_NAME,3,length(t2.TABLE_NAME))) as TABLE_ID
+  from USER_TAB_COLUMNS t2,
+       (SELECT TABLE_NAME, COLUMN_NAME
+          FROM USER_TAB_COLUMNS
+         WHERE TABLE_NAME IN (SELECT 'P#' || DBTABLENAME
+                                FROM DICT_T_MODEL
+                               WHERE ISBAK = '1'
+                                 and appId = #{appId})
+        MINUS
+        SELECT SUBSTR(TABLE_NAME, 1, LENGTH(TABLE_NAME) - 4), COLUMN_NAME
+          FROM USER_TAB_COLUMNS
+         WHERE TABLE_NAME IN (SELECT 'P#' || DBTABLENAME || '_BAK'
+                                FROM DICT_T_MODEL
+                               WHERE ISBAK = '1'
+                                 and appId = #{appId})) t1
+ where t1.table_NAME = t2.table_NAME
+   and t1.COLUMN_NAME = t2.COLUMN_NAME order by t2.table_Name
+
+
+		     ]]> 
+	</select>
+	
+		<select id="getNeedRecoverColsViewForBakTable" parameterType="java.lang.String" resultType="map">
+   	<![CDATA[  
+select t2.TABLE_NAME, t2.COLUMN_NAME, t2.DATA_TYPE, t2.DATA_LENGTH,(select TABLEID from Dict_t_Model t5 where t5.DBTABLENAME=t2.TABLE_NAME) as TABLE_ID
+  from USER_TAB_COLUMNS t2,
+       (SELECT TABLE_NAME, COLUMN_NAME
+          FROM USER_TAB_COLUMNS
+         WHERE TABLE_NAME IN (SELECT  DBTABLENAME
+                                FROM DICT_T_MODEL
+                               WHERE ISBAK = '1'
+                                 and appId = #{appId})
+        MINUS
+        SELECT SUBSTR(TABLE_NAME, 1, LENGTH(TABLE_NAME) - 4), COLUMN_NAME
+          FROM USER_TAB_COLUMNS
+         WHERE TABLE_NAME IN (SELECT DBTABLENAME || '_BAK'
+                                FROM DICT_T_MODEL
+                               WHERE ISBAK = '1'
+                                 and appId = #{appId})) t1
+ where t1.table_NAME = t2.table_NAME
+   and t1.COLUMN_NAME = t2.COLUMN_NAME order by t2.table_Name
+		     ]]> 
+	</select>
+	
+	 <!-- 查询物理表的PK的字段 -->
+   	<select id="getTableColumnPK" parameterType="java.lang.String" resultType="map">
+   	<![CDATA[  
+		SELECT cu.COLUMN_NAME 
+		 FROM USER_CONS_COLUMNS cu, USER_CONSTRAINTS au 
+		 WHERE  cu.CONSTRAINT_NAME = au.CONSTRAINT_NAME AND au.CONSTRAINT_TYPE = 'P' 
+		     AND au.TABLE_NAME =UPPER(#{tableName})
+	]]> 
+	</select>
+   
+   
+	 <!--  -->
+   	<select id="getTableDataCount" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(*) FROM  ${tableName}
+	</select>
+   
+   
+     
+    <!-- 检查 数据库中 factor表的列   和真正P# 物理表的列  一致性 -->
+   	<select id="getAllConsistency"   resultType="com.tjhq.commons.dict.external.po.ConsistencyPO">
+   	<![CDATA[  
+		select (select upper(y.DBTABLENAME)
+          from dict_t_model y
+         where x.TABLEID = y.TABLEID) as tableName ,
+       upper(x.DBCOLUMNNAME)  as factorName
+  from dict_t_factor x
+ where DATATYPE <> 4 and ISBANDCOL<>1 
+   and not exists
+ (select 1
+          from user_tab_cols
+         where table_name = (select upper(y.DBTABLENAME)
+                               from dict_t_model y
+                              where x.TABLEID = y.TABLEID)
+           and Column_Name = upper(x.DBCOLUMNNAME));
+	 ]]> 
+	</select>
+	
+   
+   <!-- 检查 数据库中 factor表的列   和真正P# 物理表的列  一致性 ； 指定 某个表 tableName-->
+   	<select id="getConsistencyByTableName" parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.ConsistencyPO">
+   	<![CDATA[  
+		select * from ( select (select upper(y.DBTABLENAME)
+           from dict_t_model y
+          where x.TABLEID = y.TABLEID AND y.DBTABLENAME=#{tableName}) as tableName ,
+        upper(x.DBCOLUMNNAME) as factorName
+   from dict_t_factor x
+  where DATATYPE <> 4 and ISBANDCOL<>1 
+    and not exists
+  (select 1
+           from user_tab_cols
+          where table_name = (select upper(y.DBTABLENAME)
+                                from dict_t_model y
+                               where x.TABLEID = y.TABLEID)
+            and Column_Name = upper(x.DBCOLUMNNAME) ) ) t1 where t1.tableName is not null 
+	 ]]> 
+	</select>
+	
+	<select id="createFormulaTrigger" statementType="CALLABLE" parameterType="java.lang.String">  
+	<![CDATA[  
+	    {CALL PKG_FORMULA.P_CREATE_FORMULA_TRIGGER(#{tableID,mode=IN,jdbcType=VARCHAR})}
+	]]>  
+	</select>
+	
+    <select id="recreateViews" statementType="CALLABLE" parameterType="java.lang.String">  
+	<![CDATA[  
+	    {CALL SYS_P_RECREATE_VIEWS(#{tableID,mode=IN,jdbcType=VARCHAR})}
+	]]> 
+	</select>
+
+</mapper>
+ <!--2014-01-17 15:51:04-->

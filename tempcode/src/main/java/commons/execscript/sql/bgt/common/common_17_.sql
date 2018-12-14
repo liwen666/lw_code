@@ -1,0 +1,130 @@
+begin
+DELETE FROM dict_t_defaultcol
+ WHERE GUID = '20895D1768692376E050A8C021057D67';
+INSERT INTO dict_t_defaultcol
+  (GUID,
+   DEALID,
+   ORDERID,
+   NAME,
+   DBCOLUMNNAME,
+   DATATYPE,
+   DATALENGTH,
+   SCALE,
+   CSID,
+   ISPRIMARY,
+   ISLOGICKEY,
+   ISRESERVE,
+   DEFAULTVALUE,
+   DEID)
+VALUES
+  ('20895D1768692376E050A8C021057D67',
+   'A0*01',
+   6,
+   '调动表',
+   'REDEPLOYTABID',
+   3,
+   32,
+   0,
+   '',
+   '0',
+   '0',
+   '1',
+   '',
+   null);
+DELETE FROM dict_t_defaultcol
+ WHERE GUID = '218F1F613DA642D0E050A8C02105382A';
+   INSERT INTO dict_t_defaultcol
+  (GUID,
+   DEALID,
+   ORDERID,
+   NAME,
+   DBCOLUMNNAME,
+   DATATYPE,
+   DATALENGTH,
+   SCALE,
+   CSID,
+   ISPRIMARY,
+   ISLOGICKEY,
+   ISRESERVE,
+   DEFAULTVALUE,
+   DEID)
+VALUES
+  ('218F1F613DA642D0E050A8C02105382A',
+   'A0*01',
+   1,
+   '证件号码',
+   'CARDID',
+   3,
+   32,
+   0,
+   '',
+   '0',
+   '0',
+   '1',
+   '',
+   '10705');
+DELETE FROM dict_t_defaultcol
+ WHERE GUID = '218F1F613DA742D0E050A8C02105382A';
+INSERT INTO dict_t_defaultcol
+  (GUID,
+   DEALID,
+   ORDERID,
+   NAME,
+   DBCOLUMNNAME,
+   DATATYPE,
+   DATALENGTH,
+   SCALE,
+   CSID,
+   ISPRIMARY,
+   ISLOGICKEY,
+   ISRESERVE,
+   DEFAULTVALUE,
+   DEID)
+VALUES
+  ('218F1F613DA742D0E050A8C02105382A',
+   'A0*01',
+   7,
+   '调动状态',
+   'FOLDSTATUS',
+   3,
+   1,
+   0,
+   '',
+   '0',
+   '0',
+   '1',
+   '',
+   '6200wUYZQB6C');
+DELETE FROM dict_t_defaultcol
+ WHERE GUID = '218F1F613DA842D0E050A8C02105382A';
+INSERT INTO dict_t_defaultcol
+  (GUID,
+   DEALID,
+   ORDERID,
+   NAME,
+   DBCOLUMNNAME,
+   DATATYPE,
+   DATALENGTH,
+   SCALE,
+   CSID,
+   ISPRIMARY,
+   ISLOGICKEY,
+   ISRESERVE,
+   DEFAULTVALUE,
+   DEID)
+VALUES
+  ('218F1F613DA842D0E050A8C02105382A',
+   'A0*01',
+   8,
+   '调动单位',
+   'FOLDAGENCYID',
+   3,
+   32,
+   0,
+   '',
+   '0',
+   '0',
+   '1',
+   '',
+   '6200BI8namQF');
+end;--郑桥_20151008_人员表添加缺省列

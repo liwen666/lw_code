@@ -1,0 +1,648 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTAgencyMapper">
+
+
+	<resultMap id="roleTreenode" type="com.tjhq.commons.secu.po.TreeNode">
+		<result property="name" column="columnName" />
+		<result property="nocheck" column="nocheck" />
+		<result property="id" column="guid" />
+		<result property="PId" column="superguid" />
+	</resultMap>
+	<resultMap id="agencyTreenode" type="com.tjhq.exp.task.po.TreeNodeForTask">
+		<result property="name" column="name" />
+		<result property="nocheck" column="nocheck" />
+		<result property="id" column="id" />
+		<result property="pId" column="pid" />
+		<result property="divType" column="isdistrict" />
+		<result property="isLeaf" column="isLeaf" />
+		<result property="levelNo" column="levelNo" />
+		<result property="code" column="code" />
+		<result property="open" column="open" />
+		<result property="chkDisabled" column="chkDisabled" />
+	</resultMap>
+	<sql id="getRoleToAgency_SQL">
+		with cuds as (
+			SELECT CASE
+			         WHEN SUBSTR(T6.CODE, -2, 2) = '00' THEN
+			          T6.SUPERGUID
+			         ELSE
+			          T6.GUID
+			       END GUID,
+			       CASE
+			         WHEN T5.ISDISTRICT = '1' THEN
+			          T6.DISTRLVL - 1
+			         ELSE
+			          T6.DISTRLVL
+			       END DISTRLVL
+			  FROM CODE_T_DISTRICT T6, CODE_T_AGENCY_SPF T5
+			 WHERE T6.GUID = T5.DISTRICTID
+			   AND T5.GUID = '${agencyId}'
+		),
+		agency as (
+			select t3.code, t3.guid, t3.superguid, t3.NAME as columnName
+			  from code_t_agency_spf t3
+			 start with guid = '${agencyId}'
+			connect by prior guid = superguid
+			union
+			select t3.code, t3.guid, t3.superguid, t3.NAME as columnName
+			  from code_t_agency_spf t3
+			 where exists (select 1
+			          from Code_t_District T1
+			         where T1.DISTRLVL > (SELECT DISTRLVL FROM CUDS)
+			           and T3.districtid = T1.guid)
+			 start with t3.guid =
+			   <if test="appId == 'BGT'">
+			   		'${agencyId}'
+			   </if>
+			   <if test="appId != 'BGT'">
+			        (select guid from cuds)
+			   </if>
+		  	connect by prior t3.guid = t3.superguid
+		),
+	
+		district as
+		 (select T1.code, T1.guid, T1.SUPERGUID, T1.NAME as columnName
+		    from Code_t_District T1
+		   where T1.DISTRLVL > (SELECT DISTRLVL FROM CUDS)
+		   start with T1.GUID = (select guid from cuds)
+		  connect by prior T1.guid = T1.SUPERGUID),
+		allagency as
+		 (select * from agency union select * from district)
+	</sql>
+	<!-- 查询未选择的单位和地区 -->
+	<select id="getUnSelectRoleToAgency" parameterType="java.util.Map" resultMap="roleTreenode">
+		<include refid="getRoleToAgency_SQL"></include>
+		select guid, superguid, columnName, 'false' as nocheck
+		  from allagency t5
+		 where not exists
+		 (select t4.guid
+		          from (select t3.guid,
+		                       t3.superguid,
+		                       t3.columnName,
+		                       'true' as nocheck
+		                  from allagency t3
+		                 start with t3.guid in (select t2.agencyId
+		                                          from secu_t_agency t2
+		                                         where t2.manId = '${roleId}'
+		                                           and manType = '${manType}'
+		                                           and appId = '${appId}')
+		                connect by prior t3.guid = t3.superguid) t4
+		         where t4.guid = t5.guid)
+		 order by code asc
+	</select>
+	<!-- 查询已选择的单位和地区 -->
+	<select id="getSelectedRoleToAgency" parameterType="java.util.Map" resultMap="roleTreenode">
+		<include refid="getRoleToAgency_SQL"></include>
+		select *
+		  from (select t3.guid,
+		               t3.superguid,
+		               t3.columnName,
+		               'true' as nocheck,
+		               t3.code
+		          from allagency t3
+		         where not exists (select t6.agencyId
+		                  from secu_t_agency t6
+		                 where t6.manId = '${roleId}'
+		                   and t6.manType = '${manType}'
+		                   and t6.appId = '${appId}'
+		                   and t6.agencyId = t3.guid)
+		         start with t3.guid in (select t2.agencyId
+		                                  from secu_t_agency t2
+		                                 where t2.manId = '${roleId}'
+		                                   and t2.appId = '${appId}'
+		                                   and manType = '${manType}')
+		        connect by prior t3.guid = t3.superguid
+		        
+		        union
+		        select t3.guid,
+		               t3.superguid,
+		               t3.columnName,
+		               'true' as nocheck,
+		               t3.code
+		          from allagency t3
+		         where not exists (select t4.agencyId
+		                  from secu_t_agency t4
+		                 where t4.manId = '${roleId}'
+		                   and t4.appId = '${appId}'
+		                   and t4.manType = '${manType}'
+		                   and t4.agencyId = t3.guid)
+		         start with t3.guid in (select t2.agencyId
+		                                  from secu_t_agency t2
+		                                 where t2.manId = '${roleId}'
+		                                   and t2.appId = '${appId}'
+		                                   and manType = '${manType}')
+		        connect by prior t3.superguid = t3.guid
+		        
+		        union
+		        
+		        select t7.guid,
+		               t7.superguid,
+		               t7.columnName,
+		               'false' as nocheck,
+		               t7.code
+		          from secu_t_agency t6, allagency t7
+		         where t6.agencyId = t7.guid
+		           and t6.appId = '${appId}'
+		           and t6.manId = '${roleId}'
+		           and t6.manType = '${manType}') t7
+		 order by t7.code asc
+
+
+
+	</select>
+
+	<select id="getAgencyListByUserIdForCZ" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+				select t7.*,GUID as ID,SUPERGUID as PID,CASE WHEN (select count(proc_inst_id_)
+          from act_ru_execution t8 where t8.business_key_='${taskId}'||GUID)=1 then 'true' ELSE 'false' END nocheck from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF,LEVELNO,isDistrict
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno-${districtLevelNo} as levelno,t3.isDistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		) t7 order by t7.code asc
+	</select>
+	
+	<select id="getAgencyListByUserIdForCZAtBIM" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+				select t7.*,GUID as ID,SUPERGUID as PID,chkDisabled,CASE WHEN (select count(proc_inst_id_)
+          from act_ru_execution t8 where t8.business_key_='${taskId}'||GUID)=1 then 'true' ELSE 'false' END nocheck from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF,LEVELNO,isDistrict,'false' as chkDisabled
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=#{agencyId}
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		union
+		select t1.GUID,t1.SUPERGUID,t1.NAME,t1.CODE,t1.DIVTYPE,t1.ISLEAF,t1.LEVELNO as levelno,t1.isdistrict,'false' as chkDisabled
+      from (select * from ${dbNameForAgency} where isdistrict = '1') t1
+     where t1.guid != #{agencyId}
+     start with t1.guid =#{agencyId}
+    connect by prior t1.guid = t1.superguid
+		) t7 order by t7.code asc
+	</select>
+		<select id="getAgencyListForCZAtBIM" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+				select t7.*,GUID as ID,SUPERGUID as PID from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF,LEVELNO,isDistrict,'false' as chkDisabled
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=#{agencyId}
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		union
+		select t1.GUID,t1.SUPERGUID,t1.NAME,t1.CODE,t1.DIVTYPE,t1.ISLEAF,t1.LEVELNO as levelno,t1.isdistrict,'false' as chkDisabled 
+      from (select * from ${dbNameForAgency} where isdistrict = '1') t1
+     start with t1.guid =#{agencyId}
+    connect by prior t1.guid = t1.superguid
+		) t7 order by t7.code asc
+	</select>
+	<select id="getAgencyListByUserIdForTaskAssignForCZ" parameterType="java.util.Map"
+		resultType="map">
+				select t7.*,GUID as ID,SUPERGUID as PID from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF,LEVELNO
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno-${districtLevelNo} as levelno
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		) t7 order by
+		t7.code asc
+	</select>
+	
+	<select id="getAgencyListByUserIdForTaskAssignForCZAtBIM" parameterType="java.util.Map"
+		resultType="map">
+				select t7.*,GUID as ID,SUPERGUID as PID from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF,LEVELNO
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		) t7 order by
+		t7.code asc
+	</select>
+	
+	<select id="getAgencyListByUserIdForTaskAssignForDW" parameterType="java.util.Map"
+		resultType="map">
+    select t7.* from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno-${districtLevelNo} as levelno
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 where t7.guid !=#{agencyId}   order by
+		t7.code asc
+	</select>
+		<select id="getAgencyListByUserIdForTaskAssignForDWAtBIM" parameterType="java.util.Map"
+		resultType="map">
+    select t7.* from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 where t7.guid !=#{agencyId}   order by
+		t7.code asc
+	</select>
+	
+		<select id="getAgencyListByUserIdForDW" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select t7.*,guid as id,superguid as pid,CASE WHEN (select t1.description_ from act_ru_task t1, act_ru_execution t2 where t1.proc_inst_id_=t2.proc_inst_id_ and t2.business_key_='${taskId}'||t7.GUID)='1'||'${userLevel}'||'L' then 'false' WHEN (select count(t0.taskId) from task_t_taskinstance t0 where t0.taskId ='${taskId}'||t7.GUID )='0' then 'false' ELSE 'true' END nocheck from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno-${districtLevelNo} as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 where  t7.guid !=#{agencyId}  order by
+		t7.code asc
+	</select>
+			<select id="getAgencyListByUserIdForDWAtBIM" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select t7.*,guid as id,superguid as pid,CASE WHEN (select t1.description_ from act_ru_task t1, act_ru_execution t2 where t1.proc_inst_id_=t2.proc_inst_id_ and t2.business_key_='${taskId}'||t7.GUID)='1'||'${userLevel}'||'L' then 'false' WHEN (select count(t0.taskId) from infoCollect_t_taskinstance t0 where t0.taskId ='${taskId}'||t7.GUID )='0' then 'false' ELSE 'true' END nocheck from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 where  t7.guid !=#{agencyId}  order by
+		t7.code asc
+	</select>
+	
+		<select id="getAgencyListForDWAtBIM" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select t7.*,guid as id,superguid as pid from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 order by
+		t7.code asc
+	</select>
+	
+	
+		<select id="getCanCheckAgencyListByUserIdForDW" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select t7.*,guid as id,superguid as pid,'false' as nocheck,'true' as open from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno-${districtLevelNo} as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 order by
+		t7.code asc
+	</select>
+	
+	<select id="getCanCheckAgencyListByUserIdForDWAtBIM" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select t7.*,guid as id,superguid as pid,'false' as nocheck,'true' as open from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf,t3.levelno as levelno,t3.isdistrict
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid) t7 order by
+		t7.code asc
+	</select>
+	
+	<select id="getCanCheckAgencyListByUserIdForCZ" parameterType="java.util.Map"
+		resultMap="agencyTreenode">
+    select guid as id,superguid as pid,columnName as name,code,nocheck,'true' as open
+		from (select t3.guid,
+		t3.superguid,
+		'[' || t3.code || ']' || t3.NAME as columnName,
+		t3.code,
+		'true' as nocheck,
+		'true' as open
+		from (select t3.code, t3.guid, t3.superguid, t3.NAME
+		from ${dbNameForAgency} t3
+		start with t3.guid =
+		(select guid from ${dbNameForAgency} where GUID = #{agencyId})
+		connect by prior t3.guid = t3.superguid
+		) t3
+		where not exists (select t6.agencyId
+		from secu_t_agency t6
+		where t6.manId in 
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and t6.manType = '1'
+		and t6.agencyId = t3.guid)
+		start with t3.guid in (select t2.agencyId
+		from secu_t_agency t2
+		where t2.manId in 
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+		union
+		select distinct t3.guid as id,
+		t3.superguid as pid,
+		'[' || t3.code || ']' || t3.NAME as name,
+		t3.code,
+		'true' as nocheck,
+		'true' as open
+		from (select t3.code, t3.guid, t3.superguid, t3.NAME
+		from ${dbNameForAgency} t3
+
+		start with t3.guid =
+		(select guid from ${dbNameForAgency} where GUID = #{agencyId})
+		connect by prior t3.guid = t3.superguid
+		) t3
+		where not exists (select t4.agencyId
+		from secu_t_agency t4
+		where t4.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and t4.manType = '1'
+		and t4.agencyId = t3.guid)
+		start with t3.guid in (select t2.agencyId
+		from secu_t_agency t2
+		where t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.superguid = t3.guid
+
+		union
+
+		select t7.guid as id,
+		t7.superguid as pid,
+		'[' || t7.code || ']' || t7.NAME as name,t7.code,
+		'false' as nocheck,'true' as open
+		from secu_t_agency t6, ${dbNameForAgency} t7
+		where t6.agencyId = t7.guid
+		and t6.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and t6.manType = '1') t7
+		order by t7.code asc
+	</select>
+	
+	<select id="getSubAgencyListToAssign" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[ 
+			select *
+			  from (select *
+			          from (select distinct GUID,
+			                                SUPERGUID,
+			                                NAME,
+			                                CODE,
+			                                DIVTYPE,
+			                                ISLEAF,
+			                                LEVELNO
+			                  from (select t3.code,
+			                               t3.guid,
+			                               t3.superguid,
+			                               t3.NAME,
+			                               t3.divtype,
+			                               t3.isLeaf,
+			                               t3.LEVELNO
+			                          from ${dbNameForAgency} t3
+			                         start with t3.guid = (select guid
+			                                                 from ${dbNameForAgency}
+			                                                where GUID ='${upAgencyId}')
+			                        connect by prior t3.guid = t3.superguid) t3
+			                 start with t3.guid in (select distinct t2.agencyId
+			                                          from secu_t_agency t2
+			                                         where t2.manId in 
+			                                        ${roleListStr}
+			                                           and manType = '1')
+			                connect by prior t3.guid = t3.superguid) t4
+			         start with t4.GUID in (select t.agencyid
+			                                  from task_t_taskagency t
+			                                 where t.TaskId = '${taskId}')
+			        connect by prior t4.guid = t4.superguid
+			        union
+			        select *
+			          from (select distinct GUID,
+			                                SUPERGUID,
+			                                NAME,
+			                                CODE,
+			                                DIVTYPE,
+			                                ISLEAF,
+			                                LEVELNO
+			                  from (select t3.code,
+			                               t3.guid,
+			                               t3.superguid,
+			                               t3.NAME,
+			                               t3.divtype,
+			                               t3.isLeaf,
+			                               t3.LEVELNO
+			                          from ${dbNameForAgency} t3
+			                         start with t3.guid = (select guid
+			                                                 from ${dbNameForAgency}
+			                                                where GUID = '${upAgencyId}')
+			                        connect by prior t3.guid = t3.superguid) t3
+			                 start with t3.guid in (select distinct t2.agencyId
+			                                          from secu_t_agency t2
+			                                         where t2.manId in 
+			 										${roleListStr}
+			                                           and manType = '1')
+			                connect by prior t3.guid = t3.superguid) t4
+			         start with t4.GUID in (select t.agencyid
+			                                  from task_t_taskagency t
+			                                 where t.TaskId = '${taskId}')
+			        connect by prior t4.superguid = t4.guid) t6 where t6.GUID <> '${agencyId}'
+			 start with t6.guid= '${agencyId}'
+			connect by prior t6.guid = t6.superguid
+		]]>
+	</select>
+
+	<select id="getAgencyListByRoleId" parameterType="java.util.Map"
+		resultType="map">
+		select t7.*,GUID as ID,SUPERGUID as PID from (
+		select distinct
+		GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF
+		from (select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid
+		) t3
+		start with
+		t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where
+		t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.guid = t3.superguid
+
+		union
+
+		select
+		distinct GUID,SUPERGUID,NAME,CODE,DIVTYPE,ISLEAF
+		from (select
+		t3.code,t3.guid, t3.superguid, t3.NAME,t3.divtype,t3.isLeaf
+		from
+		${dbNameForAgency} t3
+		start with t3.guid=(select guid from
+		${dbNameForAgency} where GUID=#{agencyId} )
+		connect by prior t3.guid =
+		t3.superguid
+		) t3
+		start with t3.guid in (select distinct t2.agencyId
+		from secu_t_agency t2
+		where t2.manId in
+		<foreach collection="roleIds" item="roleId" open="("
+			separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+		and manType = '1')
+		connect by prior t3.superguid= t3.guid ) t7 order by
+		t7.code asc
+	</select>
+
+	<select id="getAgencyListByRoleIdForDW" parameterType="java.util.Map"
+		resultType="map">
+		select t7.*,GUID as ID,SUPERGUID as PID from (
+		select t3.code,t3.guid,
+		t3.superguid, t3.NAME,t3.divtype,t3.isLeaf
+		from ${dbNameForAgency} t3
+		start with t3.guid=(select guid from ${dbNameForAgency} where
+		GUID=#{agencyId} )
+		connect by prior t3.guid = t3.superguid
+		) t7 order by
+		t7.code asc
+	</select>
+
+
+	
+	<select id="getRoleIdListByUserId" parameterType="java.lang.String"
+		resultType="map">
+		select roleId from secu_t_userrole t2 where
+		t2.userid=#{userId}
+	</select>
+	<select id="getUserInfoByUserId" parameterType="java.util.Map"
+		resultType="map">
+		select t3.*,t4.CODE as ORGCODE,(select t6.levelno from ${dbNameForAgency} t6 where t6.guid=t4.districtId ) as districtLevelNo,(select t5.LEVELNO-(select t6.LEVELNO from ${dbNameForAgency} t6 where t6.guid=t4.districtId) from ${dbNameForAgency} t5 where t5.guid=t3.ORGID) as SELFLEVELNO,t4.GUID as ORGID , (t4.LEVELNO-(select t6.LEVELNO from ${dbNameForAgency} t6 where t6.guid=t4.districtId)) as LEVELNO from secu_t_user
+		t3,${dbNameForAgency} t4 where t3.upAgencyId=t4.guid and t3.guid=#{userId}
+	</select>
+	<select id="getUserInfoByUserIdForBIM" parameterType="java.util.Map"
+		resultType="map">
+		select t3.*,t4.CODE as ORGCODE,(select t6.levelno from ${dbNameForAgency} t6 where t6.guid=t4.districtId ) as districtLevelNo,(select t5.LEVELNO from ${dbNameForAgency} t5 where t5.guid=t3.ORGID) as SELFLEVELNO,t4.GUID as ORGID , t4.LEVELNO from secu_t_user
+		t3,${dbNameForAgency} t4 where t3.upAgencyId=t4.guid and t3.guid=#{userId}
+	</select>
+	<select id="getRoleListByOrgId" parameterType="java.lang.String"
+		resultType="map">
+		select t.GUID,t.NAME,'0' as SUPERGUID from secu_t_role t where t.ROLETYPE=#{roleType}
+	</select>
+	
+	<select id="getUserList" parameterType="java.lang.String" resultType="map">
+		<![CDATA[ 
+			select guid,name,SUPERGUID,'0' leaf from code_t_district_spf
+			union all
+			select guid,name,districtid as superguid,'0' leaf from code_t_dept_spf where superguid='0' 
+			union all
+			select guid,name, superguid,'0' leaf from code_t_dept_spf where superguid<>'0'
+			union all
+			select guid,name,deptid as superguid,'1' leaf from secu_t_user where usertype='1'
+		]]> 
+	</select> 
+	
+	
+	<insert id="addSelectedAgencyToRole" parameterType="java.util.Map">
+		INSERT INTO
+		secu_t_agency (APPID, MANID,AGENCYID,MANTYPE) values
+		(#{appId},#{roleId},#{id},#{manType})
+	</insert>
+	<delete id="removeSelectedAgencyToRole" parameterType="java.util.Map">
+		delete from secu_t_agency a where a.APPID=#{appId} and
+		a.MANID=#{roleId} and a.MANTYPE= #{manType} and a.AGENCYID in
+		<foreach collection="unselectAgencyList" item="unselectAgency"
+			open="(" separator="," close=")">
+			#{unselectAgency.id}
+		</foreach>
+	</delete>
+	
+	<update id="updateSql" parameterType="string">
+		${sql}
+	</update>
+</mapper>

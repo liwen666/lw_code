@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.install.dao.IInstallDataBaseDao">
+	<select id="getInstallSqlListByObjType" parameterType="java.util.Map"
+		resultType="com.tjhq.commons.install.po.InstallSqlObject">
+		SELECT BUSI_NAME AS busiName, OBJ_NAME AS objName, OBJ_TYPE
+		AS objType,
+		PARENT_OBJ AS parentObj, SQL_TEXT AS sqlText, OBJ_COMMENT
+		AS objComment
+		FROM SQL_T_SCRIPT
+		WHERE OBJ_TYPE = #{objType} AND ISSYSOBJ  = #{isSysObj} 
+		ORDER BY
+		EXEC_ORDER
+	</select>
+
+	<update id="executeInstallSql" statementType="CALLABLE"
+		parameterType="java.lang.String">  
+	<![CDATA[  
+	    {CALL EXEC_INSTALLSQL (#{sqlString})}  
+	]]>
+	</update>
+
+	<insert id="insertInstallLog" parameterType="com.tjhq.commons.install.po.InstallLogObject">
+		INSERT INTO EFM_T_INSTALLLOG
+		(logID, objectName, objectType, isSuccess, sqlText,
+		erroInfo, objectComment)
+		VALUES
+		(#{logID}, #{objectName}, #{objectType},
+		#{isSuccess}, #{sqlText},
+		#{erroInfo}, #{objectComment})
+	</insert>
+
+	<update id="updateInstallLog" parameterType="com.tjhq.commons.install.po.InstallLogObject">
+		UPDATE EFM_T_INSTALLLOG
+		SET isSuccess = #{isSuccess}, erroInfo = #{erroInfo}
+		WHERE logID = #{logID}
+	</update>
+	
+	
+	<update id="clearInstallLogSQL" parameterType="java.lang.String">
+	    UPDATE EFM_T_INSTALLLOG
+	    SET SQLTEXT = NULL
+		WHERE logID = #{logID}
+	</update>
+	
+	<select id="getErroInstallLogList" parameterType="java.lang.String" resultType="com.tjhq.commons.install.po.InstallLogObject">
+		SELECT  logID, objectName
+	    FROM EFM_T_INSTALLLOG 
+	    WHERE ISSUCCESS = '0'
+       ORDER BY DBVERSION
+	</select>
+
+	<select id="getInstallData" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT L.OBJECTNAME,
+	L.OBJECTTYPE,
+	L.ISSUCCESS,
+	L.SQLTEXT,
+	L.ERROINFO,
+	L.OBJECTCOMMENT
+	FROM EFM_T_INSTALLLOG L
+	<where>
+		<if test="objectType_like!=null and objectType_like!=''">
+			 L.OBJECTTYPE like #{objectType_like}
+        </if>
+		<if test="objectName_like!=null and objectName_like!=''">
+			AND L.OBJECTNAME like #{objectName_like}
+        </if>
+		<if test="isSuccess_like!=null and isSuccess_like!=''">
+			AND L.ISSUCCESS = #{isSuccess_like}
+        </if>
+	</where>
+   ORDER BY L.DBVERSION DESC
+	</select>
+
+	<select id="hasModel" parameterType="java.lang.String"
+		resultType="int">
+		SELECT COUNT(1) FROM USER_OBJECTS WHERE OBJECT_NAME =
+		#{tableName}
+	</select>
+	
+	<update id="compileInvalidObjects" statementType="CALLABLE">
+		<![CDATA[
+		    {CALL COMPILE_INVALID()}
+		]]>
+	</update>
+
+	<update id="initDefaultPartition" parameterType="java.util.HashMap" statementType="CALLABLE">
+		<![CDATA[
+		    {CALL INIT_DEFAULTPARTITION(#{defaultYear,mode=IN,jdbcType=VARCHAR},#{defaultProvince,mode=IN,jdbcType=VARCHAR})}
+		]]>
+	</update>
+	
+	<select id="isExistsDBLink" parameterType="java.lang.String" resultType="int">
+	   SELECT COUNT(1) AS COUNT FROM USER_DB_LINKS WHERE DB_LINK = UPPER(#{dbLink})
+	</select>
+	
+	<select id="getDefaultProvince" resultType="java.util.HashMap">
+	   SELECT P.CODE,P.NAME, '['||P.CODE||']'||P.NAME AS C_NAME ,P.ISLEAF,
+	   P.GUID,P.SUPERGUID FROM FASP_T_PUBPROVINCE P ORDER BY CODE
+	</select>
+	
+    <select id="isExistsDBObject" parameterType="java.lang.String" resultType="int">
+	   SELECT COUNT(1) AS OBJCOUNT FROM USER_OBJECTS WHERE OBJECT_NAME = UPPER(#{objectName})
+	</select>
+	
+	<select id="isExistsBusiData"  resultType="int">
+	   SELECT COUNT(1) FROM DICT_T_APPREGISTER
+	</select>
+	
+	
+    <select id="getInstallDefaultProvince"  flushCache="true" useCache="false" resultType="java.lang.String">
+       <![CDATA[
+		SELECT CODE
+		  FROM (SELECT CODE
+		          FROM (SELECT *
+		                  FROM (SELECT CODE
+		                          FROM FW_T_ADMINDIV
+		                         WHERE CODE LIKE '87%'
+		                         ORDER BY CODE)
+		                 WHERE ROWNUM < 2
+		                UNION ALL
+		                SELECT CODE
+		                  FROM (SELECT CODE
+		                          FROM FW_T_ADMINDIV
+		                         WHERE CODE NOT LIKE '87%'
+		                         ORDER BY CODE)
+		                 WHERE ROWNUM < 2)
+		         ORDER BY CODE DESC)
+		 WHERE ROWNUM < 2
+		 ]]>
+	</select>
+	
+	
+	<select id="getInstallDefaultYear"  flushCache="true" useCache="false" resultType="java.lang.String">
+	   SELECT YEAR FROM FW_T_YEAR WHERE ISDEFAULT = '1'  
+	</select>
+	
+	<select id="getInstallFaspDBUser"  flushCache="true" useCache="false" resultType="java.lang.String">
+	   SELECT PARAMDATA FROM FW_T_SYSTEMSET WHERE PARAMCODE = 'FASP2DBLINK'
+	</select>
+</mapper>

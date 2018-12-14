@@ -1,0 +1,35 @@
+declare
+  v_n1 number(8) := 0;
+begin
+  select count(1)
+    into v_n1
+    from user_views
+   where upper(view_name) = 'BGT_T_CFLOW_ACT';
+  if v_n1 = 0 then
+    execute immediate Q'{create table BGT_T_CFLOW_ACT (
+    DATAKEY VARCHAR2(32) default SYS_GUID() not null,
+    TASKID VARCHAR2(32),
+    OBJECTID  VARCHAR2(32),
+    SOURCEAGENCYID VARCHAR2(32),
+    TARGETAGENCYID VARCHAR2(32),
+    SOURCEBATCHID VARCHAR2(32),
+    BATCHID VARCHAR2(32),
+    BUSITYPEID  VARCHAR2(32), 
+    WFSTATUS  CHAR(1),
+    WFDIRECTION CHAR(1),
+    CREATEUSER  VARCHAR2(32),
+    CREATETIME TIMESTAMP DEFAULT SYSTIMESTAMP,
+    REMARK VARCHAR2(200),
+    DBVERSION TIMESTAMP  DEFAULT SYSTIMESTAMP
+    )}';
+    execute immediate 'alter table BGT_T_CFLOW_ACT add constraint BGT_T_CFLOW_ACT  primary key (DATAKEY)';
+    SYS_P_PARTITION_TABLE('BGT_T_CFLOW_ACT');
+    execute immediate Q'{CREATE OR REPLACE VIEW BGT_T_CFLOW_ACT AS
+    SELECT
+        DATAKEY,TASKID,OBJECTID,SOURCEAGENCYID,TARGETAGENCYID,SOURCEBATCHID,BATCHID,BUSITYPEID,WFSTATUS,WFDIRECTION,CREATEUSER,REMARK,
+        province,year,dbversion,status,CREATETIME
+    FROM P#BGT_T_CFLOW_ACT
+    WHERE status='1'}';
+  end if;
+end;
+--5-BGT_T_CFLOW_ACT

@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.rule.dao.AuditRuleMapper">
+	<select id="getAuditCategoryTree" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		select CHECKSORTID,CHECKSORTNAME,LVLID,SUPERID,ENDFLAG  from bgt_t_checksort 
+	</select>
+	<select id="getNewAuditCategoryTree" resultType="com.tjhq.commons.inputcomponent.po.TreePO" parameterType="java.util.HashMap">
+		SELECT CHECKSORTID AS id,CHECKSORTNAME AS name,to_number(LVLID) as LVLID,decode(SUPERID,null,'0',SUPERID) AS pId  FROM bgt_t_checksort
+		 where 1=1 
+		 <if test="appId!=null and appId!=''">
+		   and appid=#{appId}
+		 </if>
+		 start with  SUPERID is null
+         connect by prior CHECKSORTID=SUPERID
+         order  siblings by LVLID 
+	</select>
+	<select id="getAuditRuleDef" resultType="java.util.HashMap" parameterType="java.util.HashMap">
+		  SELECT
+            CHECKID,
+            SERID,
+            DEFNAME,
+            ERRORDEF,
+            CHECKTYPE,
+	         (Select a.Name From Bgt_t_Pubcheckdef a Where a.Guid = t.Checktype And Rownum = 1 ) As CHECKTYPE_NAME
+    	from bgt_t_checkdef t
+	</select>
+	
+	<update id="updateEndFlag"  parameterType="java.util.HashMap">
+	update bgt_t_checksort s set s.endflag =(select decode(count(0),0,1,0) from bgt_t_checksort d where d.superid=#{checkSortId})
+	  where s.checksortid =#{checkSortId}
+	</update>
+	
+	<delete id="delCheckType" parameterType="java.util.HashMap">
+		delete from bgt_t_checksort ss
+		 where ss.checksortid in
+		       (select s.checksortid
+		          from bgt_t_checksort s
+		         start with s.checksortid in (${checkSortIds})
+		        connect by prior s.checksortid = s.superid)
+	</delete>
+	
+    <select id="getCheckDefTypeNum" resultType="java.lang.Integer" parameterType="java.util.HashMap">
+	    select count(0)
+	    from bgt_t_checkdef t
+	    where t.checksortid in
+	       (select s.checksortid
+	          from bgt_t_checksort s
+	         start with s.checksortid in (${checkSortIds})
+	        connect by prior s.checksortid = s.superid)
+    
+    </select>	
+      <select id="checkRelationBySuperId" resultType="java.lang.Integer" parameterType="java.lang.String">
+	    select count(0)
+	    from bgt_t_checkdef t
+	    where t.checksortid=#{superId}
+    </select>
+	<select  id="checkByWhere" parameterType="map"  resultType="map">
+		  select *
+		  from (select rownum as numb
+		        <if test="GROUP!=null and GROUP!=''">
+		        , ${GROUP}
+		        </if>
+		          from ${TABLENAME}
+		         where ${WHERE}
+		         group by rownum
+		          <if test="GROUP!=null and GROUP!=''">
+		           ,${GROUP}
+		           </if>
+		         ) t1
+		 where t1.numb = 1
+	</select>
+	
+	<select id="checkNum" parameterType="map"  resultType="Integer">
+		select ${COL} from ${TABLENAME} where rownum = 1
+	</select>
+    
+    <select id="verifyCheckSql" parameterType= "String" resultType="Map">
+		${checkSql}
+	</select>
+<insert id="insertAuditData" parameterType="Map">
+		insert into bgt_t_checkdef(CHECKID,
+		
+		<if test="CHECKNAME !=null">
+			DEFNAME,
+		</if>
+		<if test="LTABLEID !=null">
+			LMODELID,
+		</if>
+		<if test="RTABLEID !=null">
+			RMODELID,
+		</if>
+		<if test="LCOL !=null">
+			LCOMPCOL,
+		</if>
+		<if test="RCOL !=null">
+			RCOMPCOL,
+		</if>
+		<if test="LWHERE !=null">
+			LQUERY,
+		</if>
+		<if test="RWHERE !=null">
+			RQUERY,
+		</if>
+		<if test="LGROUP !=null">
+			LEFTGROUP,
+		</if>
+		<if test="RGROUP !=null">
+			RIGHTGROUP,
+		</if>
+		<if test="PUBGROUP !=null">
+			PUBGROUP,
+		</if>
+		<if test="ERRORDEF !=null">
+			ERRORDEF,
+		</if>
+		<if test="ORDERID !=null">
+			SERID,
+		</if>
+		<if test="RELATYPE !=null">
+			RELATYPE,
+		</if>
+		<if test="SHOWTEXT !=null">
+			SHOWTEXT,
+		</if>
+		 <if test="APPID!=null and APPID!=''">
+			APPID,
+		</if>
+		 <if test="USERDISTRICTID!=null and USERDISTRICTID!=''">
+			USERDISTRICTID,
+		</if>
+		<if test="CREATEBGTLEVEL!=null and CREATEBGTLEVEL!=''">
+			CREATEBGTLEVEL,
+		</if>
+		 RDESC,LDESC,CHECKTYPE,CHECKSQL,CHECKSORTID) values(#{CHECKID},
+			<if test="CHECKNAME !=null">
+			#{CHECKNAME},
+		</if>
+		<if test="LTABLEID !=null">
+			#{LTABLEID},
+		</if>
+		<if test="RTABLEID !=null">
+			#{RTABLEID},
+		</if>
+		<if test="LCOL !=null">
+			#{LCOL},
+		</if>
+		<if test="RCOL !=null">
+			#{RCOL},
+		</if>
+		<if test="LWHERE !=null">
+			#{LWHERE},
+		</if>
+		<if test="RWHERE !=null">
+			#{RWHERE},
+		</if>
+		<if test="LGROUP !=null">
+			#{LGROUP},
+		</if>
+		<if test="RGROUP !=null">
+			#{RGROUP},
+		</if>
+		<if test="PUBGROUP !=null">
+			#{PUBGROUP},
+		</if>
+		<if test="ERRORDEF !=null">
+			#{ERRORDEF},
+		</if>
+		<if test="ORDERID !=null">
+			#{ORDERID},
+		</if>
+		<if test="RELATYPE !=null">
+			#{RELATYPE},
+		</if>
+		<if test="SHOWTEXT !=null">
+			#{SHOWTEXT},
+		</if>
+		<if test="APPID!=null and APPID!=''">
+			#{APPID},
+		</if>
+		<if test="USERDISTRICTID!=null and USERDISTRICTID!=''">
+			#{USERDISTRICTID},
+		</if>
+		<if test="CREATEBGTLEVEL!=null and CREATEBGTLEVEL!=''">
+			${CREATEBGTLEVEL},
+		</if>
+		#{RDESC},#{LDESC},#{CHECKTYPE},#{CHECKSQL},#{BUSITYPEID})
+	</insert>
+	
+	<update id="modifyAuditData">
+		update bgt_t_checkdef 
+		<set>
+			<if test="CHECKNAME !=null">
+				DEFNAME=#{CHECKNAME},
+			</if>
+			<if test="LTABLEID !=null">
+				LMODELID=#{LTABLEID},
+			</if>
+			<if test="RTABLEID !=null">
+				RMODELID=#{RTABLEID},
+			</if>
+			<if test="LCOL !=null">
+				LCOMPCOL=#{LCOL},
+			</if>
+			<if test="RCOL !=null">
+				RCOMPCOL=#{RCOL},
+			</if>
+			<if test="LWHERE !=null">
+				LQUERY=#{LWHERE},
+			</if>
+			<if test="RWHERE !=null">
+				RQUERY=#{RWHERE},
+			</if>
+			<if test="LGROUP !=null">
+				LEFTGROUP=#{LGROUP},
+			</if>
+			<if test="RGROUP !=null">
+				RIGHTGROUP=#{RGROUP},
+			</if>
+			<if test="PUBGROUP !=null">
+				PUBGROUP=#{PUBGROUP},
+			</if>
+			<if test="ERRORDEF !=null">
+				ERRORDEF=#{ERRORDEF},
+			</if>
+			<if test="ORDERID !=null">
+				SERID=#{ORDERID},
+			</if>
+			<if test="RELATYPE !=null">
+				RELATYPE=#{RELATYPE},
+			</if>
+			<if test="SHOWTEXT !=null">
+				SHOWTEXT=#{SHOWTEXT},
+			</if>
+			<if test="BUSITYPEID !=null">
+				CHECKSORTID=#{BUSITYPEID},
+			</if> 
+			   RDESC=#{RDESC},
+			   LDESC=#{LDESC},
+			<if test="CHECKSQL !=null">
+				CHECKSQL=#{CHECKSQL}
+			</if>
+			</set>
+		 where CHECKID=#{CHECKID}
+	</update>
+	<resultMap type="Map" id="myClobMap">
+	    <result property="CHECKID" column="CHECKID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="ORDERID" column="SERID" jdbcType="NUMERIC" javaType="int"/>
+    	<result property="CHECKNAME" column="DEFNAME" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LTABLEID" column="LMODELID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RTABLEID" column="RMODELID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LCOL" column="LCOMPCOL" jdbcType="CLOB" javaType="String"/>
+    	<result property="RCOL" column="RCOMPCOL" jdbcType="CLOB" javaType="String"/>
+    	<result property="LDESC" column="LDESC" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RDESC" column="RDESC" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LWHERE" column="LQUERY" jdbcType="CLOB" javaType="String"/>
+    	<result property="RWHERE" column="RQUERY" jdbcType="CLOB" javaType="String"/>
+    	<result property="LGROUP" column="LEFTGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RGROUP" column="RIGHTGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="PUBGROUP" column="PUBGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="ERRORDEF" column="ERRORDEF" jdbcType="NUMERIC" javaType="String"/>
+    	<result property="RELATYPE" column="RELATYPE" jdbcType="CHAR" javaType="String"/>
+    	<result property="SHOWTEXT" column="SHOWTEXT" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKTYPE" column="CHECKTYPE" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="BUSITYPEID" column="CHECKSORTID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKSQL" column="CHECKSQL" jdbcType="CLOB" javaType="String"/>
+    	<result property="CREATEBGTLEVEL" column="CREATEBGTLEVEL" jdbcType="NUMERIC" javaType="Integer"/>
+ 	</resultMap>
+	<select id="getAuditData" parameterType="String" resultMap="myClobMap">
+		select 
+		    CHECKID,
+			DEFNAME,
+			LMODELID,
+			RMODELID,
+			LCOMPCOL,
+			RCOMPCOL,
+			LQUERY,
+			RQUERY,
+			LEFTGROUP,
+			RIGHTGROUP,
+			LDESC,
+			RDESC,
+			PUBGROUP,
+			ERRORDEF,
+			SERID,
+			RELATYPE,
+			SHOWTEXT,
+		    CHECKTYPE,
+		    CHECKSQL,
+		    CHECKSORTID,
+		    CREATEBGTLEVEL
+		  from bgt_t_checkdef
+		 where CHECKID = #{checkid}
+	</select>
+	<resultMap type="Map" id="checkClobMap" >
+	    <result property="CHECKID" column="CHECKID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="SERID" column="SERID" jdbcType="NUMERIC" javaType="int"/>
+        <result property="ERRORDEF" column="ERRORDEF" jdbcType="NUMERIC" javaType="String"/>
+    	<result property="DEFNAME" column="DEFNAME" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKTYPE" column="CHECKTYPE" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKSQL" column="CHECKSQL" jdbcType="CLOB" javaType="String"/>
+ 	</resultMap>
+	<select id="getAuditRuleCheckList" parameterType="Map" resultMap="checkClobMap">
+    select 
+        CHECKID,
+        DEFNAME,
+         SERID,
+         ERRORDEF,
+		( Select a.Name From Bgt_t_Pubcheckdef a Where a.Guid = Checktype And Rownum = 1 ) As checkType,
+         CHECKSQL
+         from bgt_t_checkdef
+         where 1=1 
+         <if test="null!=checkIds and checkIds!=''">
+           and CHECKID in(${checkIds})
+         </if>
+          <if test="null!=APPID and APPID!=''">
+            and APPID =#{APPID}
+         </if>
+         <if test="checkSortId!=null and checkSortId!=''">
+             and checksortId in (select s.checksortid from bgt_t_checksort s 
+             start with s.checksortid=#{checkSortId}
+             connect by prior s.checksortid=s.superid)
+         </if>
+         
+	</select>		
+	<select id="getAuditCategoryNameById" parameterType="String"  resultType="String">
+	   select nvl(t.checksortname,'') from bgt_t_checksort t where t.checksortid = #{typeId}
+	</select>
+	<select  id="check" parameterType="map" resultType="map">
+		select *
+		  from (select rownum as numb, ${GROUP}
+		          from ${TABLENAME}
+		         group by rownum, ${GROUP}) t1
+		 where t1.numb = 1
+	</select>
+	<select id="findRelationBusiness" parameterType="String" resultType="java.lang.Integer">
+	 select count(1) from bgt_t_businesscheckdef  where checkid in (${_parameter}) 
+	</select>
+	<select id="getAuditRuleBaseInfo" parameterType="Map" resultType="Map">
+         select 
+        CHECKID,
+        DEFNAME,
+         SERID,
+         ERRORDEF,
+         CHECKTYPE
+         from bgt_t_checkdef
+         where 1=1 
+         <if test="null!=checkIds and checkIds!=''">
+           and CHECKID in(${checkIds})
+         </if>
+
+         
+	</select>
+	<select id="checkLvUnique" parameterType="Map" resultType="java.lang.Integer">
+	select count(0) from  bgt_t_checksort  t where t.LVLID=#{LVLID} 
+	<if test="null!=CHECKSORTID and CHECKSORTID!=''">
+	  and t.CHECKSORTID !=#{CHECKSORTID}
+	</if>
+	<if test="null!=APPID and APPID!=''">
+	 	 and t.appID =#{APPID}
+	</if>
+	<choose>
+	   <when test="null!=SUPERID and SUPERID!=''">
+	    and superid = #{SUPERID}
+	   </when>
+	   <otherwise>
+	   and superid is null
+	   </otherwise>
+	   </choose>
+	</select>
+	<select id="findMaterialTalbleCount" parameterType="String" resultType="java.lang.Integer">
+		select count(0) from bgt_t_viewrelationtable where viewid=#{viewID}
+	</select>
+	<select id="findDbversionColCount"  parameterType="String" resultType="java.lang.Integer">
+	select count(0) from user_tab_columns  where TABLE_NAME=upper(#{dbtableName}) and COLUMN_NAME='DBVERSION'
+	</select>	
+	<select id="findAuditSortNameCount" parameterType="Map" resultType="java.lang.Integer">
+		select count(0) from bgt_t_checksort
+	   where appid = #{APPID}
+	   and checksortname = #{CHECKSORTNAME}
+	   <if test="null!=CHECKSORTID and CHECKSORTID!=''">
+	    and checksortid !=#{CHECKSORTID}
+	   </if>
+	   <choose>
+	   <when test="null!=SUPERID and SUPERID!=''">
+	    and superid = #{SUPERID}
+	   </when>
+	   <otherwise>
+	   and superid is null
+	   </otherwise>
+	   </choose>
+	</select>
+	<select id="findAuditSortSuperID" parameterType="Map" resultType="String">
+	 select bb.SUPERID from bgt_t_checksort bb where bb.appid=#{APPID} and bb.CHECKSORTID=#{CHECKSORTID}
+	</select>
+	<select id="findDistLevel" parameterType="String"  resultType="java.lang.Integer">
+	select nvl((select distrlvl
+	  from code_t_district
+	 where guid = (select districtid
+	                 from code_t_agency_spf
+	                where guid =#{agencyId})),4) from dual
+</select>
+<select id="getDataAuditRuleList" parameterType="Map" resultType="Map">
+Select
+       Checkid,
+       Serid,
+       Defname,
+       LmodelID,
+       (Select Name From dict_t_model Where tableid=LmodelID) As sname_LmodelID,
+       RmodelID,
+       (Select Name From dict_t_model Where tableid=RmodelID) As sname_RmodelID,
+       Errordef,
+       Checktype,
+       Sname_Checktype,
+       Checksortid,
+       Createbgtlevel
+  From (Select  Rownum Rnum, b.*
+          From (Select Checkid,
+                       Serid,
+                       Defname,
+                       LmodelID,
+                       RmodelID,
+                       Errordef,
+                       Checktype,
+                       (Select Name
+                          From Bgt_t_Pubcheckdef
+                         Where Guid = Checktype
+                            <![CDATA[ And Rownum < 2]]>) As Sname_Checktype,
+                       Checksortid,
+                       Createbgtlevel
+                  From Bgt_t_Checkdef Tbase
+                 Where 1 = 1
+                   And Appid = #{appID}
+                   <if test="null!=checkType and checkType!=''">
+                     And Checktype = #{checkType}
+                   </if>
+                    <if test="null!=checkSortId and checkSortId!=''">
+                     And checksortid in(select checksortid from BGT_T_checksort start with checksortid=#{checkSortId} connect by prior checksortid=superid ) 
+                   </if>
+                    <if test="null!=defName and defName!=''">
+                     And Defname like '%${defName}%'
+                   </if>
+                 
+                 Order By Serid) b)
+                 <if test="pagination">
+ Where  <![CDATA[  RNUM > #{startRow} AND RNUM <= #{endRow} ]]>
+ </if>
+
+</select>
+<select id="getDataAuditRuleList4count" parameterType="Map" resultType="java.lang.Integer">
+    Select  count(0) From Bgt_t_Checkdef Tbase
+                 Where 1 = 1
+                   And Appid = #{appID}
+                   <if test="null!=checkType and checkType!=''">
+                     And Checktype = #{checkType}
+                   </if>
+                    <if test="null!=checkSortId and checkSortId!=''">
+                     And checksortid in(select checksortid from BGT_T_checksort start with checksortid=#{checkSortId} connect by prior checksortid=superid ) 
+                   </if>
+                    <if test="null!=defName and defName!=''">
+                     And Defname like '%${defName}%'
+                   </if>
+                 
+               
+</select>
+</mapper>

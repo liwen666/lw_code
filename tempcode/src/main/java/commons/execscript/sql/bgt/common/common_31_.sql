@@ -1,0 +1,85 @@
+DECLARE
+  v_count NUMBER(10);
+BEGIN
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'FUNDSOURCENAME';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN FUNDSOURCENAME}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'SUPERID';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN SUPERID}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'LEVELNO';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN LEVELNO}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'ISLEAF';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN ISLEAF}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'TOBASETAB';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN TOBASETAB}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'TOPROJTAB';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN TOPROJTAB}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'TOPROJCOL';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN TOPROJCOL}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'BGTLVL';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN BGTLVL}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'CODE';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN CODE}';
+  END IF;
+  SELECT COUNT(1)
+    INTO v_count
+    FROM User_Tab_Cols
+   WHERE table_Name = 'P#EXP_S_PROJINVEST'
+     AND column_Name = 'FUNDTYPE';
+  IF v_count > 0 THEN
+    EXECUTE IMMEDIATE Q'{ALTER TABLE P#EXP_S_PROJINVEST DROP COLUMN FUNDTYPE}';
+  END IF;
+END;
+--删除资金来源对应物理列表的多余列20151123郑桥

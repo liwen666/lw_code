@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.dao.UtilsMapper">
+
+	<select id="getDBUniqueID" resultType="java.lang.String" flushCache="true">
+   	<![CDATA[
+     	SELECT SYS_GUID() as uniqueID FROM DUAL
+   	]]>
+	</select>
+	
+	<select id="getDistrictByAgencyId" resultType="java.lang.String">
+     	SELECT DISTRICTID FROM CODE_T_AGENCY_SPF t where t.GUID=#{agencyId}
+	</select>
+	
+	<select id="getAgencyLevelNoByAgencyId" resultType="java.lang.String">
+     	SELECT LEVELNO FROM CODE_T_AGENCY t where t.GUID=#{agencyId}
+	</select>
+	
+	<select id="getIsLeafByAgencyId" resultType="java.lang.String">
+     	SELECT ISLEAF FROM CODE_T_AGENCY t where t.GUID=#{agencyId}
+	</select>
+	
+	<select id="getDeptNameByDivisionId" resultType="java.lang.String">
+     	SELECT NAME FROM CODE_T_DEPT t where t.GUID=#{divisionId}
+	</select>
+	
+	<select id="getTableNameByAppIdAndObjId" resultType="java.lang.String">
+     	SELECT TABLENAME FROM DICT_T_APPCODE t where t.APPID=#{0} and t.OBJECTID=#{1}
+	</select>
+	
+	<select id="setTaskParam" resultType="string" flushCache="true">
+		SELECT GLOBAL_MULTYEAR_CZ.F_SET_TASKID(#{taskID}) FROM DUAL
+	</select>
+	
+</mapper>

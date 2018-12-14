@@ -1,0 +1,12 @@
+declare
+begin
+	
+DELETE FROM P#bd_t_homeurl WHERE HOMEURLID IN ('4F4B5BBCAB0E51F8E0533906A8C0FAFD', '4FC413817E4F486AE0533906A8C0DB21');										 
+                 
+Insert into BD_T_HOMEURL(HOMEURLID, URL, APPID, URLTYPE,STATUS) Values('4F4B5BBCAB0E51F8E0533906A8C0FAFD', 'spf/commQuery/getMoreList.do', 'SPF', '5','1');
+
+Insert into BD_T_HOMEURL(HOMEURLID, URL, APPID, URLTYPE, STATUS) Values('4FC413817E4F486AE0533906A8C0DB21', 'spf/commQuery/getMoreList.do', 'SPF', '6', '1');
+
+end;
+--初始化项目库更多P#bd_t_homeurl
+--SPF_MORELIST

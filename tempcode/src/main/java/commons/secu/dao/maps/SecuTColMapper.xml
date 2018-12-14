@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTColMapper">
+
+	<resultMap id="secutcol" type="com.tjhq.commons.secu.po.SecuTColPO">
+		<result property="tableId" column="tableId" />
+		<result property="tableName" column="tableName" />
+		<result property="colId" column="colId" />
+		<result property="columnName" column="columnName" />
+		<result property="manId" column="manId" />
+		<result property="manType" column="manType" />
+		<result property="baseSecu" column="baseSecu" />
+		<result property="isleaf" column="isleaf" />
+		<result property="superid" column="superid" />
+		<result property="levelno" column="levelno" />
+	</resultMap>
+	<select id="getTableColsAuthByRoles" parameterType="java.util.Map" resultMap="secutcol"> 
+		select '${TABLEID}' tableId, 
+			   tableid colId, 
+			   baseSecu
+		  from table(PK_BGT_SECU.f_Secu_Col('${appId}','${userId}','1','${TABLEID}','${agencyId}'))
+
+		<!--  
+		select '${TABLEID}' TABLEID,COLID,BASESECU,MANID,MANTYPE FROM(
+		select t.TABLEID,
+               t.COLID,
+               max(t.BASESECU) BASESECU, 
+               max(t.MANID) MANID,
+               max(t.MANTYPE) MANTYPE
+			from 
+				secu_t_col t,
+				secu_t_suittab suit
+			where t.tableid = suit.Suitid(+) 
+			and (t.tableId = #{TABLEID} or suit.TABLEID=#{TABLEID})  
+				and manType='1' 
+				and manId in
+			<if test="agencyId==null">
+	           	(
+	       			select 
+	       				roleid
+	                from  
+	                	secu_t_userRole ur
+	                where 
+	                	ur.userid = '${userId}' 
+	           	 )
+	        </if>
+	        <if test="agencyId!=null">
+	            (
+		   				select roleid
+	                        from secu_t_agency ds, secu_t_userRole ur
+	                       where ur.userid = '${userId}'
+	                         and ur.roleid = ds.manid 
+	                         and ds.mantype = '1'
+		                and v_agencycode like '${agencyId}' || '%' 
+	             )   
+	        </if>  
+			and colid in (select colid
+				from 
+					secu_t_col col,secu_t_suittab suit
+				where 
+					col.tableid= suit.Suitid(+) 
+					and(col.tableId = #{TABLEID} or suit.TABLEID=#{TABLEID}) 
+					and manType='1' 
+					and manId in
+					<if test="agencyId==null">
+			           	(
+			       			select 
+			       				roleid
+			                from  
+			                	secu_t_userRole ur
+			                where 
+			                	ur.userid = '${userId}' 
+			           	 )
+		           	 </if>
+		           	 <if test="agencyId!=null">
+			            (
+				   				select roleid
+			                        from secu_t_agency ds, secu_t_userRole ur
+			                       where ur.userid = '${userId}'
+			                         and ur.roleid = ds.manid 
+			                         and ds.mantype = '1'
+				                and v_agencycode like '${agencyId}' || '%'  
+			             )   
+		        	</if> 
+		     )   	
+			 group by t.tableid,t.colId 
+			having count(colId) = ${ROLECOUNT}
+			) 
+		 -->
+	</select>
+	
+	
+	<select id="getTableColsAuthWithDataBaseCache" parameterType="java.util.Map" resultType="map">
+		select tableid as colid,baseSecu from table(pk_bgt_secu.f_Secu_Col('${appId}','${userId}','${userType}','${tableId}',''))
+	</select>
+	<select id="getColLimitListByTableId" parameterType="java.util.Map"
+		resultMap="secutcol">
+		select * from (
+			select (select t3.NAME from dict_t_model t3 where t3.tableid = t1.TABLEID) as tableName,
+			       t1.TABLEID,
+			       t1.BASESECU,
+			       t1.MANTYPE,
+			       t1.MANID, 
+			       t1.colID, 
+			       t2.NAME as columnName,
+			        t2.LEVELNO,
+			       t2.SUPERID,
+			       t2.ISLEAF,
+			       t2.ORDERID
+			  from secu_t_col t1, dict_t_factor t2
+			 where t1.COLID = t2.COLUMNID
+			   and t1.TABLEID = #{tableId}
+			   and t1.MANID = #{roleId}
+			   and t1.MANTYPE = '1'
+			union
+			select (select t3.NAME from dict_t_model t3 where t3.tableid = t.TABLEID) as tableName,
+			       t.TABLEID,  
+			       '3' as baseSecu,
+			       '1' as MANTYPE,+
+			       #{roleId} as MANID,
+			       t.COLUMNID as colid,
+			       t.NAME as columnName,  
+			       t.LEVELNO, 
+			       t.SUPERID,
+			       T.ISLEAF, 
+			       t.ORDERID
+			  from dict_t_factor t
+			 where t.TABLEID =  #{tableId}
+			   and not exists (select *
+			          from secu_t_col t5
+			         where t5.TABLEID =  #{tableId}
+			           and t5.MANID = #{roleId}
+			           and t.COLUMNID = t5.COLID)
+			)  CONNECT BY SUPERID = PRIOR colid start with superid='0' 
+			order SIBLINGS BY ORDERID 
+	</select>
+	<insert id="insertSecuTColData" parameterType="java.util.Map">
+		insert into
+		secu_t_col(tableId,colId,manId,baseSecu,manType)
+		values(#{tableId},#{colId},#{roleId},#{baseSecu},'1')
+	</insert>
+	<delete id="deleteSecuTColData" parameterType="java.util.Map">
+		delete from secu_t_col t where t.manId = #{manId} and
+		t.tableId=#{tableId} and t.manType='1' and t.colId in
+		<foreach item="columnSecu" index="index" collection="editTableColLimitList"
+			open="(" separator="," close=")">
+			#{columnSecu.colId}
+		</foreach>
+	</delete>
+	<delete id="deleteColSecuLimit" parameterType="java.util.Map">
+		delete from
+		secu_t_col t where t.TABLEID=#{tableId} and t.MANID=#{roleId} and
+		t.MANTYPE='1'
+	</delete>
+	
+	<select id="getTableColSecu" parameterType="string" resultMap="secutcol">
+			WITH T_USER_COL_ROLES AS
+			 (SELECT ROLEID, COLUMNID, B.TABLEID
+			    FROM SECU_T_USERROLE A, DICT_T_FACTOR B
+			   WHERE USERID = #{userID}
+			     AND B.TABLEID = #{tableID}
+			     AND B.ISLEAF = '1'),
+			T_USER_TABLE_ROLES AS
+			 (SELECT ROLEID, #{tableID} TABLEID
+			    FROM SECU_T_USERROLE
+			   WHERE USERID = #{userID}),
+			T_SECU_TABLE AS
+			 (SELECT TAB.BASESECU,
+			         TAB.EXTADD,
+			         TAB.EXTDEL,
+			         TAB.EXTUPDATE,
+			         TAB.TABLEID,
+			         TAB.MANID
+			    FROM SECU_T_TABLE TAB
+			   WHERE TAB.TABLEID = #{tableID}
+			     AND TAB.ISSUIT = '0'
+			  UNION ALL
+			  SELECT TAB.BASESECU,
+			         TAB.EXTADD,
+			         TAB.EXTDEL,
+			         TAB.EXTUPDATE,
+			         SUIT.TABLEID,
+			         TAB.MANID
+			    FROM SECU_T_TABLE TAB,
+			         (SELECT #{tableID} TABLEID, SUITID
+			            FROM DICT_T_SUIT
+			           START WITH SUITID =
+			                      (SELECT SUITID
+			                         FROM DICT_T_MODEL
+			                        WHERE TABLEID = #{tableID})
+			          CONNECT BY SUITID = PRIOR SUPERID) SUIT
+			   WHERE TAB.TABLEID = SUIT.SUITID
+			     AND TAB.ISSUIT = '1'),
+			T_USER_SECU_TABLE AS
+			 (SELECT NVL(TAB.BASESECU, 3) BASESECU, T2.TABLEID, T2.ROLEID
+			    FROM T_SECU_TABLE TAB
+			    JOIN T_USER_TABLE_ROLES T2
+			      ON TAB.MANID = T2.ROLEID
+			     AND TAB.TABLEID = T2.TABLEID),
+			T_SECU_COL_TABLE AS
+			 (SELECT NVL(TAB.BASESECU, 3) BASESECU, RC.COLUMNID, RC.TABLEID, RC.ROLEID
+			    FROM SECU_T_COL TAB
+			   RIGHT JOIN T_USER_COL_ROLES RC
+			      ON TAB.MANID = RC.ROLEID
+			     AND TAB.COLID = RC.COLUMNID)
+			SELECT MAX(BASESECU) BASESECU,
+			       COLUMNID COLID,
+			       #{tableID} TABLEID
+			  FROM (SELECT LEAST(TSC.BASESECU, UST.BASESECU) BASESECU, TSC.COLUMNID
+			          FROM T_SECU_COL_TABLE TSC, T_USER_SECU_TABLE UST
+			         WHERE TSC.TABLEID = UST.TABLEID
+			           AND TSC.ROLEID = UST.ROLEID)
+			 GROUP BY COLUMNID
+	</select>
+</mapper>

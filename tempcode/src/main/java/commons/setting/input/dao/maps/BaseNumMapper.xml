@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.BaseNumMapper">
+    <!-- 查询条件设置 -->
+  	<sql id="basenum_sql">
+       GUID,TABLEID,COLUMNID
+    </sql>
+    <insert id="insertBaseNumTab" parameterType="Map">
+	    <selectKey resultType="String" order="BEFORE" keyProperty="guID">  
+	        SELECT SYS_GUID() AS guID FROM DUAL  
+	    </selectKey>
+        INSERT INTO dict_t_setbasenumtab(<include refid="basenum_sql"/>) VALUES
+		  (#{guID,jdbcType = VARCHAR},
+		   #{tableID,jdbcType = VARCHAR},
+		   #{columnID,jdbcType = VARCHAR})
+    </insert>
+
+    <update id="updateBaseNumTab" parameterType="Map">
+   		update dict_t_setbasenumtab
+   		<set>
+   			<if test="columnID != null">
+   				COLUMNID=#{columnID,jdbcType=VARCHAR}
+   			</if>
+   		</set>
+   		where GUID = #{guID,jdbcType=VARCHAR}
+    </update>
+    <delete id="deleteBaseNumSubByColumnID" parameterType="String">
+          delete from dict_t_setbasenumsub t where t.COLUMNID = #{columnID,jdbcType=VARCHAR}
+    </delete>
+    
+</mapper>

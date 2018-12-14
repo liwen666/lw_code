@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.grid.floatgrid.dao.IFloatGridMapper">
+  	<select id="getFloatGridData" parameterType="java.util.Map" resultType="java.util.HashMap">
+	   WITH TA1 AS (
+	   	SELECT ${selectElement}
+			    FROM ${tableNameTempl} T
+			     WHERE SYNSTATUS='1' AND TEMPLATEID NOT IN (
+		           SELECT TEMPLATEID FROM ${tableName}
+		           WHERE ISTEMPLATE = '0'
+		           AND TEMPLATEID IS NOT NULL  
+		           <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+					  AND ${rowVisibleSecu}
+				   </if> 
+		           <if test = "sqlWhere!=null"> 
+		         	  AND ${sqlWhere}  
+		           </if >)
+			 UNION ALL
+		        SELECT ${selectElement}
+		          FROM ${tableName} 
+		         WHERE ISTEMPLATE = '0'
+		         <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+				 	AND ${rowVisibleSecu}
+				 </if> 
+		         <if test = "sqlWhere!=null"> 
+		         	AND ${sqlWhere}  
+		         </if >),
+	   TA2 AS (
+	   		SELECT 
+	   		<foreach collection="leafColumnList" index="index" item="column" separator=",">
+				T.${column.columnDBName}
+			</foreach>
+		    FROM ${tableNameTempl} T, TA1
+			   WHERE T.TEMPLATEID = TA1.TEMPLATEID
+			     AND T.ISTEMPLATE = '1'
+			     AND T.SYNSTATUS = '1'
+			     AND TA1.ISTEMPLATE = '0'),
+	   TA AS (
+	   		SELECT 
+	   		<foreach collection="leafColumnList" index="index" item="column" separator=",">
+				${column.columnDBName}
+				<if test="column.refTableDBName != null">
+					,SNAME_${column.columnDBName}
+				</if>
+			</foreach>
+		    FROM TA1 WHERE ISTEMPLATE = '1'
+		    UNION ALL
+		    SELECT 
+	   		<foreach collection="leafColumnList" index="index" item="column" separator=",">
+				
+				<if test="column.columnDBName=='CELLSECU' or column.columnDBName=='ISQZX' 
+		    			or column.columnDBName=='ISDJ' or column.columnDBName=='ISUPDATE'
+		    			or column.columnDBName=='ISHZ' or column.columnDBName=='ISINSERT'">
+		    		TA2.${column.columnDBName}
+				</if>
+				<if test="column.columnDBName!='CELLSECU' and column.columnDBName!='ISQZX'  
+		    			and column.columnDBName!='ISDJ' and column.columnDBName!='ISUPDATE'
+		    			and column.columnDBName!='ISHZ' and column.columnDBName!='ISINSERT'">
+		    		TA1.${column.columnDBName}
+					<if test="column.refTableDBName != null">
+						,TA1.SNAME_${column.columnDBName}
+					</if>
+		    	</if>	
+			</foreach>
+		    FROM TA1 LEFT JOIN TA2
+		      	ON TA1.TEMPLATEID = TA2.TEMPLATEID
+		   		WHERE TA1.ISTEMPLATE = '0')
+			${floatSelectElement1}
+			UNION ALL
+			${floatSelectElement2}
+			UNION ALL
+			${floatSelectElement3}
+			ORDER BY FDCODE
+ 	</select>
+ 	
+ 	<select id="generateKey" resultType="java.lang.String">
+ 		select sys_guid() from dual
+ 	</select> 
+ 	
+ 	<resultMap type="hashmap" id="formulaCellMap">
+ 		<result property="key" column="FORMULACELL"/>
+ 		<result property="value" column="REFERENCED_CELL"/>
+ 	</resultMap> 
+ 	
+ 	<select id="getFormulaCell" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{  #{result ,mode=OUT,jdbcType=CURSOR, javaType=ResultSet, resultMap=formulaCellMap} = call PKG_FORMULA.F_GET_FORMULA_CELL(#{tableID,mode=IN,jdbcType=VARCHAR})}
+ 			]]>
+ 	</select>
+</mapper>        
+

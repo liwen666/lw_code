@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.task.dao.CdtTTaskRelaMapper">
+
+	<insert id="addTaskTargetRela" parameterType="java.util.Map">
+		insert into
+		CDT_T_TASKRELA
+		(taskId,
+		targetId
+		)
+		values
+		(#{taskId},#{targetId})
+	</insert>
+	<select id="getTaskTargetRelaInstead" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[ 
+		select distinct *
+  from code_t_agency t5
+ start with t5.GUID in (select guid
+                          from code_t_agency
+                         where guid in
+                               (select distinct targetId
+                                  from cdt_t_taskrela t1
+                                 where t1.taskid in
+                                       (select taskId
+                                          from cdt_t_taskInfo t
+                                         where t.taskLvlID like
+                                               (select t.taskLvlID || '%'
+                                                  from cdt_t_taskInfo t
+                                                 where t.taskId =
+                                                      #{taskId})))
+                           and isleaf = '1')
+connect by t5.levelno >= ${levelNo}
+       and prior t5.SUPERGUID = t5.GUID order by t5.code
+		]]>
+	</select>
+	
+		<select id="getTaskTargetRelaNotInstead" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[ 
+		select *
+ 		 from code_t_agency_bgt t5 start with t5.guid=#{agencyId} connect by prior t5.guid = t5.superguid order by t5.code
+		]]>
+	</select>
+	
+	<select id="getAllAgencyIdByTaskId" resultType="string">
+		select targetId from cdt_t_taskrela where taskId=#{taskId}
+	</select>
+	
+</mapper>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.rule.dao.DataAuditResultDAO">
+	<insert id="insertCheckResult" parameterType="com.tjhq.commons.setting.dataaudit.rule.po.CheckResultPO">
+	insert into bgt_t_checkresult
+	  (guid,AGENCYID,
+	   CKDATE,
+	   CKFLAG,
+	   USERGUID,
+	   USERUPAGENCYID,
+	   USERDISTRICTID,
+	   BUSICHECKID,
+	   TASKID
+	    )
+	values
+	  (#{guid},#{agencyID},
+	   to_date(#{ckDate},'yyyy-MM-DD hh24:mi:ss'),
+	   #{ckFlag},
+	   #{userGuid},
+	   #{userUpagencyID},
+	   #{userDistrictID},
+	   #{busiCheckID},
+	   #{taskID})
+	
+	</insert>
+	<insert id="insertCheckError" parameterType="com.tjhq.commons.setting.dataaudit.rule.po.CheckErrorPO">
+	insert into bgt_t_checkerror
+	  (RIGHTVALUE,
+	   LEFTVALUE,
+	   DEVIATION,
+	   CHECKDATA,
+	   CHECKRESULTID,
+	   ISLEAFAGENCY,
+	   CKRESULT,
+	   LDBTABLENAME,
+	   RDBTABLENAME)
+	values
+	  (#{rightValue},
+	   #{leftValue},
+	   #{deviation},
+	   #{checkData},
+	   #{checkResultID},
+	   #{isleafAgency},
+	   #{ckResult},
+	   #{ldbTableName},
+	   #{rdbTAbleName})
+	
+	</insert>	
+	<select id="findCheckResult" parameterType="Map" resultType="com.tjhq.commons.setting.dataaudit.rule.po.CheckResultPO">
+		select AGENCYID,
+	       to_char(CKDATE,'yyyy-MM-DD hh24:mi:ss') CKDATE,
+	       CKFLAG,
+	       USERGUID,
+	       USERUPAGENCYID,
+	       USERDISTRICTID,
+	       BUSICHECKID,
+	       TASKID,
+	        to_char(DBVERSION,'yyyy-MM-DD hh24:mi:ss') DBVERSION,
+	       GUID
+	  from BGT_T_CHECKRESULT t
+	  where 1=1
+	  <if test="busiCheckID!=null and busiCheckID!=''">
+	 	 AND BUSICHECKID=#{busiCheckID}
+	  </if>
+	   <if test="taskID!=null and taskID!=''">
+	 	 AND TASKID=#{taskID}
+	  </if>
+	  <if test="agencyID!=null and agencyID!=''">
+	 	 AND AGENCYID=#{agencyID}
+	  </if>
+	  <if test="deidContion!=null and deidContion!=''">
+	 	 AND (${deidContion})
+	  </if>
+	</select>
+	<select id="findCheckErrorByCheckResultID" parameterType="String" resultType="Map">
+		SELECT T.LEFTVALUE,
+	       T.RIGHTVALUE,
+	       T.DEVIATION,
+	       B.ERRORTYPE,
+	       TO_CHAR(T.CKRESULT) AS ERRORINFO,
+	       B.ISDIRECT,
+	       TO_CHAR(T.CHECKDATA) AS CHECKDATA,
+	       B.LDIRECTCOL,
+	       B.RDIRECTCOL,
+		   DECODE(T.RDBTABLENAME,NULL,T.LDBTABLENAME,T.LDBTABLENAME||','||T.RDBTABLENAME) TABLEDBNAME,
+		   B.CHECKID,
+		   (select m.tableId from dict_t_model m where upper(m.DBTABLENAME)=upper(T.LDBTABLENAME)) as LTABLEID
+	  FROM BGT_T_CHECKERROR T
+	  LEFT JOIN BGT_T_CHECKRESULT A
+	    ON T.CHECKRESULTID = A.GUID
+	  LEFT JOIN BGT_T_BUSINESSCHECKDEF B
+	    ON A.BUSICHECKID = B.GUID
+	  LEFT JOIN BGT_T_CHECKDEF C
+	    ON B.CHECKID = C.CHECKID
+	    WHERE T.CHECKRESULTID=#{checkResultID}
+	</select>
+	<delete id="delCheckResult"  parameterType="Map" >
+		delete from bgt_t_checkresult t
+		 where t.TASKID = #{taskID}
+		   and t.BUSICHECKID=#{busiCheckID}
+		   and t.AGENCYID=#{agencyID}
+	</delete>
+	<delete id="delCheckErrorByCheckResultID"  parameterType="String" >
+	delete from bgt_t_checkerror t where t.CHECKRESULTID=#{checkResultID}
+	</delete>
+	<insert id="copyCheckError"  parameterType="Map">
+	insert into bgt_t_checkerror
+		  (guid,
+		   rightvalue,
+		   leftvalue,
+		   deviation,
+		   checkdata,
+		   checkresultid,
+		   isleafagency,
+		   ckresult,
+		   ldbTableName,
+		   rdbTableName)
+		  select sys_guid() as guid,
+		         rightvalue,
+		         leftvalue,
+		         deviation,
+		         to_char(checkdata) as checkdata,
+		         '${toCheckResultID}',
+		         isleafagency,
+		         to_char(ckresult) as ckresult,
+		         ldbTableName,
+		         rdbTableName
+		    from bgt_t_checkerror
+		   where checkresultID = #{srcCheckResultID}
+	
+	</insert>
+	<delete id="delCheckErrorBybusiCheckID" parameterType="Map">
+		delete from bgt_t_checkerror
+	 where checkresultid in (select guid
+	                           from bgt_t_checkresult
+	                          where taskid = #{taskID}
+	                            and busiCheckID = #{busiCheckID})
+	</delete>
+	<delete id="delCheckResultBybusiCheckID" parameterType="Map">
+	delete from bgt_t_checkresult where taskid=#{taskID} and busiCheckID=#{busiCheckID}
+	</delete>
+	<select id="findCheckErrorExtByCheckResultID"  parameterType="String" resultType="Map">
+	
+		SELECT DECODE(T.RDBTABLENAME,NULL,T.LDBTABLENAME,T.LDBTABLENAME||','||T.RDBTABLENAME) TABLEDBNAME,
+		       (case
+		         when T.RDBTABLENAME is null then
+		          (SELECT M.NAME FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME))
+		       
+		         else
+		          (SELECT M.NAME FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME)) || ',' ||
+		          (SELECT M.NAME FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.RDBTABLENAME))
+		       
+		       end) as TABLENAME,
+		       (case
+		         when T.RDBTABLENAME is null then
+		         (SELECT M.TABLEID FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME))
+		         else
+		          (SELECT M.TABLEID FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME)) || ',' ||
+		          (SELECT M.TABLEID FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.RDBTABLENAME))
+		       end) as TABLEID,
+		       (case
+		         when  T.RDBTABLENAME  is null then
+		          (SELECT M.DEALTYPE FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME))
+		       
+		         else
+		          (SELECT M.DEALTYPE FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.LDBTABLENAME)) || ',' ||
+		          (SELECT M.DEALTYPE FROM DICT_T_MODEL M WHERE upper(M.DBTABLENAME) = upper(T.RDBTABLENAME))
+		       
+		       end) as DEALTYPE,
+		       
+		       T.LEFTVALUE,
+		       T.RIGHTVALUE,
+		       T.DEVIATION,
+		       B.ERRORTYPE,
+		       decode(B.ERRORTYPE, '1', Chr(51135)||Chr(54982)||Chr(53460),Chr(52449)||Chr(51902)||Chr(53460)) AS SNAME_ERRORTYPE,
+		       TO_CHAR(T.CKRESULT) AS ERRORINFO,
+		       B.ISDIRECT,
+		       decode(B.ISDIRECT, '1', Chr(51911), Chr(47089)) AS SNAME_ISDIRECT,
+		       B.LDIRECTCOL,
+		       B.RDIRECTCOL,
+		       TO_CHAR(T.CHECKDATA) AS CHECKDATA,
+		       A.AGENCYID,
+		       B.ISMIDCHECK,
+		       T.ISLEAFAGENCY,
+		       C.CHECKID
+		
+		  FROM BGT_T_CHECKERROR T
+		  LEFT JOIN BGT_T_CHECKRESULT A
+		    ON T.CHECKRESULTID = A.GUID
+		  LEFT JOIN BGT_T_BUSINESSCHECKDEF B
+		    ON A.BUSICHECKID = B.GUID
+		  LEFT JOIN BGT_T_CHECKDEF C
+		    ON B.CHECKID = C.CHECKID
+		 WHERE T.CHECKRESULTID =#{checkResultID}
+	
+	
+	</select>
+	<delete id="delCheckContionByCheckResultID" parameterType="String">
+	delete from bgt_t_checkcondition t where t.CHECKRESULTID=#{checkResultID}
+	</delete>
+    <delete id="delCheckResultByGuid" parameterType="String">
+    delete from bgt_t_checkresult t where t.guid=#{checkResultID}
+    </delete>
+    <insert id="insertCheckContion" parameterType="com.tjhq.commons.setting.dataaudit.rule.po.CheckContionPO">
+     insert into  bgt_t_checkcondition(CHECKRESULTID,DEID,DEIDVAL,CONTOTALNUM) values(#{checkResultID},#{deid},#{deidVal},#{conTotalNum})
+    </insert>
+</mapper>

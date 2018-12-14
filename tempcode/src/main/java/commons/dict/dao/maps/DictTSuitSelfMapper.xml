@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTSuitSelfMapper">
+    <resultMap  id="abatorgenerated_DictTSuitResult" type="com.tjhq.commons.dict.external.po.DictTSuitPO">
+    <result column="YEAR" jdbcType="CHAR" property="year" />
+    <result column="ADMDIVCODE" jdbcType="CHAR" property="admdivcode" />
+    <result column="APPID" jdbcType="VARCHAR" property="appid" />
+    <result column="SUITID" jdbcType="VARCHAR" property="suitid" />
+    <result column="SUITNAME" jdbcType="VARCHAR" property="suitname" />
+    <result column="SUITTYPE" jdbcType="CHAR" property="suittype" />
+    <result column="SUPERID" jdbcType="VARCHAR" property="superid" />
+    <result column="ISLEAF" jdbcType="CHAR" property="isleaf" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="LEVELNO" jdbcType="INTEGER" property="levelno" />
+    <result column="ORDERID" jdbcType="INTEGER" property="orderid" />
+  </resultMap>
+
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTSuit" parameterType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+		INSERT INTO dict_t_suit (APPID, SUITID, SUITNAME, SUITTYPE, SUPERID, ISLEAF, REMARK, LEVELNO,ORDERID, CODE )
+		VALUES ( 
+		  #{appid,jdbcType=VARCHAR},
+		  #{suitid,jdbcType=VARCHAR},
+		  #{suitname,jdbcType=VARCHAR},
+		  #{suittype,jdbcType=CHAR},
+		  #{superid,jdbcType=VARCHAR},
+		  #{isleaf,jdbcType=CHAR},
+		  #{remark,jdbcType=VARCHAR},
+		  #{levelno,jdbcType=INTEGER},
+		  #{orderid,jdbcType=INTEGER},
+<!--		  (SELECT LPAD(code + 1, LENGTH(code), '0') FROM-->
+<!--		  	( SELECT MAX(CODE) code FROM DICT_T_SUIT WHERE SUPERID = '${superid}' AND APPID = '${appid}' ))-->
+		  (SELECT NVL(maxCode, (SELECT CODE || '001' FROM DICT_T_SUIT WHERE SUITID = '${superid}'))
+			FROM (
+				SELECT LPAD(CODE + 1, LENGTH(CODE), '0') MAXCODE FROM (
+					SELECT MAX(CODE) CODE FROM DICT_T_SUIT WHERE SUPERID = '${superid}' AND APPID = '${appid}'
+				)
+			)
+		  )
+		)
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTSuit" parameterType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+    UPDATE dict_t_suit 
+   <set>
+		<if test="appid!=null and appid!=''">
+		    APPID = #{appid},
+	        </if>
+		<if test="suitid!=null and suitid!=''">
+		    SUITID = #{suitid},
+	        </if>
+		<if test="suitname!=null and suitname!=''">
+		    SUITNAME = #{suitname},
+	        </if>
+		<if test="suittype!=null and suittype!=''">
+		    SUITTYPE = #{suittype},
+	        </if>
+		<if test="superid!=null and superid!=''">
+		    SUPERID = #{superid},
+	        </if>
+		<if test="isleaf!=null and isleaf!=''">
+		    ISLEAF = #{isleaf},
+	        </if>
+		<if test="remark!=null and remark!=''">
+		    REMARK = #{remark},
+	        </if>
+		<if test="levelno!=null and levelno!=''">
+		    LEVELNO = #{levelno},
+	        </if>
+        <if test="orderid!=null and orderid!=''">
+		    ORDERID = #{orderid}
+	        </if>
+  </set>
+  <where>
+   SUITID = #{suitid}
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTSuit" parameterType="java.lang.String">
+		DELETE FROM dict_t_suit 
+          <where> 
+		  SUITID = #{suitid}
+          </where>
+    </delete>   
+
+	
+ </mapper>
+ <!--2014-01-08 13:55:26-->

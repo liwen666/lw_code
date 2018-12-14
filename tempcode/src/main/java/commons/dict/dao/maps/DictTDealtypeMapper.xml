@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTDealtypeMapper">
+    <resultMap id="abatorgenerated_DictTDealtypeResult" type="com.tjhq.commons.dict.external.po.DictTDealtypePO" >
+    <result column="APPID" property="appid" jdbcType="VARCHAR" />
+    <result column="DEALID" property="dealid" jdbcType="VARCHAR" />
+    <result column="DEALNAME" property="dealname" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="INTEGER" />
+    <result column="NEEDCONFIG" property="needconfig" jdbcType="VARCHAR" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTDealtype" resultType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		SELECT APPID,DEALID,DEALNAME,ORDERID,NEEDCONFIG FROM  dict_t_dealtype  ORDER BY APPID, ORDERID
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTDealtype"  parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		SELECT APPID,DEALID,DEALNAME,ORDERID,NEEDCONFIG  FROM  dict_t_dealtype 
+	    WHERE DEALID  = #{dealID} AND ( APPID = #{appID} OR APPID = '*')      
+	</select> 
+	
+	 <!-- 查找所有记录  by level -->    
+    <select id="getAllDictTDealtypeLevel" resultType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		<![CDATA[
+		SELECT DEALID, DEALNAME, APPID, ORDERID, NEEDCONFIG FROM DICT_T_DEALTYPE ORDER BY ORDERID
+         ]]>
+  	</select> 
+  
+  <!-- group by 来获取记录 -->
+    <select id="getDictTDealtypeForGroupBy"   resultType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		SELECT APPID  FROM DICT_T_APPREGISTER ORDER BY ORDERID
+	</select>
+
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTDealtype" parameterType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		INSERT INTO  dict_t_dealtype  (  APPID, DEALID, DEALNAME, ORDERID,NEEDCONFIG )
+		VALUES ( 
+		  #{appid},
+		  #{dealid},
+		  #{dealname},
+		  #{orderid},
+		  #{needconfig}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTDealtype" parameterType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+    UPDATE  dict_t_dealtype  
+   <set>
+		<if test="appid!=null and appid!=''">
+		     APPID  = #{appid},
+	        </if>
+		<if test="dealid!=null and dealid!=''">
+		     DEALID  = #{dealid},
+	        </if>
+		<if test="dealname!=null and dealname!=''">
+		     DEALNAME  = #{dealname},
+	        </if>
+		<if test="orderid!=null and orderid!=''">
+		     ORDERID  = #{orderid}
+	     </if>
+	    <if test="needconfig!=null">
+		     NEEDCONFIG  = #{needconfig}
+	     </if>
+  </set>
+  <where>
+   DEALID  = #{dealid} 
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTDealtype" parameterType="java.lang.String">
+		DELETE FROM  dict_t_dealtype  
+          <where> 
+		DEALID  = #{dealid}
+          </where>
+    </delete>   
+
+	<select id="findDictTDealtype" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDealtypePO">
+		SELECT APPID,DEALID,DEALNAME,ORDERID,NEEDCONFIG FROM  dict_t_dealtype d
+		<where>
+			(APPID = '*' OR
+			<if test="appid != null and appid != ''"> APPID = #{appid} </if>
+			<if test="appid_like != null and appid_like != ''"> APPID like #{appid_like} </if>
+			<if test="dealid != null and dealid != ''"> AND DEALID = #{dealid} </if>
+			<if test="dealid_like!=null and dealid_like!=''"> AND DEALID like #{dealid_like} </if>
+			<if test="dealname!=null and dealname!=''"> AND  DEALNAME = #{dealname} </if>
+			<if test="dealname_like!=null and dealname_like!=''"> AND DEALNAME like #{dealname_like} </if>
+			<if test="orderid!=null and orderid!=''"> AND ORDERID = #{orderid} </if>
+			<if test="needconfig!=null and needconfig!=''"> AND NEEDCONFIG = #{needconfig} </if>)
+			<!-- 已引用过的只能被引用一次的表处理类型不列出 -->
+			<if test="withoutUsed != null and withoutUsed != ''">
+				AND d.ISUNIQUE != '1' OR (d.ISUNIQUE = '1' AND d.DEALID NOT IN
+				(SELECT DISTINCT DEALTYPE FROM DICT_T_MODEL m WHERE m.APPID = '${appid}'))
+			</if>
+		</where>
+		ORDER BY APPID
+	</select>
+
+	<select id="findDictTDealtypeCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_dealtype  u
+	    <where>
+                        <if test="appid!=null and appid!=''">
+                              APPID  = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              APPID  like #{appid_like}
+                        </if>
+                        <if test="dealid!=null and dealid!=''">
+                              AND  DEALID  = #{dealid}
+                        </if>
+
+                        <if test="dealid_like!=null and dealid_like!=''">
+                              AND  DEALID  like #{dealid_like}
+                        </if>
+                        <if test="dealname!=null and dealname!=''">
+                              AND  DEALNAME  = #{dealname}
+                        </if>
+
+                        <if test="dealname_like!=null and dealname_like!=''">
+                              AND  DEALNAME  like #{dealname_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+                        <if test="needconfig!=null and needconfig!=''">
+                             AND  NEEDCONFIG  = #{needconfig}
+                        </if>
+            OR APPID='*' ORDER BY APPID
+	      </where>
+	</select>	
+ </mapper>
+ <!--2014-01-17 15:50:57-->

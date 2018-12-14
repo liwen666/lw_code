@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.external.dao.DictTFactorcodeMapper">
+    <resultMap type="com.tjhq.commons.dict.external.po.DictTFactorcodePO" id="abatorgenerated_DictTFactorcodeResult">
+    <result column="TABLEID" jdbcType="VARCHAR" property="tableid" />
+    <result column="DEID" jdbcType="VARCHAR" property="deid" />
+    <result column="COLUMNID" jdbcType="VARCHAR" property="columnid" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="ORDERID" jdbcType="INTEGER" property="orderid" />
+    <result column="DBCOLUMNNAME" jdbcType="VARCHAR" property="dbcolumnname" />
+    <result column="DATATYPE" jdbcType="INTEGER" property="datatype" />
+    <result column="DATALENGTH" jdbcType="INTEGER" property="datalength" />
+    <result column="SCALE" jdbcType="INTEGER" property="scale" />
+    <result column="DEFAULTVALUE" jdbcType="VARCHAR" property="defaultvalue" />
+    <result column="CSID" jdbcType="VARCHAR" property="csid" />
+    <result column="ISVISIBLE" jdbcType="CHAR" property="isvisible" />
+    <result column="ISRESERVE" jdbcType="CHAR" property="isreserve" />
+  <!--   <result column="VERSION" jdbcType="INTEGER" property="version" /> -->
+    <result column="BGTLVL" jdbcType="CHAR" property="bgtlvl" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTFactorcode" resultType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+		SELECT TABLEID,DEID,COLUMNID,NAME,ORDERID,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,DEFAULTVALUE,CSID,ISVISIBLE,ISRESERVE,BGTLVL FROM  dict_t_factorcode 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTFactorcode"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+		SELECT TABLEID,DEID,COLUMNID,NAME,ORDERID,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,DEFAULTVALUE,CSID,ISVISIBLE,ISRESERVE,BGTLVL  FROM  dict_t_factorcode 
+	  <where> 
+           COLUMNID  = #{columnid}       
+          </where>
+	</select>  
+	
+	
+	  <!-- 根据DBCOLUMNNAME来获取记录 -->
+     <!-- 根据主键来获取记录 -->
+    <select id="getDictTFactorcodeByDBName"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+		SELECT TABLEID,DEID,COLUMNID,NAME,ORDERID,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,DEFAULTVALUE,CSID,ISVISIBLE,ISRESERVE,BGTLVL  FROM  dict_t_factorcode 
+	  <where> 
+           DBCOLUMNNAME  = #{dbcolumnname}       
+          </where>
+	</select>  
+	
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTFactorcode" parameterType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+		INSERT INTO  dict_t_factorcode  (  TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL )
+		VALUES ( 
+		  #{tableid,jdbcType=VARCHAR},
+		  #{deid,jdbcType=VARCHAR},
+		  #{columnid,jdbcType=VARCHAR},
+		  #{name,jdbcType=VARCHAR},
+		  #{orderid,jdbcType=INTEGER},
+		  #{dbcolumnname,jdbcType=VARCHAR},
+		  #{datatype,jdbcType=INTEGER},
+		  #{datalength,jdbcType=INTEGER},
+		  #{scale,jdbcType=INTEGER},
+		  #{defaultvalue,jdbcType=VARCHAR},
+		  #{csid,jdbcType=VARCHAR},
+		  #{isvisible,jdbcType=CHAR},
+		  #{isreserve,jdbcType=CHAR},
+		  #{bgtlvl,jdbcType=CHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTFactorcode" parameterType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+    UPDATE  dict_t_factorcode  
+   <set>
+		<if test="tableid!=null and tableid!=''">
+		     TABLEID  = #{tableid},
+	        </if>
+		<if test="deid!=null and deid!=''">
+		     DEID  = #{deid},
+	        </if>
+		<if test="columnid!=null and columnid!=''">
+		     COLUMNID  = #{columnid},
+	        </if>
+		<if test="name!=null and name!=''">
+		     NAME  = #{name},
+	        </if>
+		<if test="orderid!=null and orderid!=''">
+		     ORDERID  = #{orderid},
+	        </if>
+		<if test="dbcolumnname!=null and dbcolumnname!=''">
+		     DBCOLUMNNAME  = #{dbcolumnname},
+	        </if>
+		<if test="datatype!=null and datatype!=''">
+		     DATATYPE  = #{datatype},
+	        </if>
+		<if test="datalength!=null and datalength!=''">
+		     DATALENGTH  = #{datalength},
+	        </if>
+		<if test="scale!=null and scale!=''">
+		     SCALE  = #{scale},
+	        </if>
+		<if test="defaultvalue!=null and defaultvalue!=''">
+		     DEFAULTVALUE  = #{defaultvalue},
+	        </if>
+		<if test="csid!=null and csid!=''">
+		     CSID  = #{csid},
+	        </if>
+		<if test="isvisible!=null and isvisible!=''">
+		     ISVISIBLE  = #{isvisible},
+	        </if>
+		<if test="isreserve!=null and isreserve!=''">
+		     ISRESERVE  = #{isreserve},
+	        </if>
+		<if test="bgtlvl!=null and bgtlvl!=''">
+		     BGTLVL  = #{bgtlvl}
+	        </if>
+  </set>
+  <where>
+    COLUMNID  = #{columnid}
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTFactorcode" parameterType="java.lang.String">
+		DELETE TABLEID,DEID,COLUMNID,NAME,ORDERID,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,DEFAULTVALUE,CSID,ISVISIBLE,ISRESERVE,BGTLVL FROM  dict_t_factorcode  
+          <where> 
+		 COLUMNID  = #{columnid}
+          </where>
+    </delete>   
+
+	<select id="findDictTFactorcode" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorcodePO">
+		SELECT TABLEID,DEID,COLUMNID,NAME,ORDERID,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,DEFAULTVALUE,CSID,ISVISIBLE,ISRESERVE,BGTLVL FROM  dict_t_factorcode  u  
+                <where>
+                       <if test="tableid!=null and tableid!=''">
+                             TABLEID  = #{tableid}
+                       </if>
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             TABLEID  like #{tableid_like}
+                        </if>
+                       <if test="deid!=null and deid!=''">
+                             AND  DEID  = #{deid}
+                       </if>
+                        <if test="deid_like!=null and deid_like!=''">
+                             AND  DEID  like #{deid_like}
+                        </if>
+                       <if test="columnid!=null and columnid!=''">
+                             AND  COLUMNID  = #{columnid}
+                       </if>
+                        <if test="columnid_like!=null and columnid_like!=''">
+                             AND  COLUMNID  like #{columnid_like}
+                        </if>
+                       <if test="name!=null and name!=''">
+                             AND  NAME  = #{name}
+                       </if>
+                        <if test="name_like!=null and name_like!=''">
+                             AND  NAME  like #{name_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND  ORDERID  = #{orderid}
+                       </if>
+                       <if test="dbcolumnname!=null and dbcolumnname!=''">
+                             AND  DBCOLUMNNAME  = #{dbcolumnname}
+                       </if>
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                             AND  DBCOLUMNNAME  like #{dbcolumnname_like}
+                        </if>
+                       <if test="datatype!=null and datatype!=''">
+                             AND  DATATYPE  = #{datatype}
+                       </if>
+                       <if test="datalength!=null and datalength!=''">
+                             AND  DATALENGTH  = #{datalength}
+                       </if>
+                       <if test="scale!=null and scale!=''">
+                             AND  SCALE  = #{scale}
+                       </if>
+                       <if test="defaultvalue!=null and defaultvalue!=''">
+                             AND  DEFAULTVALUE  = #{defaultvalue}
+                       </if>
+                        <if test="defaultvalue_like!=null and defaultvalue_like!=''">
+                             AND  DEFAULTVALUE  like #{defaultvalue_like}
+                        </if>
+                       <if test="csid!=null and csid!=''">
+                             AND  CSID  = #{csid}
+                       </if>
+                        <if test="csid_like!=null and csid_like!=''">
+                             AND  CSID  like #{csid_like}
+                        </if>
+                       <if test="isvisible!=null and isvisible!=''">
+                             AND  ISVISIBLE  = #{isvisible}
+                       </if>
+                        <if test="isvisible_like!=null and isvisible_like!=''">
+                             AND  ISVISIBLE  like #{isvisible_like}
+                        </if>
+                       <if test="isreserve!=null and isreserve!=''">
+                             AND  ISRESERVE  = #{isreserve}
+                       </if>
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                             AND  ISRESERVE  like #{isreserve_like}
+                        </if>
+                       <if test="bgtlvl!=null and bgtlvl!=''">
+                             AND  BGTLVL  = #{bgtlvl}
+                       </if>
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                             AND  BGTLVL  like #{bgtlvl_like}
+                        </if>
+                 </where>
+	
+	</select>
+
+	<select id="findDictTFactorcodeCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_factorcode  u
+	    <where>
+                        <if test="tableid!=null and tableid!=''">
+                              TABLEID  = #{tableid}
+                        </if>
+
+                        <if test="tableid_like!=null and tableid_like!=''">
+                              TABLEID  like #{tableid_like}
+                        </if>
+                        <if test="deid!=null and deid!=''">
+                              AND  DEID  = #{deid}
+                        </if>
+
+                        <if test="deid_like!=null and deid_like!=''">
+                              AND  DEID  like #{deid_like}
+                        </if>
+                        <if test="columnid!=null and columnid!=''">
+                              AND  COLUMNID  = #{columnid}
+                        </if>
+
+                        <if test="columnid_like!=null and columnid_like!=''">
+                              AND  COLUMNID  like #{columnid_like}
+                        </if>
+                        <if test="name!=null and name!=''">
+                              AND  NAME  = #{name}
+                        </if>
+
+                        <if test="name_like!=null and name_like!=''">
+                              AND  NAME  like #{name_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+
+                        <if test="dbcolumnname!=null and dbcolumnname!=''">
+                              AND  DBCOLUMNNAME  = #{dbcolumnname}
+                        </if>
+
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                              AND  DBCOLUMNNAME  like #{dbcolumnname_like}
+                        </if>
+                        <if test="datatype!=null and datatype!=''">
+                              AND  DATATYPE  = #{datatype}
+                        </if>
+
+                        <if test="datalength!=null and datalength!=''">
+                              AND  DATALENGTH  = #{datalength}
+                        </if>
+
+                        <if test="scale!=null and scale!=''">
+                              AND  SCALE  = #{scale}
+                        </if>
+
+                        <if test="defaultvalue!=null and defaultvalue!=''">
+                              AND  DEFAULTVALUE  = #{defaultvalue}
+                        </if>
+
+                        <if test="defaultvalue_like!=null and defaultvalue_like!=''">
+                              AND  DEFAULTVALUE  like #{defaultvalue_like}
+                        </if>
+                        <if test="csid!=null and csid!=''">
+                              AND  CSID  = #{csid}
+                        </if>
+
+                        <if test="csid_like!=null and csid_like!=''">
+                              AND  CSID  like #{csid_like}
+                        </if>
+                        <if test="isvisible!=null and isvisible!=''">
+                              AND  ISVISIBLE  = #{isvisible}
+                        </if>
+
+                        <if test="isvisible_like!=null and isvisible_like!=''">
+                              AND  ISVISIBLE  like #{isvisible_like}
+                        </if>
+                        <if test="isreserve!=null and isreserve!=''">
+                              AND  ISRESERVE  = #{isreserve}
+                        </if>
+
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                              AND  ISRESERVE  like #{isreserve_like}
+                        </if>
+                        <if test="bgtlvl!=null and bgtlvl!=''">
+                              AND  BGTLVL  = #{bgtlvl}
+                        </if>
+
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                              AND  BGTLVL  like #{bgtlvl_like}
+                        </if>
+	      </where>
+	</select>	
+	
+<insert id="copyFactorCodeDefineToProvince" parameterType="java.util.Map">
+		INSERT INTO  P#DICT_T_FACTORCODE  
+		(year,
+		province,
+		tableid,
+		deid,
+		columnid,
+		name,
+		orderid,
+		dbcolumnname,
+		datatype,
+		datalength,
+		scale,
+		defaultvalue,
+		csid,
+		isvisible,
+		isreserve,
+		dbversion,
+		bgtlvl,
+		status,
+		insertversion)
+		select year,
+		${province},
+		tableid,
+		deid,
+		columnid,
+		name,
+		orderid,
+		dbcolumnname,
+		datatype,
+		datalength,
+		scale,
+		defaultvalue,
+		csid,
+		isvisible,
+		${isreserve},
+		dbversion,
+		bgtlvl,
+		status,
+		insertversion from P#DICT_T_FACTORCODE t 
+		   where Year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') and t.status='1'  
+		   and  t.PROVINCE=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('DIVID') and  
+		   t.columnid not in(select f.columnid from P#DICT_T_FACTORCODE  f where f.year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')  
+		   and f.status='1' and f.province=#{province}
+		 )
+    </insert>
+
+	<select id="getCodeTableRegisted" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM FASP_T_DICDSSOURCE d
+		where d.GUID = #{tableID}
+	</select>
+
+	<select id="getFactorByCsid" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM DICT_T_FACTOR f
+		where f.CSID = #{tableID}
+	</select>
+ </mapper>
+ <!--2014-01-27 12:44:00-->

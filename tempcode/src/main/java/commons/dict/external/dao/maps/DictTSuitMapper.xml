@@ -1,0 +1,350 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.external.dao.DictTSuitMapper">
+    <resultMap  id="abatorgenerated_DictTSuitResult" type="com.tjhq.commons.dict.external.po.DictTSuitPO">
+    <result column="YEAR" jdbcType="CHAR" property="year" />
+    <result column="ADMDIVCODE" jdbcType="CHAR" property="admdivcode" />
+    <result column="APPID" jdbcType="VARCHAR" property="appid" />
+    <result column="SUITID" jdbcType="VARCHAR" property="suitid" />
+    <result column="SUITNAME" jdbcType="VARCHAR" property="suitname" />
+    <result column="SUITTYPE" jdbcType="CHAR" property="suittype" />
+    <result column="SUPERID" jdbcType="VARCHAR" property="superid" />
+    <result column="ISLEAF" jdbcType="CHAR" property="isleaf" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="LEVELNO" jdbcType="INTEGER" property="levelno" />
+      <result column="ORDERID" jdbcType="INTEGER" property="orderid" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTSuit" resultType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+		SELECT APPID, SUITID, SUITNAME, SUITTYPE, SUPERID,ISLEAF, REMARK,LEVELNO,ORDERID FROM dict_t_suit
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTSuit"   parameterType="java.lang.String"  resultType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+		SELECT  APPID, SUITID, SUITNAME, SUITTYPE, SUPERID,ISLEAF, REMARK,LEVELNO,ORDERID FROM dict_t_suit
+	  <where> 
+            SUITID = #{suitid}      
+      </where>
+	</select> 
+	
+	 
+	    <!-- 根据主键来获取记录 -->
+    <select id="getDictTSuitByAppID"   parameterType="java.lang.String"  flushCache="true" resultType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+		SELECT  APPID, SUITID, SUITNAME, SUITTYPE, SUPERID,ISLEAF, REMARK,LEVELNO,ORDERID FROM dict_t_suit
+        WHERE  APPID = #{appID}      
+
+	</select> 
+	
+	<select id="findDictTSuitsByAppId" parameterType="java.util.Map"  resultType="com.tjhq.commons.setting.external.po.TreeNode">
+		<if test="showApp!=0">  
+		SELECT  
+			'${appID}'  code, 
+			'0' id, 
+			(select appname from dict_t_appregister where appid='${appID}') name, 
+			'' type,
+			'' pid,
+			'0' isleaf,
+			'' remark,
+			0 levelno,
+			0 orderid,
+			1 open
+		 from dual
+		union all	
+		</if>
+		SELECT  
+			SUITID code,  
+			SUITID id, 
+			SUITNAME name, 
+			SUITTYPE type,  
+			SUPERID pid,
+			case when 
+				(select count(*) from dict_t_suit where superid=t.SUITID)>0
+			then 
+				'0'
+			else
+				'1' 
+			end isleaf,	   		
+			REMARK remark,
+			LEVELNO levelno,
+			ORDERID orderid, 
+			1  open
+		FROM 
+			dict_t_suit t
+        	WHERE  APPID = '${appID}'
+		ORDER BY ORDERID
+	</select>
+
+	<select id="getAllDictTSuitWithModelTree" parameterType="java.util.Map"  resultType="com.tjhq.commons.setting.external.po.TreeNode">
+		select * from (
+			SELECT  
+				 appid code, 
+				 appid id, 
+			     APPNAME name, 
+			     '0' dealType, 
+			     '' pid,
+			     '0' isleaf,
+			     0 levelno,
+			      case when APPID='${appId}' then
+			      -1 
+			      else 
+			      orderid end orderid,
+			      0 open
+			     from dict_t_appregister
+			    union all  
+			    SELECT  
+			      SUITID ,  
+			      SUITID , 
+			      SUITNAME , 
+			      '0' ,  
+			      case when superid='0'
+			      then appid
+			      else
+			      SUPERID end,
+			      case when 
+			        (select count(*) from dict_t_suit where superid=t.SUITID)>0
+			      then 
+			        '0'
+			      else
+			        '1' 
+			      end isleaf,         
+			      LEVELNO ,
+			      ORDERID ,  
+			      0  
+			    FROM 
+			      dict_t_suit t
+			     union all
+			     select 
+			      m.TABLEID,
+			      m.TABLEID,
+			      m.NAME,
+			      (select dealname from DICT_T_DEALTYPE where dealid=m.dealtype and (appid = m.appid or appid = '*')), 
+			      m.SUITID ,
+			      '1' ,
+			      (select LEVELNO+1 FROM DICT_T_SUIT WHERE SUITID = M.SUITID) ,
+			      m.ORDERID,
+			      0 open
+			      FROM
+			     dict_t_model m 
+			     <if test="filterForFormula!=null and filterForFormula!=''">
+			       where tabletype = '1' or tabletype = '3'
+			     </if>
+		 ) CONNECT BY pid = PRIOR id 
+	            START WITH LEVELNO = 0
+	   		order SIBLINGS BY ORDERID ASC   
+	</select>
+	
+	
+	<select id="getAllDictTSuitWithModelTree4Formula" parameterType="java.util.Map"  resultType="com.tjhq.commons.setting.external.po.TreeNode">
+		select * from (
+			SELECT  
+				 appid code, 
+				 appid id, 
+			     APPNAME name, 
+			     '0' dealType, 
+			     '' pid,
+			     '0' isleaf,
+			     0 levelno,
+			      case when APPID='${appId}' then
+			      -1 
+			      else 
+			      orderid end orderid,
+			      0 open
+			     from dict_t_appregister
+			    union all  
+			    SELECT  
+			      SUITID ,  
+			      SUITID , 
+			      SUITNAME , 
+			      '0' ,  
+			      case when superid='0'
+			      then appid
+			      else
+			      SUPERID end,
+			      case when 
+			        (select count(*) from dict_t_suit where superid=t.SUITID)>0
+			      then 
+			        '0'
+			      else
+			        '1' 
+			      end isleaf,         
+			      LEVELNO ,
+			      ORDERID ,  
+			      0  
+			    FROM 
+			      dict_t_suit t
+			     union all
+			     select 
+			      m.TABLEID,
+			      m.TABLEID,
+			      m.NAME,
+			      m.dealtype, 
+			      m.SUITID ,
+			      '1' ,
+			      (select LEVELNO+1 FROM DICT_T_SUIT WHERE SUITID = M.SUITID) ,
+			      m.ORDERID,
+			      0 open
+			      FROM
+			     dict_t_model m 
+			     where tabletype = '1' or tabletype = '3'
+		 ) CONNECT BY pid = PRIOR id 
+	            START WITH LEVELNO = 0
+	   		order SIBLINGS BY ORDERID ASC   
+	</select>
+	
+	<select id="findDictTSuit" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTSuitPO">
+		SELECT APPID, SUITID, SUITNAME, SUITTYPE, SUPERID,ISLEAF, REMARK,LEVELNO,ORDERID FROM dict_t_suit u  
+                <where>
+                       1 = 1
+                       <if test="appid!=null and appid!=''">
+                             AND APPID = #{appid}
+                       </if>
+                        <if test="appid_like!=null and appid_like!=''">
+                             AND APPID like #{appid_like}
+                        </if>
+                       <if test="suitid!=null and suitid!=''">
+                             AND SUITID = #{suitid}
+                       </if>
+                        <if test="suitid_like!=null and suitid_like!=''"> 
+                             AND SUITID like #{suitid_like} 
+                        </if>
+                       <if test="suitname!=null and suitname!=''">
+                             AND SUITNAME = #{suitname}
+                       </if>
+                        <if test="suitname_like!=null and suitname_like!=''">
+                             AND SUITNAME like #{suitname_like}
+                        </if>
+                       <if test="suittype!=null and suittype!=''">
+                             AND SUITTYPE = #{suittype}
+                       </if>
+                        <if test="suittype_like!=null and suittype_like!=''">
+                             AND SUITTYPE like #{suittype_like}
+                        </if>
+                       <if test="superid!=null and superid!=''">
+                             AND SUPERID = #{superid}
+                       </if>
+                        <if test="superid_like!=null and superid_like!=''">
+                             AND SUPERID like #{superid_like}
+                        </if>
+                       <if test="isleaf!=null and isleaf!=''">
+                             AND ISLEAF = #{isleaf}
+                       </if>
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                             AND ISLEAF like #{isleaf_like}
+                        </if>
+                       <if test="remark!=null and remark!=''">
+                             AND REMARK = #{remark}
+                       </if>
+                        <if test="remark_like!=null and remark_like!=''">
+                             AND REMARK like #{remark_like}
+                        </if>
+                       <if test="levelno!=null and levelno!=''">
+                             AND LEVELNO = #{levelno}
+                       </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND ORDERID = #{orderid}
+                       </if>
+                 </where>
+	
+	</select>
+
+	<select id="findDictTSuitCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM dict_t_suit u
+	    <where>
+	                     1 = 1
+                        <if test="appid!=null and appid!=''">
+                              AND APPID = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              AND APPID like #{appid_like}
+                        </if>
+                        <if test="suitid!=null and suitid!=''">
+                              AND SUITID = #{suitid}
+                        </if>
+
+                        <if test="suitid_like!=null and suitid_like!=''">
+                              AND SUITID like #{suitid_like}
+                        </if>
+                        <if test="suitname!=null and suitname!=''">
+                              AND SUITNAME = #{suitname}
+                        </if>
+
+                        <if test="suitname_like!=null and suitname_like!=''">
+                              AND SUITNAME like #{suitname_like}
+                        </if>
+                        <if test="suittype!=null and suittype!=''">
+                              AND SUITTYPE = #{suittype}
+                        </if>
+
+                        <if test="suittype_like!=null and suittype_like!=''">
+                              AND SUITTYPE like #{suittype_like}
+                        </if>
+                        <if test="superid!=null and superid!=''">
+                              AND SUPERID = #{superid}
+                        </if>
+
+                        <if test="superid_like!=null and superid_like!=''">
+                              AND SUPERID like #{superid_like}
+                        </if>
+                        <if test="isleaf!=null and isleaf!=''">
+                              AND ISLEAF = #{isleaf}
+                        </if>
+
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                              AND ISLEAF like #{isleaf_like}
+                        </if>
+                        <if test="remark!=null and remark!=''">
+                              AND REMARK = #{remark}
+                        </if>
+
+                        <if test="remark_like!=null and remark_like!=''">
+                              AND REMARK like #{remark_like}
+                        </if>
+                        <if test="levelno!=null and levelno!=''">
+                              AND LEVELNO = #{levelno}
+                        </if>
+                         <if test="orderid!=null and orderid!=''">
+                             AND ORDERID = #{orderid}
+                       </if>
+
+	      </where>
+	</select>
+
+	<insert id="copySuitDefineToProvince" parameterType="java.util.Map">
+		INSERT INTO  P#DICT_T_SUIT  
+		(year,
+		province,
+		appid,
+		suitid,
+		suitname,
+		suittype,
+		superid,
+		isleaf,
+		remark,
+		levelno,
+		orderid,
+		status,
+		dbversion)
+		select year,
+		${province},
+		appid,
+		suitid,
+		suitname,
+		suittype,
+		superid,
+		isleaf,
+		remark,
+		levelno,
+		orderid,
+		status,
+		dbversion from P#DICT_T_SUIT t  
+		   where Year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') and t.status='1'  
+		   and  t.PROVINCE=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('DIVID') and  
+		   t.suitid not in(select s.suitid from P#DICT_T_SUIT  s where s.year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')  
+		   and s.status='1' and s.province=#{province}
+		 )
+    </insert>	
+ </mapper>
+ <!--2014-01-08 13:55:26-->

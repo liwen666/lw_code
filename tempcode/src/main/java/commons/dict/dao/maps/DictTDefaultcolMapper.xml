@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTDefaultcolMapper">
+    <resultMap id="abatorgenerated_DictTDefaultcolResult" type="com.tjhq.commons.dict.external.po.DictTDefaultcolPO" >
+    <result column="DEALID" property="dealid" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="INTEGER" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="DBCOLUMNNAME" property="dbcolumnname" jdbcType="VARCHAR" />
+    <result column="DATATYPE" property="datatype" jdbcType="INTEGER" />
+    <result column="DATALENGTH" property="datalength" jdbcType="INTEGER" />
+    <result column="SCALE" property="scale" jdbcType="INTEGER" />
+    <result column="CSID" property="csid" jdbcType="VARCHAR" />
+    <result column="ISPRIMARY" property="isprimary" jdbcType="CHAR" />
+    <result column="ISLOGICKEY" property="islogickey" jdbcType="CHAR" />
+    <result column="ISRESERVE" property="isreserve" jdbcType="CHAR" />
+    <result column="GUID" property="guid" jdbcType="VARCHAR" />
+    <result column="DEFAULTVALUE" jdbcType="VARCHAR" property="defaultvalue" />
+    <result column="DEID" property="deid" jdbcType="VARCHAR" />
+    <result column="ISVISIBLE" property="isvisible" jdbcType="VARCHAR" />
+    <result column="ISUPDATE" property="isupdate" jdbcType="VARCHAR" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTDefaultcol" resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		SELECT GUID, DEALID,ORDERID,NAME,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,CSID,ISPRIMARY,ISLOGICKEY,ISRESERVE,DEFAULTVALUE,DEID,
+		ISVISIBLE, ISUPDATE FROM  dict_t_defaultcol WHERE  STATUS='1'  ORDER BY ORDERID 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTDefaultcol"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		SELECT GUID, DEALID,ORDERID,NAME,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,CSID,ISPRIMARY,ISLOGICKEY,ISRESERVE,DEFAULTVALUE,DEID,
+		ISVISIBLE, ISUPDATE  FROM  dict_t_defaultcol  
+	  <where> 
+             DEALID  = #{dealid} AND STATUS='1'     
+       </where>
+       ORDER BY ORDERID 
+	</select>  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTDefaultcol" parameterType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		INSERT INTO  dict_t_defaultcol  (
+			GUID,  DEALID, ORDERID, NAME, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, CSID,
+			ISPRIMARY, ISLOGICKEY, ISRESERVE ,DEFAULTVALUE,DEID, ISVISIBLE, ISUPDATE)
+		VALUES ( 
+		   sys_guid(),
+		  #{dealid,jdbcType=VARCHAR},
+		  #{orderid,jdbcType=INTEGER},
+		  #{name,jdbcType=VARCHAR},
+		  #{dbcolumnname,jdbcType=VARCHAR},
+		  #{datatype,jdbcType=INTEGER},
+		  #{datalength,jdbcType=INTEGER},
+		  #{scale,jdbcType=INTEGER},
+		  #{csid,jdbcType=VARCHAR},
+		  #{isprimary,jdbcType=CHAR},
+		  #{islogickey,jdbcType=CHAR},
+		  #{isreserve,jdbcType=CHAR},
+		  #{defaultvalue,jdbcType=VARCHAR},
+		  #{deid,jdbcType=VARCHAR},
+		  #{isvisible, jdbcType=VARCHAR},
+		  #{isupdate, jdbcType=VARCHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTDefaultcol" parameterType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+    UPDATE  dict_t_defaultcol  
+   <set>
+		<if test="name!=null and name!=''">
+		     NAME  = #{name},
+	        </if>
+		<if test="dbcolumnname!=null and dbcolumnname!=''">
+		     DBCOLUMNNAME  = #{dbcolumnname},
+	        </if>
+		<if test="datatype!=null and datatype!=''">
+		     DATATYPE  = #{datatype},
+	        </if>
+		<if test="datalength!=null and datalength!=''">
+		     DATALENGTH  = #{datalength},
+	        </if>
+		<if test="scale!=null ">
+		     SCALE  = #{scale},
+	        </if>
+		<if test="csid!=null and csid!=''">
+		     CSID  = #{csid},
+	        </if>
+		<if test="isprimary!=null and isprimary!=''">
+		     ISPRIMARY  = #{isprimary},
+	        </if>
+	    <if test="islogickey!=null and islogickey!=''">
+		     ISLOGICKEY  = #{islogickey},
+	        </if>
+		<if test="isreserve!=null and isreserve!=''">
+		     ISRESERVE  = #{isreserve},
+	        </if>
+        <if test="defaultvalue!=null">
+	         DEFAULTVALUE = #{defaultvalue},
+        </if>
+        <if test="deid!=null">
+	         DEID = #{deid},
+        </if>
+		<if test="isvisible != null  and isvisible != ''">
+			ISVISIBLE  = #{isvisible},
+	 	</if>
+		<if test="isupdate != null and isupdate != ''">
+			ISUPDATE  = #{isupdate},
+	 	</if>
+  </set>
+  <where>
+    GUID  = #{guid} 
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTDefaultcol" parameterType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		DELETE   FROM  dict_t_defaultcol  
+          <where> 
+		  GUID  = #{guid} 
+          </where>
+    </delete>   
+
+	<select id="findDictTDefaultcol" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		SELECT  GUID , DEALID,ORDERID,NAME,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,CSID,ISPRIMARY,ISLOGICKEY,
+		ISRESERVE,DEFAULTVALUE,DEID, ISVISIBLE, ISUPDATE FROM  dict_t_defaultcol  u  
+                <where>
+                             STATUS='1' 
+                       <if test="dealid!=null and dealid!=''">
+                             AND   DEALID  = #{dealid}
+                       </if>
+                        <if test="dealid_like!=null and dealid_like!=''">
+                               AND DEALID  like #{dealid_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND  ORDERID  = #{orderid}
+                       </if>
+                       <if test="name!=null and name!=''">
+                             AND  NAME  = #{name}
+                       </if>
+                        <if test="name_like!=null and name_like!=''">
+                             AND  NAME  like #{name_like}
+                        </if>
+                       <if test="dbcolumnname!=null and dbcolumnname!=''">
+                             AND  DBCOLUMNNAME  = #{dbcolumnname}
+                       </if>
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                             AND  DBCOLUMNNAME  like #{dbcolumnname_like}
+                        </if>
+                       <if test="datatype!=null and datatype!=''">
+                             AND  DATATYPE  = #{datatype}
+                       </if>
+                       <if test="datalength!=null and datalength!=''">
+                             AND  DATALENGTH  = #{datalength}
+                       </if>
+                       <if test="scale!=null and scale!=''">
+                             AND  SCALE  = #{scale}
+                       </if>
+                       <if test="csid!=null and csid!=''">
+                             AND  CSID  = #{csid}
+                       </if>
+                        <if test="csid_like!=null and csid_like!=''">
+                             AND  CSID  like #{csid_like}
+                        </if>
+                       <if test="isprimary!=null and isprimary!=''">
+                             AND  ISPRIMARY  = #{isprimary}
+                       </if>
+                       <if test="islogickey!=null and islogickey!=''">
+                             AND  ISLOGICKEY  = #{islogickey}
+                       </if>
+                        <if test="isprimary_like!=null and isprimary_like!=''">
+                             AND  ISPRIMARY  like #{isprimary_like}
+                        </if>
+                       <if test="isreserve!=null and isreserve!=''">
+                             AND  ISRESERVE  = #{isreserve}
+                       </if>
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                             AND  ISRESERVE  like #{isreserve_like}
+                        </if>
+                       <if test="deid!=null and deid!=''">
+                             AND  DEID  = #{deid}
+                       </if>
+                        
+                 </where>
+	         ORDER BY ORDERID 
+	</select>
+	<select id="findDictTDefaultfactortcodecol" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO">
+		SELECT  GUID , DEALID,ORDERID,NAME,DBCOLUMNNAME,DATATYPE,DATALENGTH,SCALE,CSID,ISPRIMARY,ISLOGICKEY,
+		ISRESERVE,DEFAULTVALUE,DEID, ISVISIBLE, ISUPDATE FROM  DICT_T_DEFAULTFACTORTCODECOL  u  ORDER BY ORDERID 
+	</select>
+	
+	
+	<select id="findDictTDefaultcol4Show" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO" flushCache="true">
+		SELECT GUID , DEALID, ORDERID, NAME, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE,
+			CSID, ISPRIMARY, ISLOGICKEY, ISRESERVE, DEFAULTVALUE, ISVISIBLE, ISUPDATE,
+				(select name from dict_t_modelcode where tableid=CSID) AS SNAME_CSID,
+				(select name from fasp_t_dicde where guid=DEID) AS SNAME_DEID,
+                decode(ISPRIMARY,'1','${YES_CODE}','${NO_CODE}') AS SNAME_ISPRIMARY,
+                decode(ISLOGICKEY,'1','${YES_CODE}','${NO_CODE}') AS SNAME_ISLOGICKEY,
+                decode(ISRESERVE,'1','${YES_CODE}','${NO_CODE}') AS SNAME_ISRESERVE,
+                DECODE(ISVISIBLE, '1', '${YES_CODE}', '${NO_CODE}') AS SNAME_ISVISIBLE,
+                DECODE(ISUPDATE, '1', '${YES_CODE}', '${NO_CODE}') AS SNAME_ISUPDATE
+		 FROM  dict_t_defaultcol  u    WHERE  STATUS='1'    AND   DEALID  = #{dealid} 
+	         ORDER BY ORDERID 
+	</select>
+	
+	<select id="findDictTDefaultcolbyDealIDandTableId" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTDefaultcolPO" flushCache="true">
+		SELECT DBCOLUMNNAME FROM Dict_t_Defaultcol WHERE DEALID = #{dealID}  AND DBCOLUMNNAME NOT IN
+(SELECT DBCOLUMNNAME FROM Dict_t_Factor WHERE TABLEID =#{tableId})
+	</select>
+
+	<select id="findDictTDefaultcolCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_defaultcol  u
+	    <where>
+	                        STATUS='1'
+                        <if test="dealid!=null and dealid!=''">
+                            AND  DEALID  = #{dealid}
+                        </if>
+
+                        <if test="dealid_like!=null and dealid_like!=''">
+                            AND  DEALID  like #{dealid_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+
+                        <if test="name!=null and name!=''">
+                              AND  NAME  = #{name}
+                        </if>
+
+                        <if test="name_like!=null and name_like!=''">
+                              AND  NAME  like #{name_like}
+                        </if>
+                        <if test="dbcolumnname!=null and dbcolumnname!=''">
+                              AND  DBCOLUMNNAME  = #{dbcolumnname}
+                        </if>
+
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                              AND  DBCOLUMNNAME  like #{dbcolumnname_like}
+                        </if>
+                        <if test="datatype!=null and datatype!=''">
+                              AND  DATATYPE  = #{datatype}
+                        </if>
+
+                        <if test="datalength!=null and datalength!=''">
+                              AND  DATALENGTH  = #{datalength}
+                        </if>
+
+                        <if test="scale!=null and scale!=''">
+                              AND  SCALE  = #{scale}
+                        </if>
+
+                        <if test="csid!=null and csid!=''">
+                              AND  CSID  = #{csid}
+                        </if>
+
+                        <if test="csid_like!=null and csid_like!=''">
+                              AND  CSID  like #{csid_like}
+                        </if>
+                        <if test="isprimary!=null and isprimary!=''">
+                              AND  ISPRIMARY  = #{isprimary}
+                        </if>
+                         <if test="islogickey!=null and islogickey!=''">
+                             AND  ISLOGICKEY  = #{islogickey}
+                       </if>
+                        <if test="isprimary_like!=null and isprimary_like!=''">
+                              AND  ISPRIMARY  like #{isprimary_like}
+                        </if>
+                        <if test="isreserve!=null and isreserve!=''">
+                              AND  ISRESERVE  = #{isreserve}
+                        </if>
+
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                              AND  ISRESERVE  like #{isreserve_like}
+                        </if>
+                        <if test="deid!=null and deid!=''">
+                             AND  DEID  = #{deid}
+                       </if>
+	      </where>
+	</select>
+
+	<select id="findRepeateDictTDefaultcol"  parameterType="java.lang.String"  resultType="java.lang.String">
+		SELECT DBCOLUMNNAME FROM dict_t_defaultcol u
+		WHERE STATUS='1'AND DEALID = #{dealid}
+		group by dbcolumnname 
+		having count(1) > 1
+	</select>
+
+	<!-- 查找所有记录 -->    
+	<select id="getDefaultcolCountByDeal" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT COUNT(1) FROM DICT_T_DEFAULTCOL WHERE DEALID = '${dealID}' AND STATUS = '1'
+	</select>
+ </mapper>

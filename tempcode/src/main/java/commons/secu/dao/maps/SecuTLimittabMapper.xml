@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTLimittabMapper">
+	<resultMap id="secutlimittab" type="com.tjhq.commons.secu.po.SecuTLimittabPO">
+		<result property="tableId" column="tableId" />
+		<result property="limitId" column="limitId" />
+		<result property="limitCon" column="limitCon" />
+		<result property="columnName" column="columnName" />
+	</resultMap>
+
+	<select id="getInputLimitItemList" parameterType="java.lang.String"
+		resultType="map">
+		select t.tableId,t.limitId as limitId ,t.LIMITCON as limitCon ,'['||
+		i.code||']' ||i.NAME as columnName from secu_t_limittab
+		t,${dbNameForAcctItem} i where t.LIMITID = i.guid and t.TABLEID=#{tableId}
+	</select>
+	<select id="getInputLimitItemsList" parameterType="java.lang.String" 
+		resultMap="secutlimittab">
+		select t.tableId,t.limitId as limitId ,t.LIMITCON as limitCon ,'['||
+		i.code||']' ||i.NAME as columnName from secu_t_limittab
+		t,${dbNameForAcctItem} i where t.LIMITID = i.guid and t.TABLEID=#{tableId}
+	</select>
+	<delete id="deleteAcctItemTreeData" parameterType="java.util.Map"> 
+		delete from secu_t_limittab where tableId=#{tableId} and limitId in 
+		<foreach collection = "deleteData" item="itemdata" open="(" separator="," close=")">
+			#{itemdata.limitId}
+		</foreach>
+	</delete>
+	<update id="updateSecuTLimittabData" parameterType="java.util.Map">
+  		UPDATE secu_t_limittab SET LIMITCON=#{limitCon} WHERE tableId =#{tableId} and limitId=#{limitId}
+  	</update>
+  	<insert id="insertSecuTLimittabData" parameterType="java.util.Map">
+  		INSERT INTO secu_t_limittab (TABLEID, LIMITID,LIMITCON) values (#{tableId},#{limitId},#{limitCon})
+  	</insert>
+	<delete id="deleteTableInputLimit" parameterType="java.lang.String"> 
+		delete from secu_t_limittab where tableId=#{tableId}
+	</delete>
+</mapper>

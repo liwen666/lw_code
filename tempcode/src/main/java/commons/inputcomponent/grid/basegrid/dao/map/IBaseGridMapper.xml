@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.grid.basegrid.dao.IBaseGridMapper">
+
+	<select id="getSumData" parameterType="java.util.Map" resultType="java.util.Map">
+	    SELECT  '0' C_STATUS, '2' AS ROWSECU, ${selectElement} FROM
+		 (SELECT 
+		 <foreach collection="sumColList" index="index" item="item" separator=",">			 
+		      ${item}		    
+		 </foreach>	,
+		 <foreach collection="nosumColList" index="index" item="item" separator=",">			 
+		      ${item}		   	 	   
+		 </foreach>	
+		  FROM (${tableName}) TBASE
+		  WHERE 1 = 1
+		 <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+		 	AND ${rowVisibleSecu}
+		 </if>
+		 <if test="sqlWhere!=null and sqlWhere!=''">
+		    AND ${sqlWhere} 
+		 </if>
+		)
+	</select>
+	
+	<select id="getRecordsCount" parameterType="java.util.Map" resultType="int">
+		 SELECT COUNT(1) FROM (${tableName}) TBASE  WHERE  1 = 1	
+		 <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+		 	AND ${rowVisibleSecu}
+		 </if>
+		 <if test="sqlWhere!=null">
+		    AND ${sqlWhere} 
+		 </if>		   
+    </select>
+ 
+    <select id="getGridData" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT C_STATUS, ROWSECU, 
+		<foreach collection="leafColumnList" index="index" item="column" separator=",">
+			${column.columnDBName}
+			<if test="column.refTableDBName != null">
+				,SNAME_${column.columnDBName}
+			</if>
+		</foreach>
+		 FROM 
+		(SELECT '0' C_STATUS, ${rowWriteSecu} AS ROWSECU, ROWNUM RNUM, B.* FROM 
+		(SELECT ${selectElement} FROM ${tableName} TBASE WHERE 1 = 1
+		 <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+		 	AND ${rowVisibleSecu}
+		 </if> 
+		 <if test="sqlWhere != null and sqlWhere != ''">
+	       AND ${sqlWhere} 
+	     </if>
+	      <if test="sortSQL != null and sortSQL != ''">
+            ORDER BY  ${sortSQL} 
+          </if>
+		  ) B)	
+		 <if test="isNeedPage==1">
+		  <![CDATA[
+		  	  WHERE RNUM > #{startRow} AND RNUM <= #{endRow}
+	       ]]>		       
+		 </if>	
+    </select>
+    
+  
+</mapper>

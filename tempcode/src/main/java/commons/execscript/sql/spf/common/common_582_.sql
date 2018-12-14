@@ -1,0 +1,43 @@
+DECLARE
+begin
+EXECUTE IMMEDIATE Q'/
+CREATE OR REPLACE VIEW SPF_T_XZCRZ AS
+SELECT c.datakey,
+       c.objectid,
+       c.BUSITYPEID,
+       c.BATCHID,
+        (select title from BD_T_BATCH where batchid=c.batchid) title,
+       c.TARGETAGENCYID,
+       (select busitypename from bd_t_busitype where BUSITYPEID = c.BUSITYPEID) busintypename,
+       c.WFSTATUS,
+       c.WFDIRECTION,
+       c.DISTRICTID,
+       c.SOURCEAGENCYID,
+     c.SOURCEBATCHID,
+       p.dbversion,
+       p.agencyid,
+       p.PROJTYPEID,
+       p.SPFID,
+       p.SPFNAME,
+       1 NEEDUPDATE,
+       1 ORDERID,
+       p.BEGINYEAR FINYEAR
+  FROM spf_t_cflow_act c
+, spf_t_fbaseinfo p where c.spfid = p.spfid and c.spfid=c.objectid
+/';
+
+delete p#dict_t_factor  where columnid in('524D7479FC405CE4E0533906A8C0A472','4B4DF9E911B907A1E0533A06A8C0682A');
+
+for v_row in (select * from pub_t_partition_divid t where t.year <> '*') loop
+begin
+insert into P#DICT_T_FACTOR (YEAR, PROVINCE, ALIAS, BANDCOLUMNID, BANDREFDWCOL, BGTLVL, COLFORMAT, COLTIPS, COLUMNID, CSID, DATALENGTH, DATATYPE, DBCOLUMNNAME, DEFAULTVALUE, DEID, EXTPROP, FRMCOLID, FRMTABID, HREFLOC, HREFPARMID, ISBANDCOL, ISHREF, OPENWINDOWTYPE, ISKEY, ISLEAF, ISREGEX, ISRESERVE, ISSUM, ISUPDATE, ISVIRTUAL, ISVISIBLE, LEVELNO, NAME, NULLABLE, ORDERID, REGEXPR, REGEXPRINFO, SCALE, SHOWFORMAT, SHOWWIDTH, STATUS, SUPERID, TABLEID, VIRCONTEXT, PARENTNODECANCHECK, XLSXCOLUMNID)
+values (v_row.year, v_row.districtid, '', '', '', '', '', '', '524D7479FC405CE4E0533906A8C0A472', '', 200, 3, 'SPFNAME', '', '', '0000000000000000000000000000000', '', '', '', '', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '1', 1, '专项资金（一级项目）名称', '1', 23, '', '', 0, '0', null, '1', '0', '4B4DF9E911AE07A1E0533A06A8C0682A', '', '0', '');
+
+insert into P#DICT_T_FACTOR (YEAR, PROVINCE, ALIAS, BANDCOLUMNID, BANDREFDWCOL, BGTLVL, COLFORMAT, COLTIPS, COLUMNID, CSID, DATALENGTH, DATATYPE, DBCOLUMNNAME, DEFAULTVALUE, DEID, EXTPROP, FRMCOLID, FRMTABID, HREFLOC, HREFPARMID, ISBANDCOL, ISHREF, OPENWINDOWTYPE, ISKEY, ISLEAF, ISREGEX, ISRESERVE, ISSUM, ISUPDATE, ISVIRTUAL, ISVISIBLE, LEVELNO, NAME, NULLABLE, ORDERID, REGEXPR, REGEXPRINFO, SCALE, SHOWFORMAT, SHOWWIDTH, STATUS, SUPERID, TABLEID, VIRCONTEXT, PARENTNODECANCHECK, XLSXCOLUMNID)
+values (v_row.year, v_row.districtid, '', '', '', '', '', '', '4B4DF9E911B907A1E0533A06A8C0682A', '', 32, 3, 'SPFID', '', '', '0000000000000000000000000000000', '', '', '', '', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', 1, '专项资金（一级项目）id', '1', 6, '', '', null, '0', null, '1', '0', '4B4DF9E911AE07A1E0533A06A8C0682A', '', '0', '');
+
+
+end;
+end loop;
+end;
+--修改SPF_T_XZCRZ视图

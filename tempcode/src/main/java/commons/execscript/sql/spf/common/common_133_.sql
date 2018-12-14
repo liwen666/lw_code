@@ -1,0 +1,11 @@
+BEGIN
+UPDATE dict_t_factor SET datatype ='3',csid = NULL ,showformat ='0' WHERE DBCOLUMNNAME ='SETUPSTATUS';
+UPDATE dict_t_factor SET datatype ='3',csid = NULL ,showformat ='0' WHERE DBCOLUMNNAME ='CHECKSTATUS';
+
+
+DELETE FROM dict_t_defaultcol WHERE  GUID ='306FD7CBE3D1C294E050A8C021051B55';
+insert into dict_t_defaultcol (DEALID, ORDERID, NAME, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, CSID, ISPRIMARY, ISRESERVE, GUID, STATUS,  DEFAULTVALUE, ISLOGICKEY, DEID, ISVISIBLE, ISUPDATE)
+values ('5*05', 1, '行标志', 'DATAKEY', 3, 32, 0, null, '1', '1', '306FD7CBE3D1C294E050A8C021051B55', '1',  'sys_guid()', '1', '080001', '0', '0');
+
+END;
+--修改审核状态去掉应用列

@@ -1,0 +1,1 @@
+8700_1_.sql  ||  重建P#BGT_T_BUSINESSCHECKDEF表主键

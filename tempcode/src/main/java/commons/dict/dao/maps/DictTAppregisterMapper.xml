@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTAppregisterMapper">
+    <resultMap id="abatorgenerated_DictTAppregisterResult" type="com.tjhq.commons.dict.external.po.DictTAppregisterPO" >
+    <!-- <result column="YEAR" property="year" jdbcType="CHAR" /> -->
+   <!--  <result column="ADMDIVCODE" property="admdivcode" jdbcType="CHAR" /> -->
+    <result column="DBID" property="dbid" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="VARCHAR" />
+    <result column="APPID" property="appid" jdbcType="VARCHAR" />
+    <result column="APPNAME" property="appname" jdbcType="VARCHAR" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTAppregister" resultType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+		SELECT DBID,ORDERID,APPID,APPNAME FROM  dict_t_appregister ORDER BY ORDERID
+  	</select>
+  	   <!-- 查找所有年份 -->    
+    <select id="getAllFinyear" resultType="map">
+    	<![CDATA[ 
+		SELECT CODE,NAME FROM FASP_T_PUBYEAR WHERE CODE <> Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')
+		]]> 
+  	</select>
+  	
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTAppregister"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+		SELECT DBID,ORDERID,APPID,APPNAME  FROM  dict_t_appregister 
+	  <where> 
+             DBID  = #{dbid}      
+          </where>
+	</select>  
+  
+  
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTAppregisterByAppid"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+		SELECT DBID,ORDERID,APPID,APPNAME  FROM  dict_t_appregister 
+	  <where> 
+             APPID  = #{appid}      
+          </where>
+	</select>  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTAppregister" parameterType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+		INSERT INTO  dict_t_appregister  (   DBID, ORDERID, APPID, APPNAME )
+		VALUES ( 
+		  #{dbid},
+		  #{orderid},
+		  #{appid},
+		  #{appname}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTAppregister" parameterType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+    UPDATE  dict_t_appregister  
+   <set>
+	
+		<if test="dbid!=null and dbid!=''">
+		     DBID  = #{dbid},
+	        </if>
+		<if test="orderid!=null and orderid!=''">
+		     ORDERID  = #{orderid},
+	        </if>
+		<if test="appid!=null and appid!=''">
+		     APPID  = #{appid},
+	        </if>
+		<if test="appname!=null and appname!=''">
+		     APPNAME  = #{appname}
+	        </if>
+  </set>
+  <where>
+    DBID  = #{dbid}
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTAppregister" parameterType="java.lang.String">
+		DELETE  FROM  dict_t_appregister  
+          <where> 
+		 DBID  = #{dbid}
+          </where>
+    </delete>   
+
+	<select id="findDictTAppregister" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTAppregisterPO">
+		SELECT DBID,ORDERID,APPID,APPNAME FROM  dict_t_appregister  u  
+                <where>
+                       
+                       <if test="dbid!=null and dbid!=''">
+                             AND  DBID  = #{dbid}
+                       </if>
+                        <if test="dbid_like!=null and dbid_like!=''">
+                             AND  DBID  like #{dbid_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND  ORDERID  = #{orderid}
+                       </if>
+                       <if test="appid!=null and appid!=''">
+                             AND  APPID  = #{appid}
+                       </if>
+                        <if test="appid_like!=null and appid_like!=''">
+                             AND  APPID  like #{appid_like}
+                        </if>
+                       <if test="appname!=null and appname!=''">
+                             AND  APPNAME  = #{appname}
+                       </if>
+                        <if test="appname_like!=null and appname_like!=''">
+                             AND  APPNAME  like #{appname_like}
+                        </if>
+                 </where>
+	
+	</select>
+
+	<select id="findDictTAppregisterCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_appregister  u
+	    <where>
+                     
+                        <if test="dbid!=null and dbid!=''">
+                              AND  DBID  = #{dbid}
+                        </if>
+
+                        <if test="dbid_like!=null and dbid_like!=''">
+                              AND  DBID  like #{dbid_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+
+                        <if test="appid!=null and appid!=''">
+                              AND  APPID  = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              AND  APPID  like #{appid_like}
+                        </if>
+                        <if test="appname!=null and appname!=''">
+                              AND  APPNAME  = #{appname}
+                        </if>
+
+                        <if test="appname_like!=null and appname_like!=''">
+                              AND  APPNAME  like #{appname_like}
+                        </if>
+	      </where>
+	</select>	
+ </mapper>
+ <!--2014-01-28 13:55:52-->

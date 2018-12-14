@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.task.dao.CdtTTaskinfoMapper">
+
+	<resultMap id="taskPO" type="com.tjhq.commons.task.po.TaskPO">
+		<result property="taskId" column="taskId" />
+		<result property="taskName" column="taskName" />
+		<result property="taskDesc" column="taskDesc" />
+		<result property="taskCode" column="taskCode" />
+		<result property="superTaskId" column="superTaskId" />
+		<result property="taskTypeId" column="taskTypeId" />
+		<result property="rootTaskId" column="rootTaskId" />
+		<result property="districtId" column="districtId" />
+		<result property="receiveId" column="receiveId" />
+		<result property="taskLvlId" column="taskLvlId" />
+		<result property="levelNo" column="levelNo" />
+		<result property="taskCycle" column="taskCycle" />
+		<result property="dataStartDate" column="dataStartDate" />
+		<result property="dataEndDate" column="dataEndDate" />
+		<result property="creator" column="creator" />
+		<result property="createDate" column="createDate" />
+		<result property="endDate" column="endDate" />
+		<result property="taskStatus" column="taskStatus" />
+		<result property="SNAME_taskStatus" column="SNAME_taskStatus" />
+		<result property="remark" column="remark" />
+		<result property="appId" column="appId" />
+		<result property="isInstead" column="isInstead" />
+		<result property="isLeaf" column="isLeaf" />
+		<result property="taskSource" column="taskSource" />
+		<result property="sname_taskSource" column="sname_taskSource" />
+		<result property="isShow" column="isShow" />
+	</resultMap>
+	
+	
+	<insert id="createRootTask" parameterType="java.util.Map">
+		insert into
+		CDT_T_TASKINFO
+		(taskId,
+		taskName,
+		taskCode,
+		taskDesc,
+		superTaskId,
+		taskTypeId,
+		rootTaskId,
+		districtId,
+		receiveId,
+		taskCycle,dataStartDate,dataEndDate,creator,createDate,endDate,taskStatus,tasklvlid,levelno,appId,isInstead,isLeaf,finYear,taskSource,isShow)
+		values
+		(#{taskId},
+		#{taskName},
+		#{taskCode},
+		#{taskDesc},
+		#{superTaskId},
+		#{taskTypeId},
+		#{rootTaskId},
+		#{districtId},
+		#{receiveId},
+		#{taskCycle},#{dataStartDate},#{dataEndDate},#{creator},sysdate,#{endDate},#{taskStatus},to_char(nvl(to_number((select max(taskLVLID) from cdt_t_taskinfo where supertaskid = '#')),0) + 1,'fm0000'),'1',#{appId},'0','0',#{finYear},#{taskSource},#{isShow})
+	</insert>
+	
+	<insert id="createTask" parameterType="java.util.Map">
+		insert into
+		CDT_T_TASKINFO
+		(taskId,
+		taskName,
+		taskCode,
+		taskDesc,
+		superTaskId,
+		taskTypeId,
+		rootTaskId,
+		districtId,
+		receiveId,
+		taskCycle,dataStartDate,dataEndDate,creator,createDate,endDate,taskStatus,tasklvlid,levelno,appId,isInstead,isLeaf)
+		values
+		(#{taskId},
+		#{taskName},
+		#{taskCode},
+		#{taskDesc},
+		#{superTaskId},
+		#{taskTypeId},
+		#{rootTaskId},
+		#{districtId},
+		#{receiveId},
+		#{taskCycle},#{dataStartDate},#{dataEndDate},#{creator},sysdate,#{endDate},#{taskStatus},to_char(nvl(to_number((select max(taskLVLID) from cdt_t_taskinfo where supertaskid = #{superTaskId}))+1,to_number((select taskLVLID||'0000' from cdt_t_taskinfo where taskid=#{superTaskId})) + 1),'fm'||'${taskLvlId}'),#{levelNo},#{appId},#{isInstead},#{isLeaf})
+	</insert>
+	
+	<select id="getTaskInfo" parameterType="java.util.Map" resultMap="taskPO">
+		SELECT T.TASKID,
+	       T.TASKNAME,
+	       T.TASKDESC,
+	       T.TASKCODE,
+	       T.SUPERTASKID,
+	       T.TASKTYPEID,
+	       T.ROOTTASKID,
+	       T.DISTRICTID,
+	       T.RECEIVEID,
+	       T.TASKLVLID,
+	       T.LEVELNO,
+	       T.TASKCYCLE,
+	       T.DATASTARTDATE,
+	       T.DATAENDDATE,
+	       T.CREATOR,
+	       T.CREATEDATE,
+	       T.ENDDATE,
+	       T.TASKSTATUS,
+	       T.REMARK,
+	       T.APPID,
+	       T.ISINSTEAD,
+	       T.ISLEAF,
+	       T.TASKSOURCE,
+	       (SELECT T1.TASKNAME
+	          FROM CDT_T_TASKINFO T1
+	         WHERE T1.TASKID = T.TASKSOURCE) AS SNAME_TASKSOURCE,
+	         T.ISSHOW
+	  FROM CDT_T_TASKINFO T
+	 WHERE T.TASKID = #{taskId}
+	</select>
+	
+	<select id="getTaskInfos" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[ 
+		select t.*,(select name from CODE_T_TASKSTATUS t1 where t1.code=t.taskstatus) as SNAME_taskStatus,
+		(select status_name from code_t_exp_status c1,exp_t_trackstatus c2 where c1.status_code = c2.status_code and t.TASKID =c2.taskid) as STATUS_NAME,
+		t1.*,(select taskTypeName from CDT_T_TASKTYPE z1 where t.tasktypeid = z1.tasktypeid) as tasktypename from CDT_T_TASKINFO t , (${querySql}) t1 where t.taskId=t1.taskId order by t.createdate
+		]]>
+	</select>
+	
+	<delete id="deleteTask" parameterType="java.lang.String" >
+		delete from CDT_T_TASKINFO where taskId = #{taskId}
+	</delete>
+	<update id="updateTaskStatus"  parameterType="java.util.Map" >
+		update CDT_T_TASKINFO t set t.TASKSTATUS=#{taskStatus} where t.taskId=#{taskId}
+	</update>
+	
+	<select id="getTaskModelRela" parameterType="java.util.Map"
+		resultType="map">
+		<![CDATA[ 
+		select t2.TABLEID, t2.NAME
+ 		 from cdt_t_tasktypemodel t1, dict_t_model t2
+ 		 where t1.MODELID = t2.TABLEID
+         and t1.TASKTYPEID =(select taskTypeID from cdt_t_taskinfo where taskId = #{taskId})
+		]]>
+	</select>
+	
+	<update id="updateTaskInfo"  parameterType="com.tjhq.commons.task.po.TaskPO" >
+		update CDT_T_TASKINFO   set taskName=#{taskName},taskDesc=#{taskDesc},endDate=#{endDate},taskCycle=#{taskCycle},isShow=#{isShow} where taskId=#{taskId}
+	</update>
+</mapper>

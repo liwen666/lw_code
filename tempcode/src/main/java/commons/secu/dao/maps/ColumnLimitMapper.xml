@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.secu.dao.ColumnLimitMapper">
+	
+	<resultMap type="java.util.HashMap" id="resultMap1">
+		<result property="id" column="ID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="code" column="CODE" jdbcType="VARCHAR" javaType="String"/>
+		<result property="name" column="NAME" jdbcType="VARCHAR" javaType="String"/>
+		<result property="pId" column="PID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="isLeaf" column="ISLEAF" jdbcType="VARCHAR" javaType="String"/>
+		<result property="datatype" column="DATATYPE" jdbcType="VARCHAR" javaType="String"/>
+	</resultMap>
+	
+	<resultMap type="java.util.HashMap" id="resultMap2">
+		<result property="id" column="ID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="code" column="CODE" jdbcType="VARCHAR" javaType="String"/>
+		<result property="name" column="NAME" jdbcType="VARCHAR" javaType="String"/>
+		<result property="pId" column="PID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="isLeaf" column="ISLEAF" jdbcType="VARCHAR" javaType="String"/>
+		<result property="open" column="OPEN" jdbcType="VARCHAR" javaType="String"/>
+		<result property="csid" column="CSID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="datatype" column="DATATYPE" jdbcType="VARCHAR" javaType="String"/>
+		<result property="showColor" column="SHOWCOLOR" jdbcType="VARCHAR" javaType="String"/>
+		<result property="condition" column="CONDITION" jdbcType="VARCHAR" javaType="String"/>
+		<result property="condition_cn" column="CONDITION_CN" jdbcType="VARCHAR" javaType="String"/>
+		<result property="guid" column="GUID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="operator" column="OPERATOR" jdbcType="VARCHAR" javaType="String"/>
+	</resultMap>
+
+	<select id="queryFactorTree" parameterType="java.util.Map"  resultMap="resultMap1">
+		select t.columnid as id,
+		       t.columnid as code,
+		       t.name as name,
+		       t.superid as pid,
+		       case
+		         when t.isleaf is null then
+		          '1'
+		         else
+		          t.isleaf
+		       end as isleaf,
+		       t.datatype
+		  from dict_t_factor t
+		 where 1 = 1
+    		<if test="tableid != null and tableid != ''">
+    			and t.tableid = '${tableid}'
+    		</if>
+      	    start with (t.superid = '0' or t.superid is null or t.superid='')
+			connect by prior t.columnid = t.superid
+			order siblings by t.orderid,t.columnid
+	</select>
+
+
+	<select id="queryFactorColumnLimitDetail" parameterType="java.util.Map"  resultMap="resultMap2">
+		select t.columnid as id,
+		       t.columnid as code,
+		       t.name as name,
+		       t.superid as pid,
+		       case
+		         when t.isleaf is null then
+		          '1'
+		         else
+		          t.isleaf
+		       end as isleaf,
+		       'true' as open,
+		       t.csid,
+		       t.datatype,
+		       case
+		         when c.operator is null then
+		          '0'
+		         when c.operator is not null then
+		          '1'
+		         else
+		          '1'
+		       end as showcolor,
+		       c.condition,
+		       c.condition_cn,
+		       c.guid,
+		       c.operator
+		       
+		  from dict_t_factor t
+		  left join (
+		  	select b.guid, b.condition, b.condition_cn, b.columnid_limit, b.operator
+		  	from secu_t_columnlimit a , secu_t_columnlimit_detail b
+		  	where a.guid = b.columnlimit_guid 
+				and a.roleid = '${roleid}'
+				and a.tableid = '${tableid}'
+				and a.columnid = '${columnid}'
+			) c on c.columnid_limit = t.columnid
+		 where t.tableid = '${tableid}'
+		 
+      	    start with (t.superid = '0' or t.superid is null or t.superid='')
+			connect by prior t.columnid = t.superid
+			order siblings by t.orderid,t.columnid
+	</select>
+
+	<select id="querySuitModel" parameterType="map" resultMap="resultMap1">
+		select 
+			suitid as id, 
+			suitname as name, 
+			'' as code, 
+			superid as pid, 
+			'0' as isleaf 
+		from dict_t_suit 
+		where suitid in (
+			select suitid from dict_t_model t
+			where 1 = 1
+    		<if test="appID != null and appID != ''">
+    			and t.appid = '${appID}'
+    		</if>
+		)
+		union
+		select 
+			t.tableid as id,
+			t.name as name,
+			'' as code,
+			suitid as pId,
+			'1' as isLeaf
+		  from dict_t_model t
+		 where 1 = 1
+    		<if test="appID != null and appID != ''">
+    			and t.appid = '${appID}'
+    		</if>
+	</select>
+
+	<select id="queryData1" parameterType="map" resultType="map">
+		select t.guid, t.columnid, a.name as columnname, t.describe
+		  from secu_t_columnlimit t 
+		  left join dict_t_factor a
+		    on a.columnid = t.columnid
+		 where 1 = 1
+		 	<if test="roleid != null and roleid != ''">
+    			and t.roleid = '${roleid}'
+    		</if>
+    		<if test="tableid != null and tableid != ''">
+    			and t.tableid = '${tableid}'
+    		</if>
+	</select>
+	
+	<insert id="insertColumnLimit" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO">
+        insert into secu_t_columnlimit (guid, roleid, tableid, columnid, describe)
+       	values
+		(
+			#{guid}
+			,#{roleid}
+			,#{tableid}
+			,#{columnid}
+			,#{describe}
+		)
+    </insert>
+	
+	<delete id="deleteColumnLimit" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO">
+		delete from secu_t_columnlimit where guid = '${guid}'
+    </delete>
+    <delete id="deleteColumnLimit_byColumnid" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO">
+		delete from secu_t_columnlimit where guid in 
+		<foreach collection="list" item="lists" index="index"  open="(" separator="," close=")">
+    		#{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+    
+    <update id="updateColumnLimit" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO">
+       	update secu_t_columnlimit
+   		<set>
+   			<if test="describe != null">
+   				describe = '${describe}'
+   			</if>
+   		</set>
+   		where guid = '${guid}'
+    </update>
+    
+    
+    <select id="queryData2" parameterType="map" resultType="map">
+		select t.guid,
+		       t.columnid_limit,
+		       a.name as COLUMNID_LIMIT_NAME,
+		       t.condition
+		  from secu_t_columnlimit_detail t
+		  left join dict_t_factor a
+		    on a.columnid = t.columnid_limit
+		 where 1 = 1
+   		<if test="columnid != null and columnid != ''">
+   			and a.columnid = '${columnid}'
+   		</if>
+	</select>
+    
+    <delete id="deleteColumnLimitDetail_byColumnid" parameterType="Map">
+		delete from secu_t_columnlimit_detail where COLUMNLIMIT_GUID in
+    	<foreach collection="list" item="lists" index="index"  open="(" separator="," close=")">
+    		#{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+    
+    <delete id="deleteColumnLimitDetail" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO" >
+		delete from secu_t_columnlimit_detail where guid = '${detailGuid}'
+    </delete>
+    
+    <select id="queryColumnLimit_Check" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO" resultType="int">
+		select count(1)
+		  from secu_t_columnlimit t
+		 where t.roleid = '${roleid}' and t.columnid = '${columnid}'
+	</select>
+	
+	<select id="querySql_Check" parameterType="String" resultType="int">
+		${sql}
+	</select>
+    
+    <delete id="deleteColumnLimitDetail_byGuid" parameterType="Map">
+		delete from secu_t_columnlimit_detail where guid in
+    	<foreach collection="list" item="lists" index="index"  open="(" separator="," close=")">
+    		#{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+    <!-- 
+    insert into secu_t_columnlimit_detail (columnid, condition)
+       	values
+		(
+        	#{columnid,jdbcType = VARCHAR},
+        	#{columnid_limit,jdbcType = VARCHAR},
+        	#{condition,jdbcType = CLOB}
+		)
+     -->
+	<insert id="insertColumnLimitDetail" parameterType="com.tjhq.commons.secu.po.ColumnLimitPO">
+		insert into secu_t_columnlimit_detail (columnlimit_guid, columnid_limit, operator, condition, condition_cn)
+        values ('${guid}', '${columnidLimit}', '${operator}', '${condition}', '${conditionCn}')
+    </insert>
+   	
+    <insert id="insertColumnLimitDetail_list" parameterType="Map">
+        
+		insert into secu_t_columnlimit_detail (columnid, columnid_limit, condition)
+       <foreach collection="list" item="lists"  index="index" separator="union all">
+		select #{lists.COLUMNID,jdbcType = VARCHAR},
+			#{lists.COLUMNID_LIMIT,jdbcType = VARCHAR},					
+			#{lists.CONDITION,jdbcType = CLOB}
+		from dual
+       </foreach>
+    </insert>
+    
+    <update id="updateColumnLimitDetail" parameterType="Map">
+    	begin
+    	<foreach collection="list" item="lists" index="index" separator=";">
+    		update secu_t_columnlimit_detail
+    		<set>
+    			<if test="lists.CONDITION!= null">
+    				CONDITION = #{lists.CONDITION,jdbcType=VARCHAR}
+    			</if>
+    			<if test="lists.COLUMNID_LIMIT != null">
+    				COLUMNID_LIMIT=#{lists.COLUMNID_LIMIT,jdbcType=CLOB}
+    			</if>
+    		</set>
+    		where guid in #{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    	;end;
+    </update>
+	
+	<resultMap id="columnLimitPO" type="com.tjhq.commons.secu.po.ColumnLimitPO">
+		<id property="guid" column="GUID" />
+		<id property="roleid" column="ROLEID" />
+		<id property="tableid" column="TABLEID" />
+		<id property="columnid" column="COLUMNID" />
+		<id property="describe" column="DESCRIBE" />
+		<id property="dbColumnName" column="DBCOLUMNNAME" />
+		<collection property="conditionList" column="{ guid = GUID" javaType="ArrayList" select="selectColumnLimitDetail" />
+	</resultMap>
+
+	<select id="queryColumnLimitList" parameterType="String" resultMap="columnLimitPO">
+		select 
+			t.GUID, t.roleid, t.tableid, t.columnid, t.describe, a.dbcolumnname
+		from secu_t_columnlimit t
+		join dict_t_factor a
+		    on a.columnid = t.columnid
+		where 1=1
+			<if test="roleid != null and roleid != ''">
+    			and t.roleid in (${roleid})
+    		</if>
+    		<if test="tableid != null and tableid != ''">
+    			and t.tableid = '${tableid}'
+    		</if> 
+	</select>
+
+	<select id="selectColumnLimitDetail" parameterType="Map" resultType="com.tjhq.commons.secu.po.ColumnLimitDetailPO">
+		select t.guid
+			, t.columnid_limit as columnidLimit
+			, t.operator
+			, t.condition
+			, t.condition_cn as conditionCn
+			, a.dbcolumnname as dbColumnName
+		from secu_t_columnlimit_detail t
+		join dict_t_factor a on a.columnid = t.columnid_limit
+		where t.COLUMNLIMIT_GUID = #{guid}
+	</select>
+	
+	<select id="queryRolesByUserid" parameterType="String" resultType="map">
+		select * from secu_t_userrole t where t.userid = '${userID}'
+	</select>
+	
+	<select id="getRefrelaDbTableTree" parameterType="Map" resultType="com.tjhq.commons.setting.input.po.TreeNode">
+		SELECT GUID as ID, CODE, SUPERGUID as PID, ISLEAF, LEVELNO, <!-- '[' || CODE || ']' || NAME --> NAME
+		FROM ${dbTableName}
+		<if test="sqlWhere!=null">
+			WHERE ${sqlWhere}
+		</if>
+	</select>
+</mapper>

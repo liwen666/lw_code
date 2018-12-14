@@ -1,0 +1,503 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.external.dao.DictTModelMapper">
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTModel" resultType="com.tjhq.commons.dict.external.po.DictTModelPO">
+    	SELECT
+    		m.TABLEID, m.NAME, m.ORDERID, m.DBTABLENAME, m.TABLETYPE, m.ISSHOW,
+    		m.ISTASK, m.APPID, m.REMARK, m.SUITID, su.SUITNAME, m.DEALTYPE,
+    		m.ISRESERVED, m.INPUTLVL, m.ISADD, m.SHORTTITLE, m.EXTPROP, m.BGTLVL,
+    		m.SECUSQL, m.INITSQL, m.INITSQLTIME, m.ISSUMTAB, m.ISMAN, m.MAINUPTAB,
+    		m.RELATAB, m.TABSWHERE, m.ISPARTITION, m.ISBAK, m.ISALLDISTRICT, m.INITSQLBTNNAME,m.ISEXCELIMP,m.isReadOnly,m.DESCFILE,
+			(SELECT ATTACHNAME FROM PUB_T_ATTACH WHERE ATTACHID = DESCFILE) FILENAME,
+			(select DEALNAME from dict_t_dealtype where DEALID = m.DEALTYPE AND (APPID = m.APPID OR APPID='*')) AS DEALNAME
+		FROM dict_t_model m,dict_t_suit su where  m.SUITID = su.SUITID
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTModel"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTModelPO">
+		SELECT     m.TABLEID,
+			       m.NAME,
+			       m.ORDERID,
+			       m.DBTABLENAME,
+			       m.TABLETYPE,
+			       NVL(m.ISSHOW,'1') AS ISSHOW,
+			       NVL(m.ISTASK,'0') AS ISTASK,
+			       m.APPID,
+			       m.REMARK,
+			       m.SUITID,
+			       su.SUITNAME,
+			       m.DEALTYPE,
+			       m.ISRESERVED,
+			       m.INPUTLVL,
+			       NVL(m.ISADD, '0') AS ISADD,
+			       m.SHORTTITLE,
+			       m.EXTPROP,
+			       m.BGTLVL,
+			       m.SECUSQL,
+			       m.INITSQL,
+			       m.INITSQLTIME,
+			       NVL(m.ISSUMTAB,'0') AS ISSUMTAB,
+			       m.ISMAN,
+			       m.MAINUPTAB,
+			       m.RELATAB,
+			       m.TABSWHERE,
+			       NVL(m.ISPARTITION,'0') AS ISPARTITION,
+			       NVL(m.ISBAK,'0') AS ISBAK,
+			       NVL(m.ISALLDISTRICT,'0') AS ISALLDISTRICT,
+			       NVL(m.ISALLYEAR,'0') AS ISALLYEAR,
+			       m.INITSQLBTNNAME,
+			       m.ISEXCELIMP,
+			       m.isReadOnly,
+			       m.DESCFILE,
+			       (SELECT ATTACHNAME FROM PUB_T_ATTACH WHERE ATTACHID = DESCFILE) FILENAME,
+			       (select DEALNAME from dict_t_dealtype where DEALID = m.DEALTYPE AND (APPID = m.APPID OR APPID='*')) AS DEALNAME,
+			       (select ORIGINALXLSXNAME from dict_t_modelexcel where tableid = m.tableid) AS  ORIGINALXLSXNAME,
+			       m.isSaveFormula
+       FROM dict_t_model m,dict_t_suit su
+	  <where> 
+             m.SUITID =su.SUITID AND  m.TABLEID = #{tableid}
+      </where>
+	</select>  
+  
+  
+   <!-- 根据dbtablename来获取记录 -->
+    <select id="getDictTModelByName"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTModelPO">
+		SELECT     m.TABLEID,
+			       m.NAME,
+			       m.ORDERID,
+			       m.DBTABLENAME,
+			       m.TABLETYPE,
+			       m.ISSHOW,
+			       m.ISTASK,
+			       m.APPID,
+			       m.REMARK,
+			       m.SUITID,
+			       su.SUITNAME,
+			       m.DEALTYPE,
+			       m.ISRESERVED,
+			       m.INPUTLVL,
+			       m.ISADD,
+			       m.SHORTTITLE,
+			       m.EXTPROP,
+			       m.BGTLVL,
+			       m.SECUSQL,
+			       m.INITSQL,
+			       m.INITSQLTIME,
+			       m.ISSUMTAB,
+			       m.ISMAN,
+			       m.MAINUPTAB,
+			       m.RELATAB,
+			       m.TABSWHERE,
+			       m.ISPARTITION,
+			       m.ISBAK,
+			       m.ISALLDISTRICT,
+			       m.ISALLYEAR,
+			       m.ISEXCELIMP,
+			       m.isReadOnly,
+			       m.INITSQLBTNNAME,
+			       m.DESCFILE,
+			       (SELECT ATTACHNAME FROM PUB_T_ATTACH WHERE ATTACHID = DESCFILE) FILENAME,
+			       (select DEALNAME from dict_t_dealtype where DEALID = m.DEALTYPE AND (APPID = m.APPID OR APPID='*')) AS DEALNAME,
+			       m.isSaveFormula
+       FROM dict_t_model m,dict_t_suit su
+	  <where> 
+            m.SUITID =su.SUITID AND  m.DBTABLENAME = #{dbtablename}   
+      </where>
+	</select>  
+  
+  
+  
+	<select id="findDictTModel" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTModelPO">
+		SELECT     m.TABLEID,
+			       m.NAME,
+			       m.ORDERID,
+			       m.DBTABLENAME,
+			       m.TABLETYPE,
+			       m.ISSHOW,
+			       m.ISTASK,
+			       m.APPID,
+			       m.REMARK,
+			       m.SUITID,
+			       su.SUITNAME,
+			       m.DEALTYPE,
+			       m.ISRESERVED,
+			       m.INPUTLVL,
+			       m.ISADD,
+			       m.SHORTTITLE,
+			       m.EXTPROP,
+			       m.BGTLVL,
+			       m.SECUSQL,
+			       m.INITSQL,
+			       m.INITSQLTIME,
+			       m.ISSUMTAB,
+			       m.ISMAN,
+			       m.MAINUPTAB,
+			       m.RELATAB,
+			       m.TABSWHERE,
+			       m.ISPARTITION,
+			       m.ISBAK,
+			       m.ISALLDISTRICT,
+			       m.ISALLYEAR,
+			       m.INITSQLBTNNAME,
+			       m.ISEXCELIMP,
+			       m.isReadOnly,
+			       m.DESCFILE,
+			       (SELECT ATTACHNAME FROM PUB_T_ATTACH WHERE ATTACHID = DESCFILE) FILENAME,
+			       (select DEALNAME from dict_t_dealtype where DEALID = m.DEALTYPE AND (APPID = m.APPID OR APPID='*')) AS DEALNAME,
+			       m.isSaveFormula
+       FROM dict_t_model m,dict_t_suit su
+                <where>
+                           m.SUITID =su.SUITID
+                       <if test="tableid!=null and tableid!=''">
+                             AND m.TABLEID = #{tableid}
+                       </if>
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             AND m.TABLEID like #{tableid_like}
+                        </if>
+                       <if test="name!=null and name!=''">
+                             AND m.NAME = #{name}
+                       </if>
+                        <if test="name_like!=null and name_like!=''">
+                             AND m.NAME like #{name_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND m.ORDERID = #{orderid}
+                       </if>
+                       <if test="dbtablename!=null and dbtablename!=''">
+                             AND m.DBTABLENAME = #{dbtablename}
+                       </if>
+                        <if test="dbtablename_like!=null and dbtablename_like!=''">
+                             AND m.DBTABLENAME like #{dbtablename_like}
+                        </if>
+                       <if test="tabletype!=null and tabletype!=''">
+                             AND m.TABLETYPE = #{tabletype}
+                       </if>
+                        <if test="tabletype_like!=null and tabletype_like!=''">
+                             AND m.TABLETYPE like #{tabletype_like}
+                        </if>
+                       <if test="isshow!=null and isshow!=''">
+                             AND m.ISSHOW = #{isshow}
+                       </if>
+                       <if test="istask!=null and istask!=''">
+		    				AND  m.ISTASK = #{istask}
+	        			</if>
+                        <if test="isshow_like!=null and isshow_like!=''">
+                             AND m.ISSHOW like #{isshow_like}
+                        </if>
+                       <if test="appid!=null and appid!=''">
+                             AND m.APPID = #{appid}
+                       </if>
+                        <if test="appid_like!=null and appid_like!=''">
+                             AND m.APPID like #{appid_like}
+                        </if>
+                       <if test="remark!=null and remark!=''">
+                             AND m.REMARK = #{remark}
+                       </if>
+                        <if test="remark_like!=null and remark_like!=''">
+                             AND m.REMARK like #{remark_like}
+                        </if>
+                       <if test="suitid!=null and suitid!=''">
+                             AND m.SUITID = #{suitid}
+                       </if>
+                        <if test="suitid_like!=null and suitid_like!=''">
+                             AND m.SUITID like #{suitid_like}
+                        </if>
+                       <if test="dealtype!=null and dealtype!=''">
+                             AND m.DEALTYPE = #{dealtype}
+                       </if>
+                        <if test="dealtype_like!=null and dealtype_like!=''">
+                             AND m.DEALTYPE like #{dealtype_like}
+                        </if>
+                       <if test="isreserved!=null and isreserved!=''">
+                             AND m.ISRESERVED = #{isreserved}
+                       </if>
+                        <if test="isreserved_like!=null and isreserved_like!=''">
+                             AND m.ISRESERVED like #{isreserved_like}
+                        </if>
+                       <if test="inputlvl!=null and inputlvl!=''">
+                             AND m.INPUTLVL = #{inputlvl}
+                       </if>
+                        <if test="inputlvl_like!=null and inputlvl_like!=''">
+                             AND m.INPUTLVL like #{inputlvl_like}
+                        </if>
+                       <if test="isadd!=null and isadd!=''">
+                             AND m.ISADD = #{isadd}
+                       </if>
+                        <if test="isadd_like!=null and isadd_like!=''">
+                             AND m.ISADD like #{isadd_like}
+                        </if>
+                       <if test="shorttitle!=null and shorttitle!=''">
+                             AND m.SHORTTITLE = #{shorttitle}
+                       </if>
+                        <if test="shorttitle_like!=null and shorttitle_like!=''">
+                             AND m.SHORTTITLE like #{shorttitle_like}
+                        </if>
+                       <if test="extprop!=null and extprop!=''">
+                             AND m.EXTPROP = #{extprop}
+                       </if>
+                        <if test="extprop_like!=null and extprop_like!=''">
+                             AND m.EXTPROP like #{extprop_like}
+                        </if>
+                       <if test="bgtlvl!=null and bgtlvl!=''">
+                             AND m.BGTLVL = #{bgtlvl}
+                       </if>
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                             AND m.BGTLVL like #{bgtlvl_like}
+                        </if>
+                       <if test="secusql!=null and secusql!=''">
+                             AND m.SECUSQL = #{secusql}
+                       </if>
+                        <if test="initsql!=null and initsql!=''">
+		    				 AND  m.INITSQL = #{initsql}
+	        			</if>
+	    				<if test="initsqltime!=null and initsqltime!=''">
+		   					 AND  m.INITSQLTIME = #{initsqltime}
+	        			</if>
+                        <if test="secusql_like!=null and secusql_like!=''">
+                             AND m.SECUSQL like #{secusql_like}
+                        </if>
+                       <if test="issumtab!=null and issumtab!=''">
+                             AND m.ISSUMTAB = #{issumtab}
+                       </if>
+                        <if test="issumtab_like!=null and issumtab_like!=''">
+                             AND m.ISSUMTAB like #{issumtab_like}
+                        </if>
+                       <if test="isman!=null and isman!=''">
+                             AND m.ISMAN = #{isman}
+                       </if>
+                        <if test="isman_like!=null and isman_like!=''">
+                             AND m.ISMAN like #{isman_like}
+                        </if>
+                       <if test="relatab!=null and relatab!=''">
+                             AND m.RELATAB = #{relatab}
+                       </if>
+                        <if test="relatab_like!=null and relatab_like!=''">
+                             AND m.RELATAB like #{relatab_like}
+                        </if>
+                       <if test="tabswhere!=null and tabswhere!=''">
+                             AND m.TABSWHERE = #{tabswhere}
+                       </if>
+                        <if test="tabswhere_like!=null and tabswhere_like!=''">
+                             AND m.TABSWHERE like #{tabswhere_like}
+                        </if>
+                         <if test="ispartition!=null and ispartition!=''">
+                             AND m.ISPARTITION = #{ispartition}
+                        </if>
+                        <if test="isbak!=null and isbak!=''">
+                             AND m.ISBAK = #{isbak}
+                        </if>        
+                        <if test="isalldistrict != null and isalldistrict != ''">
+                             AND m.ISALLDISTRICT = #{isalldistrict}
+                        </if>
+                        <if test="isallallyear!=null and isallallyear != ''">
+                             AND m.ISALLALLYEAR = #{isallallyear}
+                        </if>
+                        <if test="isexcelimp!=null and isexcelimp != ''">
+                             AND m.ISEXCELIMP = #{isexcelimp}
+                        </if>
+                        <if test="isReadOnly!=null and isReadOnly != ''">
+                             AND m.isReadOnly = #{isReadOnly}
+                        </if>
+                 </where>
+	          order by m.ORDERID,m.TABLEID
+	</select>
+
+	<select id="findDictTModelCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM dict_t_model u
+	    <where>
+	                    1 = 1
+                        <if test="tableid!=null and tableid!=''">
+                              TABLEID = #{tableid}
+                        </if>
+
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             AND TABLEID like #{tableid_like}
+                        </if>
+                        <if test="name!=null and name!=''">
+                              AND NAME = #{name}
+                        </if>
+
+                        <if test="name_like!=null and name_like!=''">
+                              AND NAME like #{name_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND ORDERID = #{orderid}
+                        </if>
+
+                        <if test="dbtablename!=null and dbtablename!=''">
+                              AND DBTABLENAME = #{dbtablename}
+                        </if>
+
+                        <if test="dbtablename_like!=null and dbtablename_like!=''">
+                              AND DBTABLENAME like #{dbtablename_like}
+                        </if>
+                        <if test="tabletype!=null and tabletype!=''">
+                              AND TABLETYPE = #{tabletype}
+                        </if>
+
+                        <if test="tabletype_like!=null and tabletype_like!=''">
+                              AND TABLETYPE like #{tabletype_like}
+                        </if>
+                        <if test="isshow!=null and isshow!=''">
+                              AND ISSHOW = #{isshow}
+                        </if>
+                        <if test="istask!=null and istask!=''">
+		    				  AND  ISTASK = #{istask}
+	        			</if>
+                        <if test="isshow_like!=null and isshow_like!=''">
+                              AND ISSHOW like #{isshow_like}
+                        </if>
+                        <if test="appid!=null and appid!=''">
+                              AND APPID = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              AND APPID like #{appid_like}
+                        </if>
+                        <if test="remark!=null and remark!=''">
+                              AND REMARK = #{remark}
+                        </if>
+
+                        <if test="remark_like!=null and remark_like!=''">
+                              AND REMARK like #{remark_like}
+                        </if>
+                        <if test="suitid!=null and suitid!=''">
+                              AND SUITID = #{suitid}
+                        </if>
+
+                        <if test="suitid_like!=null and suitid_like!=''">
+                              AND SUITID like #{suitid_like}
+                        </if>
+                        <if test="dealtype!=null and dealtype!=''">
+                              AND DEALTYPE = #{dealtype}
+                        </if>
+
+                        <if test="dealtype_like!=null and dealtype_like!=''">
+                              AND DEALTYPE like #{dealtype_like}
+                        </if>
+                        <if test="isreserved!=null and isreserved!=''">
+                              AND ISRESERVED = #{isreserved}
+                        </if>
+
+                        <if test="isreserved_like!=null and isreserved_like!=''">
+                              AND ISRESERVED like #{isreserved_like}
+                        </if>
+                        <if test="inputlvl!=null and inputlvl!=''">
+                              AND INPUTLVL = #{inputlvl}
+                        </if>
+
+                        <if test="inputlvl_like!=null and inputlvl_like!=''">
+                              AND INPUTLVL like #{inputlvl_like}
+                        </if>
+                        <if test="isadd!=null and isadd!=''">
+                              AND ISADD = #{isadd}
+                        </if>
+
+                        <if test="isadd_like!=null and isadd_like!=''">
+                              AND ISADD like #{isadd_like}
+                        </if>
+                        <if test="shorttitle!=null and shorttitle!=''">
+                              AND SHORTTITLE = #{shorttitle}
+                        </if>
+
+                        <if test="shorttitle_like!=null and shorttitle_like!=''">
+                              AND SHORTTITLE like #{shorttitle_like}
+                        </if>
+                        <if test="extprop!=null and extprop!=''">
+                              AND EXTPROP = #{extprop}
+                        </if>
+
+                        <if test="extprop_like!=null and extprop_like!=''">
+                              AND EXTPROP like #{extprop_like}
+                        </if>
+                        <if test="bgtlvl!=null and bgtlvl!=''">
+                              AND BGTLVL = #{bgtlvl}
+                        </if>
+
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                              AND BGTLVL like #{bgtlvl_like}
+                        </if>
+                        <if test="secusql!=null and secusql!=''">
+                              AND SECUSQL = #{secusql}
+                        </if>
+                         <if test="initsql!=null and initsql!=''">
+		   					  AND INITSQL = #{initsql}
+	        				</if>
+	  					 <if test="initsqltime!=null and initsqltime!=''">
+		   					  AND INITSQLTIME = #{initsqltime}
+	        				</if>
+                        <if test="secusql_like!=null and secusql_like!=''">
+                              AND SECUSQL like #{secusql_like}
+                        </if>
+                        <if test="issumtab!=null and issumtab!=''">
+                              AND ISSUMTAB = #{issumtab}
+                        </if>
+
+                        <if test="issumtab_like!=null and issumtab_like!=''">
+                              AND ISSUMTAB like #{issumtab_like}
+                        </if>
+                        <if test="isman!=null and isman!=''">
+                              AND ISMAN = #{isman}
+                        </if>
+
+                        <if test="isman_like!=null and isman_like!=''">
+                              AND ISMAN like #{isman_like}
+                        </if>
+                      <!--   <if test="mainuptab!=null and mainuptab!=''">
+                              AND MAINUPTAB = #{mainuptab}
+                        </if>
+
+                        <if test="mainuptab_like!=null and mainuptab_like!=''">
+                              AND MAINUPTAB like #{mainuptab_like}
+                        </if> -->
+                        <if test="relatab!=null and relatab!=''">
+                              AND RELATAB = #{relatab}
+                        </if>
+
+                        <if test="relatab_like!=null and relatab_like!=''">
+                              AND RELATAB like #{relatab_like}
+                        </if>
+                        <if test="tabswhere!=null and tabswhere!=''">
+                              AND TABSWHERE = #{tabswhere}
+                        </if>
+
+                        <if test="tabswhere_like!=null and tabswhere_like!=''">
+                              AND TABSWHERE like #{tabswhere_like}
+                        </if>
+                         <if test="ispartition!=null and ispartition!=''">
+                             AND m.ISPARTITION = #{ispartition}
+                        </if>
+                         <if test="isbak!=null and isbak!=''">
+                             AND m.ISBAK = #{isbak}
+                        </if>
+                         <if test="isexcelimp!=null and isexcelimp!=''">
+                             AND m.ISEXCELIMP = #{isexcelimp}
+                        </if>
+                         <if test="isReadOnly!=null and isReadOnly!=''">
+                             AND m.isReadOnly = #{isReadOnly}
+                        </if>
+                         <if test="initsqlbtnname!=null and initsqlbtnname!=''">
+                             AND m.INITSQLBTNNAME = #{initsqlbtnname}
+                        </if>
+                        <if test="isalldistrict!=null and isalldistrict!=''">
+                             AND m.ISALLDISTRICT = #{isalldistrict}
+                        </if> 
+                        <if test=" isallallyear != null and isallallyear!=''">
+                             AND m.ISALLDISTRICT = #{isallallyear}
+                        </if> 
+	      </where>
+	</select>	
+	<select id="getTableByDealtype" parameterType="java.util.Map" resultType="java.util.Map">
+		 select t.tableId,t.DBTABLENAME
+		  from dict_t_model t
+		  where DEALTYPE  =#{dealtype}
+		  and tabletype = #{type}  and appid=#{appId}
+	</select>
+
+	<select id="existRexistRela" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(1) FROM CDT_T_TASKTYPEMODEL t WHERE t.MODELID = '${tableID}'
+	</select>
+ </mapper>
+ 

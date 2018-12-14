@@ -1,0 +1,200 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.FloatMapper">
+
+	<select id="getFloatData" parameterType="Map" resultType="Map">
+		 select ${columnsql} 
+		 from ${dbTableName}  where ISTEMPLATE = '1' 
+		 <if test="whereCondition!=null and whereCondition!=''">
+		 	and ${whereCondition}
+		 </if>
+		 order by ORDERID
+	</select>
+	<select id="getCodeTableInfoByColID" parameterType="String" resultType="Map">
+		SELECT CSID,  (SELECT DBTABLENAME FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME
+	  FROM dict_t_factor
+	 WHERE COLUMNID = #{colID}
+	 </select>
+
+	<select id="getCodeTableData" parameterType="map" resultType="map">
+		SELECT t.name, t.GUID, t.isleaf, t.levelno, t.superguid as superid, t.code
+		FROM ${dbTableName} t
+		where t.levelno<![CDATA[ <= ]]> #{levelno}
+		<if test="whereSTR != null">
+			and  ${whereSTR}
+		</if>
+		order by t.code
+	 </select>
+
+	<select id="getStatusByTableID" parameterType="String" resultType="int">
+		SELECT COUNT(1) FROM dict_T_factorcode where dbcolumnname = 'STATUS' AND TABLEID = #{tableID}
+	</select>
+
+			 <sql id="fd_sql">
+		DATAKEY,AGENCYID,ORDERID,FDCODE,LEVELNO,TEMPLATEID,ISLEAF,ISQZX, ISDJ, ISUPDATE,ISHZ,ISINSERT,
+		ISTEMPLATE,SYNSTATUS
+  	</sql>
+	 <insert id="setFloatData" parameterType="map">
+		 <selectKey resultType="String" order="BEFORE" keyProperty="DATAKEY">  
+        	SELECT SYS_GUID() AS DATAKEY FROM DUAL  
+   	 	</selectKey>
+   	 	 insert into ${floatName}(<include refid="fd_sql"/>,${colName})  VALUES(
+        			#{DATAKEY,jdbcType = VARCHAR},
+			       #{AGENCYID,jdbcType = VARCHAR},
+			       #{ORDERID,jdbcType = NUMERIC},
+			       #{FDCODE,jdbcType = VARCHAR},
+			       #{LEVELNO,jdbcType = NUMERIC},
+			       #{TEMPLATEID,jdbcType = VARCHAR},
+			       #{ISLEAF,jdbcType = CHAR},
+			       #{ISQZX,jdbcType = CHAR},
+			       #{ISDJ,jdbcType = CHAR},
+			       #{ISUPDATE,jdbcType = CHAR},
+			       #{ISHZ,jdbcType = CHAR},
+			       #{ISINSERT,jdbcType = CHAR},
+			       #{ISTEMPLATE,jdbcType = CHAR},
+			       #{SYNSTATUS,jdbcType = CHAR},#{GUID,jdbcType = VARCHAR})		       
+	 </insert>
+	  <update id="updateInitFloatData" parameterType="map">
+	   UPDATE ${floatName} SET FDCODE=#{FDCODE} , ORDERID = #{ORDERID} WHERE TEMPLATEID=#{TEMPLATEID}
+	 </update>
+	<delete id="delAllFloatData" parameterType="map">
+		delete from ${floatName}
+	</delete>
+	
+	<sql id="fddef_sql">
+		GUID,TABLEID,ISFIX,LVLNANMECOL,LAYERINDENT,REFID,REFWHERE,COLORDER
+  	</sql>
+  	<insert id="insertFloatWhole" parameterType="com.tjhq.commons.setting.input.po.DictTSetFddefPO">
+  		<selectKey resultType="String" order="BEFORE" keyProperty="guID">  
+        	SELECT SYS_GUID() AS guID FROM DUAL  
+   	 	</selectKey>
+        INSERT INTO dict_t_setfddef(<include refid="fddef_sql"/>) VALUES(
+        	#{guID,jdbcType = VARCHAR},
+        	#{tableID,jdbcType = VARCHAR},
+        	#{isFix,jdbcType = VARCHAR},
+        	#{lvlNanmeCol,jdbcType = VARCHAR},
+        	#{layerIndent,jdbcType = VARCHAR},
+        	#{refID,jdbcType = VARCHAR},
+        	#{refWhere,jdbcType = VARCHAR},
+        	#{colOrder,jdbcType = VARCHAR})
+  	</insert>
+ 
+   	<update id="updateFloatWhole" parameterType="com.tjhq.commons.setting.input.po.DictTSetFddefPO">
+  		 update dict_t_setfddef
+    		<set>
+    			<if test="isFix != null">
+    				ISFIX=#{isFix,jdbcType = VARCHAR},
+    			</if>
+    			<if test="lvlNanmeCol != null">
+    				LVLNANMECOL=#{lvlNanmeCol,jdbcType=VARCHAR},
+    			</if>
+    			<if test="layerIndent != null">
+    				LAYERINDENT=#{layerIndent,jdbcType=VARCHAR},
+    			</if>
+    			<if test="refID != null">
+    				REFID=#{refID,jdbcType=VARCHAR},
+    			</if>
+    			<if test="refWhere != null">
+    				REFWHERE=#{refWhere,jdbcType=VARCHAR},
+    			</if>
+    			<if test="colOrder != null">
+    				COLORDER=#{colOrder,jdbcType=VARCHAR}
+    			</if>
+    		</set>
+    		where GUID = #{guID,jdbcType=VARCHAR}
+   	</update>
+   	<update id="updateFloatColOrder" parameterType="String">
+  		 update ${dbTableName}
+    		<set>
+    			<if test="colOrder != null">
+    				COLORDER=#{colOrder,jdbcType = VARCHAR}
+    			</if>
+    		</set>
+    		where TABLEID = #{tableID,jdbcType=VARCHAR}
+   	</update>
+
+  	<update id="updateIsLeafSql" parameterType="String">
+    	${statement}
+   	</update>
+   	
+    <update id="updateIsLeaf" parameterType="Map">
+    	begin
+    	<foreach collection="list" item="lists" index="index" separator=";">
+    		update ${DBTABLENAME}
+    		<set>
+    			<if test="lists.ISLEAF != null">
+    				ISLEAF = #{lists.ISLEAF,jdbcType=VARCHAR},
+    			</if>
+    			<if test="lists.LEVELNO != null">
+    				LEVELNO = #{lists.LEVELNO,jdbcType=NUMERIC},
+    			</if>
+    			<if test="lists.CELLSECU != null">
+    				CELLSECU = #{lists.CELLSECU,jdbcType=VARCHAR},
+    			</if>
+    			<if test="lists.SUPERID != null">
+    				SUPERID = #{lists.SUPERID,jdbcType=VARCHAR},
+    			</if>
+    				SYNSTATUS = (CASE WHEN SYNSTATUS = '2' THEN '3' ELSE SYNSTATUS END)
+    		</set>
+    		where DATAKEY = #{lists.DATAKEY,jdbcType=VARCHAR} and AGENCYID = '*'
+    		<!--  
+    			where FDCODE = #{lists.FDCODE,jdbcType=VARCHAR} and AGENCYID = '*'
+    		-->
+    	</foreach>
+    	;end;
+    </update>
+    <update id="saveCellSecu" parameterType="String">
+    		update ${DBTABLENAME}
+    		<set>
+    			<if test="renew != null">
+    				CELLSECU = #{renew,jdbcType=VARCHAR}
+    			</if>
+    		</set>
+    		where DATAKEY = #{dataKey,jdbcType=VARCHAR} and AGENCYID = '*'
+    </update> 
+    <update id="refreshCellSecu" parameterType="Map">
+    	begin
+    	<foreach collection="list" item="lists" index="index" separator=";">
+    		update ${DBTABLENAME}
+    		<set>			
+    			<if test="lists.CELLSECU != null">
+    				CELLSECU = #{lists.CELLSECU,jdbcType=VARCHAR}
+    			</if>
+    		</set>
+    		where DATAKEY = #{lists.DATAKEY,jdbcType=VARCHAR} and AGENCYID = '*'
+    	</foreach>
+    	;end;
+    </update>
+    
+    <select id="selectFormulaByFdCode" parameterType="String" resultType="Integer">
+		 select count(t.FORMULAID)
+		   from formula_t_formuladef t
+		  where t.FORMULATYPE = '1'
+		    and t.TABLEID = #{tableID, jdbcType = VARCHAR}
+		    and t.FORWHERE = #{forWhere, jdbcType = VARCHAR}
+	</select>
+    <delete id="deleteFormulaByFdCode" parameterType="String">
+    	delete from formula_t_formuladef t
+		 where t.FORMULATYPE = '1'
+		   and t.TABLEID = #{tableID, jdbcType = VARCHAR}
+		   and t.FORWHERE = #{forWhere, jdbcType = VARCHAR}
+    </delete>
+    
+<select id="getFloatDataByTemplateID" parameterType="map" resultType="map">
+ SELECT t.datakey,t.cellsecu  FROM ${tableName} t where t.AGENCYID='*' and t.TEMPLATEID=#{templateID}
+</select>
+<select id="getResCount" parameterType="String" resultType="Integer">
+SELECT count(1) FROM ${tableName} WHERE STATUS = '1'
+</select>
+<select id="getFloatDataByDatakey" parameterType="String" resultType="String">
+ SELECT T.TEMPLATEID  FROM  ${tableName} T where T.AGENCYID='*' and  T.DATAKEY=#{datakey}
+</select>
+<select id="refreshAllData" parameterType="String" statementType="CALLABLE">
+  <![CDATA[ 
+		{call SYS_P_REFRESH_FDCODE(#{tableID, mode=IN, jdbcType=VARCHAR})} 
+  	]]> 
+</select>
+</mapper>

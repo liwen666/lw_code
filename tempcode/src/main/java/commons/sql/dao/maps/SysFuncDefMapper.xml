@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.sql.dao.SysFuncDefMapper">
+	<resultMap type="Map" id="sysFuncDefMap">
+		<result property="GUID" column="GUID" jdbcType="VARCHAR" javaType="String"/>
+		<result property="NAME" column="NAME" jdbcType="VARCHAR" javaType="String"/>
+		<result property="TITLE" column="TITLE" jdbcType="VARCHAR" javaType="String"/>
+		<result property="PARAMS" column="PARAMS" jdbcType="VARCHAR" javaType="String"/>
+		<result property="RETVAL" column="RETVAL" jdbcType="VARCHAR" javaType="String"/>
+		<result property="TBODY" column="TBODY" jdbcType="CLOB" javaType="String"/>
+		<result property="ISPASS" column="ISPASS" jdbcType="VARCHAR" javaType="String"/>
+ 	 </resultMap>
+
+
+
+<select id="getGridData" parameterType="map" resultMap="sysFuncDefMap">
+	SELECT B.GUID,B.NAME,B.TITLE,B.PARAMS,B.RETVAL,B.TBODY,B.ISPASS
+	  FROM (SELECT A.GUID,A.NAME,A.TITLE,A.PARAMS,A.RETVAL,A.TBODY,A.ISPASS,ROWNUM RNUM
+	          FROM (SELECT  T.GUID,T.NAME,T.TITLE,T.PARAMS,T.RETVAL,T.TBODY,
+	                       CASE T.ISPASS
+	                         WHEN '0' THEN
+	                          '否'
+	                         WHEN '1' THEN
+	                          '是'
+	                          ELSE ''
+	                       END ISPASS      
+	                  FROM BGT_T_SYSFUNCDEF T
+	                 WHERE T.DEFTYPE=#{defType}
+	                   AND T.APPID = #{appID}
+	                 ORDER BY T.DBVERSION DESC) A
+	<![CDATA[  WHERE ROWNUM <= #{end}) B
+	 WHERE B.RNUM > #{start}]]>			
+</select>
+<select id="getGridDataCount" parameterType="map" resultType="string">
+	SELECT COUNT(1) FROM BGT_T_SYSFUNCDEF T WHERE T.DEFTYPE=#{defType} AND T.APPID=#{appID}
+</select>
+<select id="getDefInfoByID" parameterType="string" resultMap="sysFuncDefMap">
+	SELECT T.GUID,T.NAME,T.TITLE,T.PARAMS,T.RETVAL,T.TBODY,T.ISPASS,T.DEFTYPE FROM BGT_T_SYSFUNCDEF T WHERE T.GUID=#{guid}
+</select>
+<insert id="insertData" parameterType="java.util.HashMap">
+	INSERT INTO BGT_T_SYSFUNCDEF(NAME,TITLE,PARAMS,RETVAL,TBODY,APPID,DEFTYPE,ISPASS) 
+	VALUES(#{NAME},#{TITLE},#{PARAMS},#{RETVAL},#{TBODY},#{APPID},#{DEFTYPE},#{ISPASS})
+</insert>
+<delete id="deleteData" parameterType="string">
+	DELETE FROM BGT_T_SYSFUNCDEF WHERE GUID=#{guid}
+</delete>
+<update id="updateData" parameterType="java.util.HashMap">
+	UPDATE BGT_T_SYSFUNCDEF 
+	<set>
+	<if test="ISPASS!=null"> ISPASS=#{ISPASS}, </if>
+	<if test="NAME!=null"> NAME=#{NAME}, </if>
+	<if test="PARAMS!=null"> PARAMS=#{PARAMS}, </if>
+	<if test="RETVAL!=null"> RETVAL=#{RETVAL}, </if>
+	<if test="TBODY!=null"> TBODY=#{TBODY} </if>
+	</set>
+	WHERE GUID=#{GUID}
+</update>
+
+<select id="execSql" statementType="CALLABLE" parameterType="string">  
+	<![CDATA[  
+	    {call EXEC_SQL (#{sql})}  
+	]]>  
+	
+</select>
+</mapper>

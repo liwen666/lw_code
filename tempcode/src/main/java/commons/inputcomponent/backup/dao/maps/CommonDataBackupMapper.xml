@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.inputcomponent.backup.dao.ICommonDataBackupDAO">
+
+	<update id="updateBackDataVersion" parameterType="string">
+		UPDATE ${bakDbName}_BAK T1
+		   SET BAKVERSION =
+		       ((SELECT NVL((SELECT MAX(BAKVERSION)
+		                      FROM ${bakDbName}_BAK T3 WHERE T1.DATAKEY = T3.DATAKEY AND T1.BAKTYPE = T3.BAKTYPE),
+		                    0)
+		           FROM DUAL) + 1)
+		 WHERE EXISTS (SELECT 1 FROM ${bakDbName} T2 WHERE T1.DATAKEY = T2.DATAKEY) 
+		 <if test="bakWhere != null and bakWhere != ''">
+		 	AND ${bakWhere}
+		 </if>
+		 AND BAKVERSION = 0
+		 AND BAKTYPE = #{bakType}
+	</update>
+	
+	<insert id="backupData">
+		${backupSql}
+	</insert>
+	
+</mapper>

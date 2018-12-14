@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.PubTPartitionDividMapper">
+    <resultMap id="abatorgenerated_PubTPartitionDividResult" type="com.tjhq.commons.dict.external.po.PubTPartitionDividPO" >
+    <result column="DISTRICTID" property="districtid" jdbcType="VARCHAR" />
+    <result column="ID_TABSPACE" property="idTabspace" jdbcType="VARCHAR" />
+    <result column="YEAR" property="year" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+
+
+ <!-- 查找所有记录 -->    
+    <select id="getAllForYear" resultType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+        <![CDATA[  
+		  select t.year,t.id_tabspace as idTabspace from pub_t_partition_divid t where t.year <>'*' group by t.year,t.id_tabspace
+		  ]]> 
+  	</select>
+  
+   <!-- 状态为2   多年多财政的     group by  -->    
+    <select id="getProvinceGroupByYear" resultType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+     <![CDATA[  
+		select t.districtid,t.id_tabspace as idTabspace  from pub_t_partition_divid t where t.year='*' group by t.districtid ,t.id_tabspace
+		  ]]> 
+  	</select>
+  
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllPubTPartitionDivid" resultType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+		SELECT DISTRICTID,ID_TABSPACE,YEAR FROM  pub_t_partition_divid 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getPubTPartitionDivid"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+		SELECT DISTRICTID,ID_TABSPACE,YEAR  FROM  pub_t_partition_divid 
+	  <where> 
+                  
+      </where>
+	</select>  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertPubTPartitionDivid" parameterType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+		INSERT INTO  pub_t_partition_divid  (  DISTRICTID, ID_TABSPACE, YEAR )
+		VALUES ( 
+		  #{districtid},
+		  #{idTabspace},
+		  #{year}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updatePubTPartitionDivid" parameterType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+    UPDATE  pub_t_partition_divid  
+   <set>
+		<if test="districtid!=null and districtid!=''">
+		     DISTRICTID  = #{districtid},
+	        </if>
+		<if test="idTabspace!=null and idTabspace!=''">
+		     ID_TABSPACE  = #{idTabspace},
+	        </if>
+		<if test="year!=null and year!=''">
+		     YEAR  = #{year}
+	        </if>
+  </set>
+  <where>
+   
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deletePubTPartitionDivid" parameterType="java.lang.String">
+		DELETE FROM  pub_t_partition_divid  
+          <where> 
+		
+          </where>
+    </delete>   
+
+	<select id="findPubTPartitionDivid" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.PubTPartitionDividPO">
+		SELECT DISTRICTID,ID_TABSPACE,YEAR FROM  pub_t_partition_divid  u  
+                <where>
+                       <if test="districtid!=null and districtid!=''">
+                             DISTRICTID  = #{districtid}
+                       </if>
+                        <if test="districtid_like!=null and districtid_like!=''">
+                             DISTRICTID  like #{districtid_like}
+                        </if>
+                       <if test="idTabspace!=null and idTabspace!=''">
+                             AND  ID_TABSPACE  = #{idTabspace}
+                       </if>
+                        <if test="idTabspace_like!=null and idTabspace_like!=''">
+                             AND  ID_TABSPACE  like #{idTabspace_like}
+                        </if>
+                       <if test="year!=null and year!=''">
+                             AND  YEAR  = #{year}
+                       </if>
+                        <if test="year_like!=null and year_like!=''">
+                             AND  YEAR  like #{year_like}
+                        </if>
+                 </where>
+	
+	</select>
+
+	<select id="findPubTPartitionDividCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  pub_t_partition_divid  u
+	    <where>
+                        <if test="districtid!=null and districtid!=''">
+                              DISTRICTID  = #{districtid}
+                        </if>
+
+                        <if test="districtid_like!=null and districtid_like!=''">
+                              DISTRICTID  like #{districtid_like}
+                        </if>
+                        <if test="idTabspace!=null and idTabspace!=''">
+                              AND  ID_TABSPACE  = #{idTabspace}
+                        </if>
+
+                        <if test="idTabspace_like!=null and idTabspace_like!=''">
+                              AND  ID_TABSPACE  like #{idTabspace_like}
+                        </if>
+                        <if test="year!=null and year!=''">
+                              AND  YEAR  = #{year}
+                        </if>
+
+                        <if test="year_like!=null and year_like!=''">
+                              AND  YEAR  like #{year_like}
+                        </if>
+	      </where>
+	</select>	
+ </mapper>
+ <!--2014-01-26 17:18:06-->

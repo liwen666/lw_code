@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.busimanage.dao.BusimanageMapper">
+	<select id="getDataList" resultType="map" parameterType="map">       
+		<![CDATA[   	 
+select * from (select rownum rnum , tmp.* from (select sbi.appid,
+ 	 		to_char(sbi.dbversion,'yyyy-mm-dd') aa, 
+		 sbi.DATAKEY, 
+		 sbi.name,
+  		sbi.orderid,
+		   sbi.status, 
+   			sbi.url ,
+   			sbi.is_ajax
+  from DICT_T_SETTINGBUSIINFO  sbi
+ where 1=1 
+		]]>
+	   <if test=" QueryTitle != null and '' != QueryTitle ">  
+            <![CDATA[  
+              and sbi.name LIKE '%${QueryTitle}%' 
+            ]]>  
+        </if>  
+		order by orderid
+		) tmp  ) where 1=1 
+		 <if test="isNeedPage==1">
+		  <![CDATA[
+		  	and    RNUM > #{startRow} AND RNUM <= #{endRow}
+	       ]]>		       
+		 </if>	
+	</select>
+	
+	
+	<select id="getDataListCount" resultType="int" parameterType="map">       
+		<![CDATA[   	 
+select count(1) 
+  from DICT_T_SETTINGBUSIINFO  sbi
+ where 1=1 
+		]]>
+	   <if test=" QueryTitle != null and '' != QueryTitle ">  
+            <![CDATA[  
+              and sbi.name LIKE '%${QueryTitle}%' 
+            ]]>  
+        </if>  
+	
+		
+	</select>
+
+	<insert id="saveData" parameterType="map">
+    	<![CDATA[   
+    		INSERT 
+    		INTO 
+    		DICT_T_SETTINGBUSIINFO(
+    		 appid,
+ 		dbversion, 
+	
+		 name,
+  		orderid,
+		
+   			url , 
+   			is_ajax 
+    		)
+    		 values(
+    		upper( #{APPID}),
+    		 #{DBVERSION},
+    		 #{NAME},
+    		 #{ORDERID} , 
+    		 #{URL} , 
+    		  #{IS_AJAX}
+    		 )
+    	]]>
+	</insert>
+
+	<update id="updateData" parameterType="map">
+		update DICT_T_SETTINGBUSIINFO
+		<set>
+			<if test="APPID != null">APPID=upper(#{APPID}),</if>
+			<if test="NAME != null">NAME=#{NAME},</if>
+			<if test="ORDERID != null">ORDERID=#{ORDERID},</if>
+			<if test="STATUS != null">STATUS=#{STATUS},</if>
+			<if test="URL != null">URL=#{URL},</if>
+			<if test="IS_AJAX != null">IS_AJAX=#{IS_AJAX},</if>
+		</set>
+		where DATAKEY=#{DATAKEY}
+	</update>
+
+	<delete id="delData" parameterType="map">
+		delete from
+		DICT_T_SETTINGBUSIINFO
+		where DATAKEY = #{DATAKEY} 
+	</delete>
+</mapper>

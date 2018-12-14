@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.rule.dao.AuditRuleXmlDAO">
+	<resultMap type="Map" id="ckClobMap">
+	    <result property="CHECKID" column="CHECKID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="SERID" column="SERID" jdbcType="NUMERIC" javaType="String"/>
+    	<result property="DEFNAME" column="DEFNAME" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LMODELID" column="LMODELID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RMODELID" column="RMODELID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LCOMPCOL" column="LCOMPCOL" jdbcType="CLOB" javaType="String"/>
+    	<result property="RCOMPCOL" column="RCOMPCOL" jdbcType="CLOB" javaType="String"/>
+    	<result property="LDESC" column="LDESC" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RDESC" column="RDESC" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="LQUERY" column="LQUERY" jdbcType="CLOB" javaType="String"/>
+    	<result property="RQUERY" column="RQUERY" jdbcType="CLOB" javaType="String"/>
+    	<result property="LEFTGROUP" column="LEFTGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="RIGHTGROUP" column="RIGHTGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="PUBGROUP" column="PUBGROUP" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="ERRORDEF" column="ERRORDEF" jdbcType="NUMERIC" javaType="String"/>
+    	<result property="RELATYPE" column="RELATYPE" jdbcType="CHAR" javaType="String"/>
+    	<result property="SHOWTEXT" column="SHOWTEXT" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKTYPE" column="CHECKTYPE" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKSORTID" column="CHECKSORTID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CHECKSQL" column="CHECKSQL" jdbcType="CLOB" javaType="String"/>
+    	<result property="APPID" column="APPID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="CREATEBGTLEVEL" column="CREATEBGTLEVEL" jdbcType="NUMERIC" javaType="String"/>
+ 	</resultMap>
+	<select id="findAuditData" parameterType="Map" resultMap="ckClobMap">
+		select 
+		    CHECKID,
+			DEFNAME,
+			LMODELID,
+			RMODELID,
+			LCOMPCOL,
+			RCOMPCOL,
+			LQUERY,
+			RQUERY,
+			LEFTGROUP,
+			RIGHTGROUP,
+			LDESC,
+			RDESC,
+			PUBGROUP,
+			ERRORDEF,
+			SERID,
+			RELATYPE,
+			SHOWTEXT,
+		    CHECKTYPE,
+		    CHECKSQL,
+		    CHECKSORTID,
+		    appID,
+		    CREATEBGTLEVEL
+		  from bgt_t_checkdef
+		 where appid= #{appID} and CHECKID in(${checkIDs})
+	</select>
+	<select id="findSysDate" resultType="String">
+	 select to_char(sysdate,'yyyy-MM-DD hh24:mi:ss') from dual
+	</select>
+	<insert id="insertAuditData" parameterType="Map">
+		insert into bgt_t_checkdef(CHECKID,
+		
+		<if test="DEFNAME !=null">
+			DEFNAME,
+		</if>
+		<if test="LMODELID !=null">
+			LMODELID,
+		</if>
+		<if test="RMODELID !=null">
+			RMODELID,
+		</if>
+		<if test="LCOMPCOL !=null">
+			LCOMPCOL,
+		</if>
+		<if test="RCOMPCOL !=null">
+			RCOMPCOL,
+		</if>
+		<if test="LQUERY !=null">
+			LQUERY,
+		</if>
+		<if test="RQUERY !=null">
+			RQUERY,
+		</if>
+		<if test="LEFTGROUP !=null">
+			LEFTGROUP,
+		</if>
+		<if test="RIGHTGROUP !=null">
+			RIGHTGROUP,
+		</if>
+		<if test="PUBGROUP !=null">
+			PUBGROUP,
+		</if>
+		<if test="ERRORDEF !=null">
+			ERRORDEF,
+		</if>
+		<if test="SERID !=null">
+			SERID,
+		</if>
+		<if test="RELATYPE !=null">
+			RELATYPE,
+		</if>
+		<if test="SHOWTEXT !=null">
+			SHOWTEXT,
+		</if>
+		 <if test="APPID!=null and APPID!=''">
+			APPID,
+		</if>
+		 <if test="USERDISTRICTID!=null and USERDISTRICTID!=''">
+			USERDISTRICTID,
+		</if>
+		 <if test="CREATEBGTLEVEL!=null and CREATEBGTLEVEL!=''">
+			CREATEBGTLEVEL,
+		</if>
+		 RDESC,LDESC,CHECKTYPE,CHECKSQL,CHECKSORTID) values(#{CHECKID},
+			<if test="DEFNAME !=null">
+			#{DEFNAME},
+		</if>
+		<if test="LMODELID !=null">
+			#{LMODELID},
+		</if>
+		<if test="RMODELID !=null">
+			#{RMODELID},
+		</if>
+		<if test="LCOMPCOL !=null">
+			#{LCOMPCOL},
+		</if>
+		<if test="RCOMPCOL !=null">
+			#{RCOMPCOL},
+		</if>
+		<if test="LQUERY !=null">
+			#{LQUERY},
+		</if>
+		<if test="RQUERY !=null">
+			#{RQUERY},
+		</if>
+		<if test="LEFTGROUP !=null">
+			#{LEFTGROUP},
+		</if>
+		<if test="RIGHTGROUP !=null">
+			#{RIGHTGROUP},
+		</if>
+		<if test="PUBGROUP !=null">
+			#{PUBGROUP},
+		</if>
+		<if test="ERRORDEF !=null">
+			#{ERRORDEF},
+		</if>
+		<if test="SERID !=null">
+			#{SERID},
+		</if>
+		<if test="RELATYPE !=null">
+			#{RELATYPE},
+		</if>
+		<if test="SHOWTEXT !=null">
+			#{SHOWTEXT},
+		</if>
+		<if test="APPID!=null and APPID!=''">
+			#{APPID},
+		</if>
+		<if test="USERDISTRICTID!=null and USERDISTRICTID!=''">
+			#{USERDISTRICTID},
+		</if>
+		<if test="CREATEBGTLEVEL!=null and CREATEBGTLEVEL!=''">
+			${CREATEBGTLEVEL},
+		</if>
+		#{RDESC},#{LDESC},#{CHECKTYPE},#{CHECKSQL},#{CHECKSORTID})
+	</insert>
+	<update id="updateAuditData">
+		update bgt_t_checkdef 
+		<set>
+			<if test="DEFNAME !=null">
+				DEFNAME=#{DEFNAME},
+			</if>
+			<if test="LMODELID !=null">
+				LMODELID=#{LMODELID},
+			</if>
+			<if test="RMODELID !=null">
+				RMODELID=#{RMODELID},
+			</if>
+			<if test="LCOMPCOL !=null">
+				LCOMPCOL=#{LCOMPCOL},
+			</if>
+			<if test="RCOMPCOL !=null">
+				RCOMPCOL=#{RCOMPCOL},
+			</if>
+			<if test="LQUERY !=null">
+				LQUERY=#{LQUERY},
+			</if>
+			<if test="RQUERY !=null">
+				RQUERY=#{RQUERY},
+			</if>
+			<if test="LEFTGROUP !=null">
+				LEFTGROUP=#{LEFTGROUP},
+			</if>
+			<if test="RIGHTGROUP !=null">
+				RIGHTGROUP=#{RIGHTGROUP},
+			</if>
+			<if test="PUBGROUP !=null">
+				PUBGROUP=#{PUBGROUP},
+			</if>
+			<if test="ERRORDEF !=null">
+				ERRORDEF=#{ERRORDEF},
+			</if>
+			<if test="SERID !=null">
+				SERID=#{SERID},
+			</if>
+			<if test="RELATYPE !=null">
+				RELATYPE=#{RELATYPE},
+			</if>
+			<if test="SHOWTEXT !=null">
+				SHOWTEXT=#{SHOWTEXT},
+			</if>
+			<if test="CHECKSORTID !=null">
+				CHECKSORTID=#{CHECKSORTID},
+			</if> 
+			   RDESC=#{RDESC},
+			   LDESC=#{LDESC},
+			<if test="CHECKSQL !=null">
+				CHECKSQL=#{CHECKSQL}
+			</if>
+			</set>
+		 where CHECKID=#{CHECKID}
+	</update>
+	<select id="findCountByCheckID"  parameterType="Map" resultType="Integer">
+	select count(0) from bgt_t_checkdef where checkID = #{CHECKID}
+	</select>
+	<select id="findCountByCheckSortID"  parameterType="Map" resultType="Integer">
+	 select count(0) from bgt_t_checksort where CHECKSORTID = #{CHECKSORTID}
+	</select>
+	<select id="findCountTableID" parameterType="Map" resultType="Integer">
+	select count(0) from dict_t_model where tableid=#{tableID}
+	</select>
+	<select id="findAuditSortDataByExp" parameterType="Map" resultType="Map">
+	with spTab as (select distinct t.* 
+	 from bgt_t_checksort t where t.APPID=#{appID}
+	start with t.CHECKSORTID in(select ck.CHECKSORTID from bgt_t_checkdef ck where  ck.CHECKID in(${checkIDs}))
+	connect by prior t.SUPERID=t.CHECKSORTID)
+	select t.*,to_char(level) rlevel,ltrim(SYS_CONNECT_BY_PATH(t.CHECKSORTNAME,'\'),'\') fullpath
+	 from spTab t 
+	start with t.superid is null
+	connect by prior t.CHECKSORTID=t.SUPERID
+	order by fullpath
+	</select>
+	<select id="findAuditSortDataFromRoot" parameterType="Map" resultType="Map">
+	select t.CHECKSORTID,t.CHECKSORTNAME,t.SUPERID,t.ENDFLAG,t.LVLID,t.appid,t.REMARK,to_char(level) as rlevel,ltrim(SYS_CONNECT_BY_PATH(t.CHECKSORTNAME,'\'),'\') fullpath
+	 from bgt_t_checksort t where t.APPID=#{appID}
+	start with t.superID is null
+	connect by prior t.CHECKSORTID=t.SUPERID
+	order by fullpath
+	</select>
+	<insert id="saveAuditSort" parameterType="Map">
+	insert into bgt_t_checksort (CHECKSORTID, CHECKSORTNAME, SUPERID, ENDFLAG, LVLID, APPID, REMARK)
+    values (#{CHECKSORTID}, #{CHECKSORTNAME}, #{SUPERID}, #{ENDFLAG}, #{LVLID}, #{APPID}, #{REMARK})
+	</insert>
+	<update id="updateLevelHasSuperID" parameterType="Map">
+		select case
+	         when count(0) = 0 then
+	          (select ta.LVLID || '1'
+	             from bgt_t_checksort ta
+	            where ta.CHECKSORTID =  #{SUPERID} )
+	         else
+	          (select to_char((max(to_number(tc.LVLID)) + 1))
+	             from bgt_t_checksort tc
+	            where tc.SUPERID =  #{SUPERID} 
+	              and tc.appid =  #{APPID} 
+	              and tc.CHECKSORTID !=  #{CHECKSORTID} )
+	       end as levelNo
+	  from bgt_t_checksort tb
+	 where tb.SUPERID = #{SUPERID} 
+	   and tb.checksortid != #{CHECKSORTID} 
+	   and tb.appid = #{APPID} 
+	   group by superid
+	</update>
+	<update id="updateLevelNullSuperID" parameterType="Map">
+	update bgt_t_checksort ta  set ta.LVLID=( 
+		select case when count(0) = 0 then '1' else to_char(max(to_number(lvlid))+1) end as levelNO
+		  from bgt_t_checksort
+		 where appid=#{APPID}  and (superid is null) and checksortid !=#{CHECKSORTID})
+		 where ta.checksortid=#{CHECKSORTID} 
+	</update>
+	<update id="clearAuditData"  statementType="CALLABLE">
+		{call  P_AUDITRULE_CLEARDATA()}
+	</update>
+	<resultMap type="Map" id="vomClobMap">
+	    <result property="TABLEID" column="TABLEID" jdbcType="VARCHAR" javaType="String"/>
+    	<result property="TABWHERE" column="TABWHERE" jdbcType="CLOB" javaType="String"/>
+    	<result property="VIEWID" column="VIEWID" jdbcType="VARCHAR" javaType="String"/>
+ 	</resultMap>
+	<select id="findViewToTable" parameterType="Map" resultMap="vomClobMap">
+	select tableid,tabwhere,viewid
+ 	 	from bgt_t_viewrelationtable t
+	 	where (t.TABLEID is not null) and (t.viewid is not null)
+  		 	  and exists (select ck.CHECKID
+			          from bgt_t_checkdef ck
+			         where (ck.LMODELID = t.viewid
+			           or ck.RMODELID = t.viewid)
+			           and ck.appid=#{appID}
+			           and ck.CHECKID in(${checkIDs}))
+	</select>
+	<select id="findInputObjToAuditObj" parameterType="Map" resultType="Map">
+	select t.INPUTTABLEID,t.MODELID
+	  from bgt_t_inputrelatonmodel t
+	 	where (t.MODELID is not null) and (t.INPUTTABLEID is not null)
+  		 	  and exists (select ck.CHECKID
+			          from bgt_t_checkdef ck
+			         where (ck.LMODELID = t.MODELID
+			           or ck.RMODELID = t.MODELID)
+			           and ck.appid=#{appID}
+			           and ck.CHECKID in(${checkIDs}))
+	</select>
+	<select id="findByInputObj" parameterType="String" resultType="Map">
+	select INPUTTABLEID from bgt_t_inputrelatonmodel where INPUTTABLEID=#{inputObjID}
+	</select>
+	<insert id="insertInputObjToAuditObj" parameterType="Map" >
+	insert into bgt_t_inputrelatonmodel(inputtableid,modelid) values(#{INPUTTABLEID},#{MODELID})
+	</insert>
+	<select id="findViewToTableByViewID" parameterType="String" resultType="Map">
+    	select viewid from bgt_t_viewrelationtable where viewid=#{viewID}
+	</select>
+	<insert id="insertViewToTable" parameterType="Map" >
+	insert into bgt_t_viewrelationtable(viewID,tableid,tabwhere) values(#{VIEWID},#{TABLEID},#{TABWHERE})
+	</insert>
+	<select id="findCreateBgtLevelByCheckID" parameterType="Map" resultType="Integer">
+	 select createBgtLevel from bgt_T_checkdef where checkid=#{CHECKID}
+	</select>
+</mapper>

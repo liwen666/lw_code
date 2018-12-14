@@ -1,0 +1,292 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.formula.dao.FormulaDAO">
+	<resultMap type="Map" id="ClobMap">
+		<result property="ORDERID" column="ORDERID" jdbcType="NUMERIC"
+			javaType="String" />
+		<result property="FORMULADEF" column="FORMULADEF" jdbcType="CLOB"
+			javaType="String" />
+		<result property="FORMULADEFCHI" column="FORMULADEFCHI"
+			jdbcType="CLOB" javaType="String" />
+		<result property="FORMULADEFENG" column="FORMULADEFENG"
+			jdbcType="CLOB" javaType="String" />
+	</resultMap>
+	<select id="selectFormulaData" parameterType="Map"
+		resultType="com.tjhq.commons.setting.formula.po.FormulaTFormulaDefPO">
+		select t.TABLEID,
+		t.FORMULAID,
+		t.FORMULANAME,
+		t.FORMULATYPE,
+		t.FORMULALVL,
+		t.FORMULADEF,
+		substr(t.FORMULADEFCHI,
+		(case
+		when
+		instr(t.FORMULADEFCHI, '}=') <![CDATA[<>]]>
+		0 then
+		instr(t.FORMULADEFCHI, '}=') + 2
+		else
+		0
+		end),
+		length(t.FORMULADEFCHI)) FORMULADEFCHI,
+		t.FORMULADEFENG,
+		t.ISPUBLIC,
+		t.FORCOMCOL,
+		t.FORWHERE,
+		t.FORPARMCOL,
+		t.ISEDIT,
+		t.ORDERID
+		from
+		formula_t_formuladef t
+		where t.TABLEID = #{tableID}
+		and t.FORMULATYPE =
+		#{formulaType}
+		<if test="formulaID != null and formulaID != ''">
+			and t.FORMULAID = #{formulaID}
+		</if>
+		order by t.ORDERID
+	</select>
+	<select id="selectFormulaGridData" parameterType="Map"
+		resultMap="ClobMap">
+		select t.TABLEID,
+		t.FORMULAID,
+		t.FORMULANAME,
+		t.FORMULATYPE,
+		t.FORMULALVL,
+		t.FORMULADEF,
+		${colName}
+		substr(t.FORMULADEFCHI,
+		(case
+		when
+		instr(t.FORMULADEFCHI, '}=') <![CDATA[<>]]>
+		0 then
+		instr(t.FORMULADEFCHI, '}=') + 2
+		else
+		0
+		end),
+		length(t.FORMULADEFCHI)) FORMULADEFCHI,
+		t.FORMULADEFENG,
+		t.ISPUBLIC,
+		t.FORCOMCOL,
+		t.FORWHERE,
+		t.FORPARMCOL,
+		t.ISEDIT,
+		t.ORDERID
+		from
+		formula_t_formuladef t ${factorTableName}
+		where t.TABLEID = #{tableID}
+		and t.FORMULATYPE = #{formulaType}
+		${colWhere}
+		<if test="formulaID != null and formulaID != ''">
+			and t.FORMULAID = #{formulaID}
+		</if>
+		order by t.ORDERID
+	</select>
+	<sql id="formula_sql">
+		FORMULAID,TABLEID,ORDERID,FORMULANAME,FORMULATYPE,FORMULALVL,FORMULADEF,ISPUBLIC,FORMULADEFCHI,FORCOMCOL,FORWHERE,FORPARMCOL,FORMULADEFENG,ISEDIT
+	</sql>
+	<insert id="insertFormulaData"
+		parameterType="com.tjhq.commons.setting.formula.po.FormulaTFormulaDefPO">
+		<selectKey resultType="String" order="BEFORE" keyProperty="formulaID">
+			SELECT SYS_GUID() AS formulaID FROM DUAL  
+   	 	</selectKey>
+		INSERT INTO formula_t_formuladef(
+		<include refid="formula_sql" />
+		) VALUES(
+		#{formulaID,jdbcType = VARCHAR},
+		#{tableID,jdbcType =
+		VARCHAR},
+		#{orderID,jdbcType = NUMERIC},
+		#{formulaName,jdbcType =
+		VARCHAR},
+		#{formulaType,jdbcType = VARCHAR},
+		#{formulaLvl,jdbcType =
+		VARCHAR},
+		#{formulaDef,jdbcType = CLOB},
+		#{isPublic,jdbcType = VARCHAR},
+		#{formulaDefChi,jdbcType = CLOB},
+		#{forComcol,jdbcType = VARCHAR},
+		#{forWhere,jdbcType = VARCHAR},
+		#{forParmCol,jdbcType = VARCHAR},
+		#{formulaDefEng,jdbcType = CLOB},
+		#{isEdit,jdbcType = VARCHAR}
+		)
+	</insert>
+	<update id="updateFormulaData"
+		parameterType="com.tjhq.commons.setting.formula.po.FormulaTFormulaDefPO">
+		update formula_t_formuladef
+		<set>
+			<if test="formulaName != null">
+				FORMULANAME=#{formulaName,jdbcType = VARCHAR},
+    			</if>
+			<if test="formulaLvl != null">
+				FORMULALVL=#{formulaLvl,jdbcType=VARCHAR},
+    			</if>
+			<if test="formulaDef != null">
+				FORMULADEF=#{formulaDef,jdbcType=CLOB},
+    			</if>
+			<if test="isPublic != null">
+				ISPUBLIC=#{isPublic,jdbcType=VARCHAR},
+    			</if>
+			<if test="formulaDefChi != null">
+				FORMULADEFCHI=#{formulaDefChi,jdbcType=CLOB},
+    			</if>
+			<if test="forComcol != null">
+				FORCOMCOL=#{forComcol,jdbcType=VARCHAR},
+    			</if>
+			<if test="forWhere != null">
+				FORWHERE=#{forWhere,jdbcType=VARCHAR},
+    			</if>
+			<if test="forParmCol != null">
+				FORPARMCOL=#{forParmCol,jdbcType=VARCHAR},
+    			</if>
+			<if test="formulaDefEng != null">
+				FORMULADEFENG=#{formulaDefEng,jdbcType=CLOB},
+    			</if>
+			<if test="orderID != null">
+				ORDERID=#{orderID,jdbcType=NUMERIC},
+    			</if>
+			<if test="isEdit != null ">
+				ISEDIT = #{isEdit,jdbcType = VARCHAR}
+		       </if>
+		</set>
+		where FORMULAID = #{formulaID,jdbcType=VARCHAR}
+	</update>
+	<delete id="deleteFormulaData" parameterType="Map">
+		delete from formula_t_formuladef where FORMULAID in
+		<foreach collection="list" item="lists" index="index" open="("
+			separator="," close=")">
+			#{lists.FORMULAID,jdbcType=VARCHAR}
+    	</foreach>
+	</delete>
+	<select id="verifyFormulaDef" parameterType="String" resultType="Integer">
+		${sql}
+	</select>
+	<select id="verifyFormula" parameterType="String" resultType="String">
+		${sql}
+	</select>
+	<select id="callErrorMessage" statementType="CALLABLE"
+		parameterType="Map">  
+	<![CDATA[  
+	    {CALL EXECDLL_LONG_PARAM (#{errorMessage,mode=OUT,jdbcType=VARCHAR},#{sql,mode=IN,jdbcType=VARCHAR})}  
+	]]>
+	</select>
+
+	<select id="formulaExist" parameterType="Map" resultType="Integer">
+		select count(1) from formula_t_formuladef t
+		where t.TABLEID =
+		#{tableID}
+		and t.FORCOMCOL = #{forComcol}
+		<if test="formulaID != null and formulaID != ''">
+			and t.FORMULAID <![CDATA[ <> ]]>
+			#{formulaID}
+		</if>
+		<if test="forWhere != null and forWhere != ''">
+			and t.FORWHERE IS NULL
+		</if>
+	</select>
+
+	<update id="refreshFormula" parameterType="String">
+		update formula_t_formuladef
+		<set>
+			<if test="formulaDefChi != null">
+				FORMULADEFCHI=#{formulaDefChi,jdbcType = VARCHAR}
+    			</if>
+		</set>
+		where FORMULAID = #{formulaID,jdbcType=VARCHAR}
+	</update>
+
+	<select id="formulaOrderID" parameterType="String" resultType="Integer">
+		select nvl(max(ORDERID),0) ORDERID
+		from formula_t_formuladef
+		where
+		TABLEID = #{tableID}
+		and FORMULATYPE = #{formulaType}
+	</select>
+
+	<select id="selectCellFormula" parameterType="Map"
+		resultType="com.tjhq.commons.setting.formula.po.FormulaTFormulaDefPO">
+		select t.TABLEID,
+		t.FORMULAID,
+		t.FORMULANAME,
+		t.FORMULATYPE,
+		t.FORMULALVL,
+		t.FORMULADEF,
+		substr(t.FORMULADEFCHI,
+		(case
+		when
+		instr(t.FORMULADEFCHI, '}=') <![CDATA[<>]]>
+		0 then
+		instr(t.FORMULADEFCHI, '}=') + 2
+		else
+		0
+		end),
+		length(t.FORMULADEFCHI)) FORMULADEFCHI,
+		t.FORMULADEFENG,
+		t.ISPUBLIC,
+		t.FORCOMCOL,
+		t.FORWHERE,
+		t.FORPARMCOL,
+		t.ISEDIT,
+		t.ORDERID
+		from
+		formula_t_formuladef t
+		where t.TABLEID = #{tableID}
+		and t.FORCOMCOL =
+		#{forComcol}
+		and t.FORWHERE = #{forWhere}
+		order by t.ORDERID
+	</select>
+
+	<resultMap type="hashmap" id="formulaColumnMap">
+		<result column="COLUMNID" property="COLUMNID" javaType="string"
+			jdbcType="CLOB" />
+		<result column="FDCODE" property="FDCODE" javaType="string"
+			jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="selectFormulaColumn" parameterType="String"
+		resultType="hashmap">
+		select TO_CHAR(wm_concat(f.COLUMNID)) COLUMNID, t.FORWHERE
+		FDCODE
+		from formula_t_formuladef t, dict_t_factor f
+		where f.TABLEID =
+		t.TABLEID
+		and f.DBCOLUMNNAME = t.FORCOMCOL
+		and t.TABLEID = #{tableID}
+		and t.FORMULATYPE = #{formulaType}
+		group by t.TABLEID, t.FORWHERE
+	</select>
+	<select id="callPDropVoidTriggerForParam" statementType="CALLABLE"
+		parameterType="java.util.Map">  
+	<![CDATA[  
+	    {CALL PKG_FORMULA.P_DROPVOIDTRIGGER (#{tableId,mode=IN,jdbcType=VARCHAR})}  
+	]]>
+	</select>
+	<select id="callPCreateTrigger8ForParam" statementType="CALLABLE"
+		parameterType="java.util.Map">  
+	<![CDATA[  
+	    {CALL PKG_FORMULA.P_CREATE_TRIGGER_8 (#{tableId,mode=IN,jdbcType=VARCHAR})}  
+	]]>
+	</select>
+	<select id="getColNameByColID" parameterType="map" resultType="hashmap">
+		select name , code  from ${tableName} where guid=#{columnID}
+</select>
+	<select id="getAppList" resultType="map">
+		select
+		t.APPID,t.APPNAME,t.DBID from dict_t_appregister t order by ORDERID
+	</select>
+	<update id="get_Needupdate_Length" parameterType="java.util.HashMap" statementType="CALLABLE">
+	<![CDATA[
+		DECLARE
+		  V_NEEDUPDATE VARCHAR2(32760);
+		BEGIN
+		 V_NEEDUPDATE := PKG_FORMULA.F_GETNEEDUPDATE_689(#{tableId,mode=IN,jdbcType=VARCHAR});
+		 #{len,jdbcType=VARCHAR,mode=OUT} := TO_CHAR(LENGTH(V_NEEDUPDATE));
+		END;
+	]]>
+	</update>
+</mapper>

@@ -1,0 +1,470 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.input.dao.GeneralMapper">
+	<!-- 可复用的SQL代码段 BEGIN -->
+	<sql id="angleview_sql">	<!-- 视角 -->
+		TABLEID, ORDERID, COLUMNID
+	</sql>
+	<sql id="group_sql">	<!-- 分组设置 -->
+		TABLEID, ORDERID, COLUMNID, IDSHOWCOL, NAMESHOWCOL, ISASC
+	</sql>
+	<sql id="sort_sql">		<!-- 排序设置 -->
+		TABLEID, ORDERID, COLUMNID, ASCFlAG, ISDEFAULT, ISRESERVE
+	</sql>
+	<sql id="refrela_sql">	<!-- 引用列关系定义 -->
+		RELAID, RELANAME, RELADBTAB, TABLEID, CONDCOLUMNID, COLUMNID, TABLETYPE
+	</sql>
+	<sql id="refrela_dbTab_sql">	<!-- 引用列关系定义 相关物理表 -->
+		RELAID, CONDDATAID, DATAID
+	</sql>
+	<sql id="analy_sql">			<!-- 查询（分析）引用定义 -->
+		HREFPARMID, ORDERID, TABLEID, HREFNAME, HREFLOC, PICTUREID
+	</sql>
+	<sql id="hrefParm_sql">			<!-- 查询（分析）引用定义 -->
+		HREFID, HREFPARMID, ORDERID, PARMNAME, PARMCON
+	</sql>
+	<sql id="queryd_sql">			<!-- 查询条件设置 -->
+		RECID, TABLEID, SHOWCOLS, TITLEWIDTH, ISSHOWTITLE
+	</sql>
+	<sql id="querydDet_sql">		<!-- 查询条件设置 子表 -->
+		GUID, RECID, CTRLID, ORDERID, COLSPAN, OPERATOR, DEFVALUE, ISSHOW
+	</sql>
+	<sql id="baseNumSub_sql">		<!-- 基本数字表设置 子表 -->
+		GUID, COLUMNID, ORDERID, COLVALUE
+	</sql>
+	<!-- 可复用的SQL代码段 END -->
+
+	<insert id="insertAngleView" parameterType="Map">
+		INSERT INTO dict_t_setangleview(<include refid="angleview_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT
+				#{lists.tableID, jdbcType = VARCHAR},
+				#{lists.orderID,jdbcType = NUMERIC},
+				#{lists.columnID,jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateAngleView" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETANGLEVIEW
+			<set>
+				<if test="lists.orderID != null">
+					ORDERID = #{lists.orderID, jdbcType=NUMERIC},
+				</if>
+				<if test="lists.isDefault != null">
+					ISDEFAULT = #{lists.isDefault, jdbcType=VARCHAR}
+				</if>
+			</set>
+			WHERE COLUMNID IN #{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteAngleView" parameterType="Map">
+		DELETE FROM DICT_T_SETANGLEVIEW WHERE COLUMNID IN
+		<foreach collection="list" item="lists" index="index" open="(" separator="," close=")">
+			#{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+
+	<insert id="insertGroup" parameterType="Map">
+		INSERT INTO DICT_T_SETGROUP(<include refid="group_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT
+				#{lists.tableID, jdbcType = VARCHAR}, #{lists.orderID, jdbcType = NUMERIC},
+				#{lists.columnID, jdbcType = VARCHAR}, #{lists.idShowCol, jdbcType = VARCHAR},
+				#{lists.nameShowCol, jdbcType = VARCHAR}, #{lists.isasc, jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateGroup" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETGROUP
+			<set>
+				<if test="lists.orderID != null"> ORDERID = #{lists.orderID, jdbcType=NUMERIC}, </if>
+				<if test="lists.idShowCol != null"> IDSHOWCOL = #{lists.idShowCol, jdbcType=VARCHAR}, </if>
+				<if test="lists.nameShowCol != null"> NAMESHOWCOL = #{lists.nameShowCol, jdbcType=VARCHAR}, </if>
+				<if test="lists.isasc != null"> ISASC = #{lists.isasc, jdbcType=VARCHAR} </if>
+			</set>
+			WHERE COLUMNID IN #{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteGroup" parameterType="Map">
+		DELETE FROM DICT_T_SETGROUP WHERE COLUMNID IN
+		<foreach collection="list" item="lists" index="index" open="(" separator="," close=")">
+			#{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+
+	<insert id="insertSort" parameterType="Map">
+		INSERT INTO dict_t_setsort(<include refid="sort_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT
+				#{lists.tableID,jdbcType = VARCHAR}, #{lists.orderID,jdbcType = NUMERIC},
+				#{lists.columnID,jdbcType = VARCHAR}, #{lists.ascFlag,jdbcType = VARCHAR},
+				#{lists.isDefault,jdbcType = VARCHAR}, #{lists.isReserve,jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateSort" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETSORT
+			<set>
+				<if test="lists.orderID != null"> ORDERID = #{lists.orderID, jdbcType=NUMERIC}, </if>
+				<if test="lists.ascFlag != null"> ASCFLAG = #{lists.ascFlag, jdbcType=VARCHAR}, </if>
+				<if test="lists.isDefault != null"> ISDEFAULT = #{lists.isDefault, jdbcType=VARCHAR}, </if>
+				<if test="lists.isReserve != null"> ISRESERVE = #{lists.isReserve, jdbcType=VARCHAR}, </if>
+				COLUMNID = #{lists.columnID, jdbcType=VARCHAR}
+			</set>
+			WHERE COLUMNID IN #{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteSort" parameterType="Map">
+		DELETE FROM DICT_T_SETSORT WHERE COLUMNID IN
+		<foreach collection="list" item="lists" index="index" open="(" separator="," close=")">
+			#{lists.columnID, jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+
+	<insert id="insertRefrela" parameterType="Map">
+		INSERT INTO dict_t_setrefrela(<include refid="refrela_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT
+				SYS_GUID(),
+				#{lists.relaName, jdbcType = VARCHAR}, Upper(#{lists.relaDbTab, jdbcType = VARCHAR}),
+				#{lists.tableID, jdbcType = VARCHAR}, #{lists.condColumnID, jdbcType = VARCHAR},
+				#{lists.columnID, jdbcType = VARCHAR}, #{lists.tableType, jdbcType = VARCHAR}
+			FROM dual
+		</foreach>
+	</insert>
+
+	<select id="findRepeatNameCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(*) FROM DICT_T_SETREFRELA WHERE 1=1
+		<if test="relaName != null and relaName!=''"> AND relaName = #{relaName} </if>
+		<if test="TABLEID != null and TABLEID!=''"> AND TABLEID = #{TABLEID} </if>
+		<if test="RELAID != null and RELAID!=''">
+			AND RELAID <![CDATA[ <> ]]> #{RELAID}
+			AND TABLEID =
+				(SELECT s.TABLEID FROM DICT_T_SETREFRELA s WHERE s.RELAID=#{RELAID})
+		</if>
+	</select>
+
+	<!-- 引用列关系表不能修改 -->
+	<update id="updateRefrela" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETREFRELA
+			<set>
+				<if test="lists.tableType!= null"> TABLETYPE = #{lists.tableType, jdbcType=VARCHAR}, </if>
+				<if test="lists.relaName != null"> RELANAME = #{lists.relaName, jdbcType=VARCHAR}, </if>
+				<!-- <if test="lists.relaDbTab != null"> RELADBTAB=#{lists.relaDbTab,jdbcType=VARCHAR}, 
+					</if> <if test="lists.columnID != null"> COLUMNID=#{lists.columnID,jdbcType=VARCHAR}, 
+					</if> <if test="lists.toColumnID != null"> TOCOLUMNID=#{lists.toColumnID,jdbcType=VARCHAR} 
+					</if> -->
+				RELAID = #{lists.relaID, jdbcType=VARCHAR}
+			</set>
+			WHERE RELAID IN #{lists.relaID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteRefrela" parameterType="Map">
+		DELETE FROM DICT_T_SETREFRELA WHERE RELAID IN
+		<foreach collection="list" item="lists" index="index" open="(" separator="," close=")">
+			#{lists.relaID, jdbcType=VARCHAR}
+		</foreach>
+	</delete>
+
+	<select id="findOtherSameRelName" parameterType="java.util.Map" resultType="int">
+		<!-- select count(*) from dict_t_setrefrela where RELADBTAB=#{relaDbTab} 
+			AND RELAID not in <foreach collection="list" item="listmap" index="index" 
+			open="(" separator="," close=")"> #{listmap.relaID} </foreach> -->
+		SELECT COUNT(*) FROM P#DICT_T_SETREFRELA
+		WHERE
+			RELADBTAB = '${relaDbTab}' AND STATUS = '1'
+		AND (RELAID NOT IN (
+			<foreach collection="list" item="listmap" separator=",">
+				#{listmap.relaID}
+			</foreach>)
+		OR YEAR <![CDATA[ <> ]]> '${year}')
+	</select>
+
+	<!-- 引用列关系定义  相关物理表 -->   
+	<insert id="insertRefrelaDetail" parameterType="Map">
+		INSERT INTO ${relaDbTab}(<include refid="refrela_dbTab_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT
+				#{lists.relaID,jdbcType = VARCHAR},
+				#{lists.condDataID,jdbcType = VARCHAR},
+				#{lists.dataID,jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<delete id="deleteRefrelaDetail" parameterType="Map">
+		DELETE FROM ${relaDbTab}
+		WHERE CONDDATAID = #{lists.condDataID, jdbcType=VARCHAR}
+		AND DATAID IN
+		(<foreach collection="list" item="lists" index="index" separator="," >
+			#{lists.dataID,jdbcType=VARCHAR}
+		</foreach>)
+	</delete>
+
+	<delete id="deleteAllRefrelaDetail" parameterType="Map">
+		DELETE FROM ${relaDbTab}
+		WHERE CONDDATAID = '${condDataID}'
+	</delete>
+
+	<!-- 引用列关系定义  相关物理表 -->   
+	<insert id="addRefrelaDetail" parameterType="Map">
+		INSERT INTO ${relaDbTab}(<include refid="refrela_dbTab_sql" />)
+		<foreach collection="relas" item="rela" index="index" separator="union all">
+			SELECT
+				#{relaID, jdbcType = VARCHAR},
+				#{condDataID, jdbcType = VARCHAR},
+				#{rela.dataID, jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<insert id="insertAnaly" parameterType="Map">
+		begin
+		<foreach collection="list" item="lists" index="index" separator=";">
+			INSERT INTO DICT_T_SETANALY(<include refid="analy_sql" />)
+			VALUES(
+			SYS_GUID(),
+			<if test="lists.orderID != null and lists.orderID != ''">
+				#{lists.orderID, jdbcType = VARCHAR},
+			</if>
+			<if test="lists.orderID == null">
+				(SELECT MAX(ORDERID)+1 FROM DICT_T_SETANALY),
+			</if>
+			#{lists.tableID,jdbcType = VARCHAR},
+			#{lists.hrefName,jdbcType = VARCHAR},
+			#{lists.hrefLoc,jdbcType = VARCHAR},
+			#{lists.pictureID,jdbcType = VARCHAR})
+		</foreach>
+		;END;
+	</insert>
+
+	<update id="updateAnaly" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETANALY
+			<set>
+				<if test="lists.orderID != null">
+					ORDERID = #{lists.orderID, jdbcType=NUMERIC},
+				</if>
+				<if test="lists.hrefName != null">
+					 HREFNAME = #{lists.hrefName, jdbcType=VARCHAR},
+				</if>
+				<if test="lists.hrefLoc != null">
+					HREFLOC = #{lists.hrefLoc, jdbcType=VARCHAR},
+				</if>
+				<if test="lists.pictureID != null">
+					PICTUREID = #{lists.pictureID, jdbcType=VARCHAR} 
+				</if>
+			</set>
+			WHERE HREFPARMID IN #{lists.hrefParmID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteAnaly" parameterType="Map">
+		DELETE FROM DICT_T_SETANALY WHERE HREFPARMID IN
+		(<foreach collection="list" item="lists" index="index" separator=",">
+			#{lists.hrefParmID, jdbcType=VARCHAR}
+		</foreach>)
+	</delete>
+	<delete id="deleteAnalyCascHref" parameterType="Map">
+		DELETE FROM DICT_T_SETHREFPARM WHERE HREFPARMID IN
+		(<foreach collection="list" item="lists" index="index" separator=",">
+			#{lists.hrefParmID, jdbcType=VARCHAR}
+		</foreach>)
+	</delete>
+
+	<insert id="insertAnalyDetail" parameterType="Map">
+		INSERT INTO dict_t_sethrefparm(<include refid="hrefParm_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT 
+			SYS_GUID(),
+				#{lists.hrefParmID,jdbcType = VARCHAR}, #{lists.orderID,jdbcType = NUMERIC},
+				#{lists.parmName,jdbcType = VARCHAR}, #{lists.parmCon,jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateAnalyDetail" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETHREFPARM
+			<set>
+				<if test="lists.orderID != null">
+					ORDERID = #{lists.orderID, jdbcType=NUMERIC},
+				</if>
+				<if test="lists.parmName != null">
+					PARMNAME = #{lists.parmName, jdbcType=VARCHAR},
+				</if>
+				<if test="lists.parmCon != null">
+					PARMCON = #{lists.parmCon, jdbcType=VARCHAR}
+				</if>
+			</set>
+			WHERE HREFID IN #{lists.hrefID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteAnalyDetail" parameterType="Map">
+		DELETE FROM DICT_T_SETHREFPARM WHERE HREFID IN
+		(<foreach collection="list" item="lists" index="index" separator=",">
+			#{lists.hrefID, jdbcType=VARCHAR}
+   		</foreach>)
+	</delete>
+
+    <!-- 查询条件设置 -->
+	<insert id="insertQueryd" parameterType="Map">
+		<selectKey resultType="String" order="BEFORE" keyProperty="recID">
+			SELECT SYS_GUID() AS recID FROM DUAL  
+		</selectKey>
+		INSERT INTO dict_t_setqueryd(<include refid="queryd_sql" />)
+		VALUES
+		(#{recID,jdbcType = VARCHAR},
+		#{tableID,jdbcType = VARCHAR},
+		#{showCols,jdbcType = NUMERIC},
+		#{titleWidth,jdbcType = NUMERIC},
+		#{isShowTitle,jdbcType = VARCHAR})
+	</insert>
+
+	<update id="updateQueryd" parameterType="Map">
+		UPDATE DICT_T_SETQUERYD
+		<set>
+			<if test="showCols != null">
+				SHOWCOLS = #{showCols, jdbcType=NUMERIC},	
+			</if>
+			<if test="titleWidth != null">
+				TITLEWIDTH = #{titleWidth, jdbcType=NUMERIC}, 
+			</if>
+			<if test="isShowTitle != null">
+				ISSHOWTITLE=#{isShowTitle, jdbcType=VARCHAR}
+			</if>
+		</set>
+		WHERE RECID = #{recID, jdbcType=VARCHAR}
+	</update>
+
+	<insert id="insertQuerydDet" parameterType="Map">
+		INSERT INTO dict_t_setqueryddet(<include refid="querydDet_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT 
+				SYS_GUID(), #{lists.recID,jdbcType = VARCHAR},
+				#{lists.ctrlID, jdbcType = VARCHAR}, #{lists.orderID, jdbcType = NUMERIC},
+				#{lists.colspan, jdbcType = NUMERIC}, #{lists.operator, jdbcType = VARCHAR},
+				#{lists.defvalue, jdbcType = VARCHAR}, #{lists.isShow, jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateQuerydDet" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETQUERYDDET
+			<set>
+				<if test="lists.ctrlID != null">
+					CTRLID=#{lists.ctrlID, jdbcType=VARCHAR}, 
+				</if>
+				<if test="lists.orderID != null">
+					ORDERID=#{lists.orderID, jdbcType=NUMERIC},
+				</if>
+				<if test="lists.colspan != null">
+					COLSPAN=#{lists.colspan, jdbcType=NUMERIC}, 
+				</if>
+				<if test="lists.operator != null">
+				OPERATOR=#{lists.operator, jdbcType=VARCHAR},
+				
+				</if>
+				<if test="lists.defvalue != null">DEFVALUE=#{lists.defvalue, jdbcType=VARCHAR}, </if>
+				<if test="lists.isShow != null">
+				ISSHOW=#{lists.isShow, jdbcType=VARCHAR} </if>
+			</set>
+			WHERE RECID = #{lists.recID, jdbcType=VARCHAR}
+			AND GUID = #{lists.guID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteQuerydDet" parameterType="Map">
+		DELETE FROM DICT_T_SETQUERYDDET
+		WHERE RECID = #{lists.recID, jdbcType=VARCHAR} 
+		AND GUID IN
+		(<foreach collection="list" item="lists" index="index" separator=",">
+			#{lists.guID, jdbcType=VARCHAR}
+   		</foreach>)
+	</delete>
+
+	<!-- 删除值集连关系设置 -->
+	<delete id="deleteRefrelaData" parameterType="String">
+		DELETE FROM ${relaDbTabName} WHERE RELAID = '${relaId}'
+	</delete>
+
+	<insert id="insertBaseNumSub" parameterType="Map">
+		INSERT INTO dict_t_setbasenumsub(<include refid="baseNumSub_sql" />)
+		<foreach collection="list" item="lists" index="index" separator="union all">
+			SELECT 
+				SYS_GUID(),
+				#{lists.columnID, jdbcType = VARCHAR},
+				#{lists.orderID, jdbcType = NUMERIC},
+				#{lists.colValue, jdbcType = VARCHAR}
+			FROM dual
+	   </foreach>
+	</insert>
+
+	<update id="updateBaseNumSub" parameterType="Map">
+		BEGIN
+		<foreach collection="list" item="lists" index="index" separator=";">
+			UPDATE DICT_T_SETBASENUMSUB
+			<set>
+				<if test="lists.orderID != null">
+					ORDERID = #{lists.orderID, jdbcType=NUMERIC},
+				</if>
+				<if test="lists.colValue != null">
+					COLVALUE = #{lists.colValue, jdbcType=VARCHAR}
+				</if>
+			</set>
+			WHERE GUID = #{lists.guID, jdbcType=VARCHAR}
+		</foreach>
+		;END;
+	</update>
+
+	<delete id="deleteBaseNumSub" parameterType="Map">
+		DELETE FROM DICT_T_SETBASENUMSUB
+		WHERE GUID IN
+		(<foreach collection="list" item="lists" index="index" separator=",">
+			#{lists.guID, jdbcType=VARCHAR}
+   		</foreach>)
+	</delete>
+
+	<resultMap id="codeMap" type="Map">
+		<id property="id" column="GUID" />
+		<result property="code" column="CODE" />
+		<result property="name" column="NAME" />
+		<result property="pId" column="SUPERGUID" />
+		<result property="isLeaf" column="ISLEAF" />
+		<result property="levelNo" column="LEVELNO" />
+	</resultMap>
+
+	<select id="queryCodeTable" parameterType="String" resultMap="codeMap">
+		SELECT
+			GUID, CODE, NAME, SUPERGUID, ISLEAF, LEVELNO
+		FROM ${dbTableName}
+	</select>
+</mapper>
+

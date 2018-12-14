@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.commonweb.dao.ICommonwebDAO">
+
+	<select id="queryRelData" parameterType="java.util.Map" resultType="java.util.Map">
+		 WITH RELA_TAB AS (
+		 	<foreach collection="relaTabs" item="item" index="index" close="" separator="INTERSECT">
+        		SELECT DATAID FROM ${item.refTableName}  WHERE CONDDATAID = #{item.refValue}
+			</foreach>
+		 )
+		 SELECT 
+		 <foreach item="mapField" separator="," collection="fields">
+				A_1.${mapField}
+		 </foreach>
+		 FROM ${tableName}  A_1  WHERE GUID IN (SELECT GUID 
+         FROM ${tableName} 
+		 START WITH GUID IN (SELECT DATAID FROM RELA_TAB)
+         CONNECT BY PRIOR SUPERGUID = GUID)
+		 <if test="sqlWhere!=null">
+		  		AND ${sqlWhere}
+		 </if>
+		 
+	</select>
+	
+	<select id="queryListData" parameterType="java.util.Map" resultType="java.util.Map">
+		 SELECT  
+		 <foreach item="mapField" separator="," collection="fields">
+				${mapField}
+		 </foreach> 
+         FROM ${tableName}  A_1
+		 <if test="sqlWhere!=null">
+		  		WHERE ${sqlWhere} 
+		 </if>
+	</select>
+	
+	<select id="queryForList" parameterType="java.util.Map" resultType="java.util.Map">
+		 ${querySql}
+	</select>
+  
+</mapper>

@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTTableMapper">
+	<resultMap id="secuttable" type="com.tjhq.commons.secu.po.SecuTTablePO">
+		<result property="tableId" column="tableId" />
+		<result property="tableName" column="tableName" />
+		<result property="isSuit" column="isSuit" />
+		<result property="manId" column="manId" />
+		<result property="manType" column="manType" />
+		<result property="extAdd" column="extAdd" />
+		<result property="extDel" column="extDel" />
+		<result property="extUpdate" column="extUpdate" />
+		<result property="baseSecu" column="baseSecu" />
+		<result property="suitId" column="suitId" />
+	</resultMap>
+	<resultMap id="acctitemtreenode" type="com.tjhq.commons.secu.po.TreeNode">
+		<result property="name" column="name" />
+		<result property="nocheck" column="nocheck" />
+		<result property="id" column="guid" />
+		<result property="PId" column="superguid" />
+	</resultMap>
+	<resultMap id="dicttmodel" type="com.tjhq.commons.dict.external.po.DictTModelPO">
+		<result column="YEAR" property="year" />
+		<result column="ADMDIVCODE" property="admdivcode" />
+		<result column="TABLEID" property="tableid" />
+		<result column="NAME" property="name" />
+		<result column="ORDERID" property="orderid" />
+		<result column="DBTABLENAME" property="dbtablename" />
+		<result column="TABLETYPE" property="tabletype" />
+		<result column="ISSHOW" property="isshow" />
+		<result column="APPID" property="appid" />
+		<result column="VERSION" property="version" />
+		<result column="REMARK" property="remark" />
+		<result column="SUITID"  property="suitid" />
+		<result column="DEALTYPE"  property="dealtype" />
+		<result column="ISRESERVED"  property="isreserved" />
+		<result column="INPUTLVL"  property="inputlvl" />
+		<result column="ISADD"  property="isadd" />
+		<result column="SHORTTITLE"  property="shorttitle" />
+		<result column="EXTPROP"  property="extprop" />
+		<result column="BGTLVL"  property="bgtlvl" />
+		<result column="SECUSQL"  property="secusql" />
+		<result column="ISSUMTAB"  property="issumtab" />
+		<result column="ISMAN"  property="isman" />
+		<result column="MAINUPTAB"  property="mainuptab" />
+		<result column="RELATAB"  property="relatab" />
+		<result column="TABSWHERE"  property="tabswhere" />
+		<result column="ISPARTITION" property="ispartition" />
+		<!-- 父表字段 -->
+		<result column="SUITNAME"  property="suitName" />
+		<result column="DEALNAME"  property="dealName" />
+	</resultMap>
+
+	<select id="getTableSecuList" parameterType="java.util.Map"
+		resultMap="secuttable">
+		select t.*, t2.NAME as tableName,t2.suitid 
+		from secu_t_table t,
+		dict_t_model t2
+		where t.TABLEID = t2.TABLEID
+		and t.manId = #{roleId}
+		and
+		t.manType = '1'
+		and issuit = '0'
+		and t2.APPID=#{appId}
+
+		union
+
+		select t.*, t2.suitname as
+		tableName,t2.suitid
+		from secu_t_table t, dict_t_suit t2
+		where t.TABLEID =
+		t2.SUITID
+		and t.manId = #{roleId}
+		and t.manType = '1'
+		and issuit = '1'
+		and t2.APPID=#{appId}
+
+	</select>
+	
+	<select id="getTableSecuWithDataBaseCache" parameterType="java.util.Map" resultType="java.lang.String">
+		<![CDATA[
+		select (pk_bgt_secu.f_Secu_Tab('BGT','F68296EBDBE608CAE040A8C020032510','0','F7320E40F4DD37F2E040A8C02003507A',''))  as TABLESECU from dual
+		]]>
+	</select>
+	
+	<select id="verifyTableRowLimit" parameterType="java.util.Map" resultType="map">
+		select * from (select rownum as numb from ${tableDBName} where ${sqlWhere}) t1 where t1.numb=1
+	</select>
+	<select id="verifyTableCellLimit" parameterType="java.util.Map" resultType="map">
+		select ${sqlWhere} as test from (select rownum as numbtmpnihao,t2.* from ${tableDBName} t2) t1 where t1.numbtmpnihao=1
+	</select>
+	<select id="getSecuTtableLimitList" parameterType="java.util.Map"
+		resultMap="secuttable">
+		<!--  
+			select * from secu_t_table u where mantype='1' and issuit='0' and
+			tableID=#{TABLEID} and manid in
+			<foreach item="roleId" index="index" collection="ROLEIDS"
+				open="(" separator="," close=")">
+				#{roleId.ROLEID}
+			</foreach>
+		--> 
+			<!--  
+		select '${TABLEID}' tableid, 
+		       max(name),
+		       max(ISSUIT) ISSUIT,
+		       max(MANTYPE) MANTYPE,
+		       max(baseSecu) baseSecu,
+		       max(extadd) extAdd,
+		       max(extdel) extDel,
+		       max(extupdate) extUpdate
+		  from (select tab.manid,
+               tab.MANTYPE,
+               tab.basesecu,
+               tab.extadd,
+               tab.extdel,
+               tab.ExtUpdate,
+               tab.ISSUIT,
+               (select name from dict_t_model m where m.tableid=#{TABLEID}) name, 
+               tab.tableid
+          from Secu_t_Table tab, secu_t_suittab suit
+         where tab.tableid = suit.Suitid(+) 
+         	and (tab.tableid = #{TABLEID} or suit.tableid=#{TABLEID})
+         	and tab.mantype='1'
+           	and tab.manid in
+           	<if test="agencyId==null">
+           	(
+       			select 
+       				roleid
+                from  
+                	secu_t_userRole ur
+                where 
+                	ur.userid = '${userId}' 
+           	 )
+           	 </if>
+           	 <if test="agencyId!=null">
+            (
+	   				select roleid
+                        from secu_t_agency ds, secu_t_userRole ur
+                       where ur.userid = '${userId}'
+                         and ur.roleid = ds.manid 
+                         and ds.mantype = '1'
+	                and v_agencycode like '${agencyid}' || '%' 
+             )   
+             </if>    	  
+          ) kkk group by tableid
+			select tableid,
+				   s.baseSecu,
+				   s.extadd,
+				   s.extdel,
+				   s.ExtUpdate,
+				   (select name from dict_t_model m where m.tableid=#{TABLEID}) name 
+			from table(PK_BGT_SECU.f_Secu_Return_Tabs('${appId}','${userId}','1','${agencyId}')) s
+				 where tableid = #{TABLEID}
+		 -->
+		SELECT 
+			substr(s_data, 1, length(s_data) - 4) tableid,
+			substr(s_data, -4, 1) baseSecu,
+			substr(s_data, -3, 1) extadd,
+			substr(s_data, -2, 1) extdel,
+			substr(s_data,-1,1) ExtUpdate,
+			(select name from dict_t_model m where m.tableid=#{TABLEID}) name
+		FROM (select
+			PK_BGT_SECU.F_GET_SECU_TAB('${appId}','${userId}','1','${TABLEID}','${agencyId}')
+			s_data from dual) TTT
+ 
+			
+	</select> 
+	
+	<select id="getSecuTtableLimitListViaSuitIDs" parameterType="java.util.Map"
+		resultMap="secuttable">
+		select * from secu_t_table u where mantype='1' and issuit='1' and
+		tableID =(select suitid from dict_t_model where tableId=#{TABLEID})
+		and manid in
+		<foreach item="roleId" index="index" collection="ROLEIDS"
+			open="(" separator="," close=")">
+			#{roleId.ROLEID}
+		</foreach>
+	</select>
+	
+	<select id="getTableInputLimitListBySuitId" parameterType="java.lang.String"
+		resultType="map">
+		select t.TABLEID, t.NAME, '1' as LIMITFLAG
+		from Dict_t_Model
+		t,
+		(select tableID
+		from secu_t_limitcol
+		union
+		select tableID from
+		secu_t_limittab) s
+		where t.TABLEID = s.tableid
+		and t.SUITID = #{objId}
+		union
+		select t1.TABLEID, t1.NAME, '0' as LIMITFLAG
+		from dict_t_model t1
+		where t1.SUITID = #{objId}
+		and not exists
+		(select t.TABLEID, t.NAME, '1'
+		as LIMITFLAG
+		from Dict_t_Model t,
+		(select tableID
+		from secu_t_limitcol
+		union
+		select tableID from secu_t_limittab) s
+		where t.TABLEID = s.tableid
+		and t.SUITID = #{objId}
+		and t1.TABLEID = t.TABLEID)
+	</select>
+	
+	<select id="getTableInputUnlimitListBySuitId" parameterType="java.lang.String"
+		resultType="map">
+		select t1.TABLEID, t1.NAME, '0' as LIMITFLAG
+		from
+		dict_t_model t1
+		where t1.SUITID = #{objId}
+		and not exists (select
+		t.TABLEID, t.NAME, '1' as LIMITFLAG
+		from Dict_t_Model t,
+		(select tableID
+		from secu_t_limitcol
+		union
+		select tableID from secu_t_limittab) s
+		where
+		t.TABLEID = s.tableid
+		and t.SUITID = #{objId}
+		and t1.TABLEID =
+		t.TABLEID)
+	</select>
+	
+	<select id="getTableInputLimitedListBySuitId" parameterType="java.lang.String"
+		resultType="map">
+		select t.TABLEID, t.NAME, '1' as LIMITFLAG
+		from Dict_t_Model
+		t,
+		(select tableID
+		from secu_t_limitcol
+		union
+		select tableID from
+		secu_t_limittab) s
+		where t.TABLEID = s.tableid
+		and t.SUITID = #{objId}
+	</select>
+	
+	<select id="getTableInputLimitListByTableId" parameterType="java.lang.String"
+		resultType="map">
+		select t1.TABLEID, t1.NAME, DECODE(t2.LIMITFLAG, '', '0',
+		'1') as LIMITFLAG
+		from dict_t_model t1,
+		(select t.TABLEID, t.NAME, '1'
+		as LIMITFLAG
+		from dict_t_model t,
+		(select tableID
+		from secu_t_limitcol
+		union
+		select tableID from secu_t_limittab) s
+		where t.TABLEID =
+		s.tableid) t2
+		where t2.tableID(+) = t1.TABLEID
+		and t1.tableid = #{objId}
+	</select>
+
+	<select id="getAcctItemTreeData" parameterType="java.lang.String"
+		resultMap="acctitemtreenode">
+		select t.CODE,
+		decode((select code
+		from secu_t_limittab b,
+		${tableName} e
+		where b.LIMITID = e.GUID
+		and b.TABLEID = #{tableId}
+		and e.code = t.code),
+		'',
+		'false',
+		'true') as nocheck,
+		'['|| t.code||']'
+		||t.NAME as NAME,
+		t.GUID,
+		t.SUPERGUID
+		from ${tableName} t
+	</select>
+	
+	<select id="getTableListWithNoSuitSecu" parameterType="java.util.Map"
+		resultMap="dicttmodel">
+		select * from dict_t_model t1 where t1.TABLEID in (select
+		tableId from dict_t_model where suitId=#{suitId}) and
+		not exists
+		(select t.TABLEID
+		from secu_t_table t
+		where t.TABLEID in (select tableId
+		from dict_t_model where suitId=#{suitId})
+		and t.isSuit = 0
+		and t.MANID
+		in (select roleId from secu_t_userrole where userid = #{userId})
+		and
+		t.mantype = '1'
+		and t.baseSecu = '1' and t.TABLEID = t1.TABLEID) and t1.ISSHOW='1' and not exists ( select t4.TABLEID from DICT_T_SETMAINSUBTAB t4 where t4.ISMAINTABLE='0' and t4.TABLEID = t1.TABLEID ) ORDER BY t1.ORDERID
+	</select>
+	<select id="getTableListWithSuitSecu" parameterType="java.util.Map"
+		resultMap="dicttmodel">
+		<!-- <![CDATA[ 
+			select * from dict_t_model t1 where t1.TABLEID in (select
+			tableId from dict_t_model where suitId=#{suitId}) and exists (select
+			t.TABLEID
+			from secu_t_table t
+			where t.TABLEID in (select tableId from dict_t_model where
+			suitId=#{suitId})
+			and t.isSuit = 0
+			and t.MANID in (select roleId from secu_t_userrole where userid
+			=#{userId})
+			and t.mantype = '1'
+			and t.baseSecu <> '1' and t.TABLEID = t1.TABLEID) and t1.ISSHOW='1'  and not exists ( select t4.TABLEID from DICT_T_SETMAINSUBTAB t4 where t4.ISMAINTABLE='0' and t4.TABLEID = t1.TABLEID ) ORDER BY t1.ORDERID
+		]]> -->
+		<![CDATA[ 
+			select m.*
+			from table(PK_BGT_SECU.f_Secu_Return_Tabs('${appId}','${userId}','1','${agencyId}')) s,dict_t_model m
+			where s.tableid = m.tableid
+			and m.suitid = '${suitid}'
+			and s.baseSecu<>'1'
+			and m.ISSHOW='1'
+			and not exists ( select t4.TABLEID from DICT_T_SETMAINSUBTAB t4 where t4.ISMAINTABLE='0' and t4.TABLEID = m.TABLEID ) ORDER BY m.ORDERID 
+		]]>
+	</select>
+	<select id="getSuitIsHiddenBySuitId" parameterType="java.util.Map"
+		resultType="map">
+		select t.TABLEID
+		from secu_t_table t
+		where t.TABLEID in (
+		select suitid
+		from dict_t_suit t1 where appid=#{appId}
+		start with
+		t1.SUITID = #{suitId}
+		connect by prior t1.SUPERID = t1.SUITID)
+		and
+		t.isSuit = 1
+		and t.MANID in (select roleId from secu_t_userrole where
+		userid = #{userId})
+		and t.mantype = '1'
+		and t.baseSecu = '1'
+	</select>
+	<select id="getTableDatabaseNameBy" parameterType="java.util.Map"
+		resultType="map">
+		select TABLENAME from DICT_T_APPCODE where appId=#{appId} and objectId = #{tableType}
+	</select>
+
+	<update id="updateSecuTTableData" parameterType="java.util.Map">
+		update
+		secu_t_table t set t.extadd=#{extAdd},t.extDel = #{extDel},t.extUpdate
+		= #{extUpdate},t.baseSecu=#{baseSecu} where t.tableId=#{tableId} and
+		t.isSuit=#{isSuit} and t.manId=#{roleId} and t.manType='1'
+	</update>
+	
+	<insert id="insertSecuTTableData" parameterType="java.util.Map">
+		insert into
+		secu_t_table(tableId,isSuit,manId,extAdd,extDel,extUpdate,baseSecu,manType)
+		values(#{tableId},#{isSuit},#{roleId},#{extAdd},#{extDel},#{extUpdate},#{baseSecu},'1')
+	</insert>
+	
+	<delete id="deleteTableSecuLimit" parameterType="java.util.Map">
+		delete from secu_t_table t where t.tableId=#{tableId} and t.isSuit=#{isSuit} and t.manId=#{roleId} and t.mantype='1'
+	</delete>
+	
+	<select id="isContrTableSecu" resultType="string" parameterType="string">
+		SELECT NVL(ISSECUCTRL , '1') FROM CDT_T_TASKINFO A, CDT_T_TASKTYPE B WHERE A.TASKTYPEID = B.TASKTYPEID AND A.TASKID = #{taskID}
+	</select>
+	
+	<select id="getTableSecu" parameterType="string" resultMap="secuttable">
+		WITH T_USER_ROLES AS (
+		   SELECT ROLEID, #{tableID} TABLEID FROM Secu_t_Userrole WHERE userID = #{userID}
+		),
+		T_SECU_TABLE AS (SELECT TAB.BASESECU,
+               TAB.EXTADD,
+               TAB.EXTDEL,
+               TAB.EXTUPDATE,
+               TAB.TABLEID,
+               TAB.MANID
+          FROM SECU_T_TABLE TAB
+         WHERE TAB.TABLEID = #{tableID}
+           AND TAB.ISSUIT = '0'
+        UNION ALL
+        SELECT TAB.BASESECU,
+               TAB.EXTADD,
+               TAB.EXTDEL,
+               TAB.EXTUPDATE,
+               SUIT.TABLEID,
+               TAB.MANID
+          FROM SECU_T_TABLE TAB,
+               (SELECT #{tableID} TABLEID, SUITID
+                  FROM DICT_T_SUIT
+                 START WITH SUITID =
+                            (SELECT SUITID FROM DICT_T_MODEL WHERE TABLEID = #{tableID})
+                CONNECT BY SUITID = PRIOR SUPERID) SUIT
+         WHERE TAB.TABLEID = SUIT.SUITID
+           AND TAB.ISSUIT = '1')
+		SELECT MAX(BASESECU) baseSecu,
+		       MAX(EXTADD) extAdd,
+		       MAX(EXTDEL) extDel,
+		       MAX(EXTUPDATE) extUpdate,
+		       tableId
+		  FROM (SELECT NVL(TAB.BASESECU, 3) BASESECU,
+               NVL(TAB.EXTADD, 1) EXTADD,
+               NVL(TAB.EXTDEL, 1) EXTDEL,
+               NVL(TAB.EXTUPDATE, 1) EXTUPDATE,
+               T2.TABLEID
+          FROM T_SECU_TABLE TAB JOIN T_USER_ROLES T2 ON TAB.MANID = T2.ROLEID AND TAB.TABLEID = T2.TABLEID)
+		 GROUP BY TABLEID
+	</select>
+
+</mapper>

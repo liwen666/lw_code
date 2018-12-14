@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.MainSubRelaMapper">
+
+    <select id="getCollectTypeTreeList" parameterType="Map" resultType="com.tjhq.commons.setting.input.po.TreeNode">
+    	select GUID as ID,reftable as columnId,CODE,'['||CODE||']'||NAME as NAME,SUPERGUID as PID,ISLEAF,LEVELNO
+		  from code_t_collecttype order by code
+	</select>
+	
+	<select id="getTableData" parameterType="String" resultType="map">
+    	select t.GUID,
+	           t.ORDERID,
+	           t.TABLEID,
+	           t.COLLTYPEID,
+		       t.ISMAINTABLE,
+		       decode(t.ISMAINTABLE,'1','是','0','否') SNAME_ISMAINTABLE,
+		       t1.NAME as TABLENAME,
+		       t2.DEALNAME,
+		       t2.DEALID as DEALTYPE
+		  from DICT_T_SETMAINSUBTAB t, DICT_T_MODEL t1, DICT_T_DEALTYPE t2
+		 where lower(t.collTypeID) = lower(#{collTypeID})
+		   and t.TABLEID = t1.TABLEID
+		   and t1.DEALTYPE = t2.DEALID
+		 order by t.ORDERID
+	</select>
+	
+    <sql id="tab_sql">
+       GUID,COLLTYPEID,TABLEID,ORDERID,ISMAINTABLE
+    </sql>
+    <insert id="insertTableData" parameterType="java.util.List" >
+        INSERT INTO DICT_T_SETMAINSUBTAB(<include refid="tab_sql"/>) 
+       <foreach collection="list" item="lists"  index="index" separator="union all">
+			SELECT SYS_GUID() AS GUID, 
+				   #{lists.COLLTYPEID,jdbcType = VARCHAR},
+			       #{lists.TABLEID,jdbcType = VARCHAR},
+			       #{lists.ORDERID,jdbcType = NUMERIC},
+			       #{lists.ISMAINTABLE,jdbcType = VARCHAR}
+			       FROM DUAL
+       </foreach>
+    </insert>
+
+    <update id="updateTableData" parameterType="Map">
+    	begin
+    	<foreach collection="list" item="lists" index="index" separator=";">
+    		update DICT_T_SETMAINSUBTAB
+    		<set>
+    			<if test="lists.ORDERID != null">
+    				ORDERID=#{lists.ORDERID,jdbcType=NUMERIC},
+    			</if>
+    			<if test="lists.ISMAINTABLE != null">
+    				ISMAINTABLE=#{lists.ISMAINTABLE,jdbcType=VARCHAR}
+    			</if>	
+    		</set>
+    		where GUID in #{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    	;end;
+    </update>
+
+    <delete id="deleteTableData" parameterType="java.util.List">
+    	delete from DICT_T_SETMAINSUBTAB where GUID in
+    	<foreach collection="list" item="lists" index="index"  open="(" separator="," close=")">
+    		#{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+    <select id="selectMainSubRela" parameterType="String" resultType="com.tjhq.commons.setting.input.po.DictTSetMainSubRela">
+    	select t.MAINSUBID, t.MAINTABID, t.SUBTABID, t.MAINFKID, t.FKID
+		  from DICT_T_SETMAINSUBRELA t
+		 where t.MAINSUBID = #{mainSubID}
+	</select>
+
+	<sql id="rela_sql">
+       	MAINSUBID,MAINTABID,SUBTABID,MAINFKID,FKID
+    </sql>
+    <insert id="insertMainSubRela" parameterType="Map" >
+	     INSERT INTO DICT_T_SETMAINSUBRELA(<include refid="rela_sql"/>) VALUES
+	       (#{mainSubID,jdbcType = VARCHAR},
+	        #{mainTabID,jdbcType = VARCHAR},
+	        #{subTabID,jdbcType = VARCHAR},
+	        #{mainFkID,jdbcType = VARCHAR},
+	        #{fkID,jdbcType = VARCHAR})
+    </insert>
+	<update id="updateMainSubRela" parameterType="Map">
+  		 update DICT_T_SETMAINSUBRELA
+    		<set>
+    			<if test="mainFkID != null">
+    				MAINFKID=#{mainFkID,jdbcType = VARCHAR},
+    			</if>
+    			<if test="fkID != null">
+    				FKID=#{fkID,jdbcType=VARCHAR}
+    			</if>
+    		</set>
+    		where MAINSUBID = #{mainSubID,jdbcType=VARCHAR}
+   </update>
+    <delete id="deleteMainSubRela" parameterType="Map">
+    	delete from DICT_T_SETMAINSUBRELA where MAINSUBID in
+    	<foreach collection="list" item="lists" index="index"  open="(" separator="," close=")">
+    		#{lists.GUID,jdbcType=VARCHAR}
+    	</foreach>
+    </delete>
+    
+   <select id="getSetRecID" parameterType="String" resultType="String">
+    	select t.RECID
+		  from DICT_T_SETREC t
+		 where t.OBJECTID = #{objectID}
+		   and t.TABLEID = #{tableID}
+	</select>
+    <insert id="insertLeftTree" parameterType="map">
+     <selectKey resultType="String" order="BEFORE" keyProperty="tableID">  
+        	SELECT SYS_GUID() AS GUID FROM DUAL  
+   	 	</selectKey>
+    	insert into Code_t_Collecttype(GUID,NAME,CODE,REFTABLE,SUPERGUID) VALUES(
+    		#{tableID,jdbcType = VARCHAR},
+	        #{name,jdbcType = VARCHAR},
+	        #{code,jdbcType = VARCHAR},
+	        #{reftable,jdbcType = VARCHAR},
+			#{superid,jdbcType = VARCHAR})
+    </insert>
+    
+	<select id="getMainTabIDByCode" parameterType="String" resultType="map">
+	 SELECT TABLEID,ISMAINTABLE FROM DICT_T_SETMAINSUBTAB WHERE COLLTYPEID=#{code} 
+	 </select>
+	 <delete id="delMainSubRelaDataByMainId" parameterType="String">
+	 delete from DICT_T_SETMAINSUBRELA where MAINTABID=#{mainTabID} and SUBTABID = #{subTabID}
+	 </delete>
+	 
+	 <delete id="delMainSubTabByColltypeID" parameterType="String">
+	 delete from DICT_T_SETMAINSUBTAB where COLLTYPEID=#{code}
+	 </delete>
+	 <delete id="deleteTreeData" parameterType="map">
+	 delete from Code_t_Collecttype where GUID=#{suitID}
+	 </delete>
+</mapper>

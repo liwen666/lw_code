@@ -1,0 +1,1214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<INSTALL_SQL>
+  <TABLE>
+    <SQL>
+      <OBJECT_NAME>WORKFLOW_TABLES</OBJECT_NAME>
+      <SQL_COMMENT>工作流表结构</SQL_COMMENT>
+      <SQL_CONTENT><![CDATA[
+ declare 
+ i integer;
+ begin
+  select count(*) into i from user_tables t where t.table_name = 'ACT_GE_PROPERTY';
+  if i > 0 then
+  execute immediate 'drop table ACT_GE_PROPERTY';
+  end if;
+  execute immediate '
+    create table ACT_GE_PROPERTY
+ (
+   name_  NVARCHAR2(64) not null,
+   value_ NVARCHAR2(300),
+   rev_   NUMBER(38)
+ )
+  ';
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HI_ACTINST';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_ACTINST cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_HI_ACTINST
+ (
+   id_                NVARCHAR2(64) not null,
+   proc_def_id_       NVARCHAR2(64) not null,
+   proc_inst_id_      NVARCHAR2(64) not null,
+   execution_id_      NVARCHAR2(64) not null,
+   act_id_            NVARCHAR2(255) not null,
+   task_id_           NVARCHAR2(64),
+   call_proc_inst_id_ NVARCHAR2(64),
+   act_name_          NVARCHAR2(255),
+   act_type_          NVARCHAR2(255) not null,
+   assignee_          NVARCHAR2(255),
+   start_time_        TIMESTAMP(6) not null,
+   end_time_          TIMESTAMP(6),
+   duration_          NUMBER(19)
+ )
+  ';
+  execute immediate 'create index ACT_IDX_HI_ACT_INST_END on ACT_HI_ACTINST (END_TIME_)';
+  execute immediate 'create index ACT_IDX_HI_ACT_INST_EXEC on ACT_HI_ACTINST (EXECUTION_ID_, ACT_ID_)';
+  execute immediate 'create index ACT_IDX_HI_ACT_INST_PROCINST on ACT_HI_ACTINST (PROC_INST_ID_, ACT_ID_)';
+  execute immediate 'create index ACT_IDX_HI_ACT_INST_START on ACT_HI_ACTINST (START_TIME_)';
+  execute immediate 'alter table ACT_HI_ACTINST
+   add primary key (ID_)';
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_HI_ATTACHMENT';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_ATTACHMENT cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HI_ATTACHMENT
+ (
+   id_           NVARCHAR2(64) not null,
+   rev_          INTEGER,
+   user_id_      NVARCHAR2(255),
+   name_         NVARCHAR2(255),
+   description_  NVARCHAR2(2000),
+   type_         NVARCHAR2(255),
+   task_id_      NVARCHAR2(64),
+   proc_inst_id_ NVARCHAR2(64),
+   url_          NVARCHAR2(2000),
+   content_id_   NVARCHAR2(64)
+ )
+  ';
+   execute immediate 'alter table ACT_HI_ATTACHMENT
+   add primary key (ID_)';
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_HI_DETAIL';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_DETAIL cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HI_DETAIL
+ (
+   id_           NVARCHAR2(64) not null,
+   type_         NVARCHAR2(255) not null,
+   proc_inst_id_ NVARCHAR2(64),
+   execution_id_ NVARCHAR2(64),
+   task_id_      NVARCHAR2(64),
+   act_inst_id_  NVARCHAR2(64),
+   name_         NVARCHAR2(255) not null,
+   var_type_     NVARCHAR2(64),
+   rev_          INTEGER,
+   time_         TIMESTAMP(6) not null,
+   bytearray_id_ NVARCHAR2(64),
+   double_       NUMBER(*,10),
+   long_         NUMBER(19),
+   text_         NVARCHAR2(2000),
+   text2_        NVARCHAR2(2000)
+ )
+  ';
+  
+   execute immediate 'create index ACT_IDX_HI_DETAIL_ACT_INST on ACT_HI_DETAIL (ACT_INST_ID_)';
+   execute immediate 'create index ACT_IDX_HI_DETAIL_NAME on ACT_HI_DETAIL (NAME_)';
+   execute immediate 'create index ACT_IDX_HI_DETAIL_PROC_INST on ACT_HI_DETAIL (PROC_INST_ID_)';
+   execute immediate 'create index ACT_IDX_HI_DETAIL_TASK_ID on ACT_HI_DETAIL (TASK_ID_)';
+   execute immediate 'create index ACT_IDX_HI_DETAIL_TIME on ACT_HI_DETAIL (TIME_)';
+   execute immediate 'alter table ACT_HI_DETAIL
+   add primary key (ID_)';
+ 
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_HI_IDENTITYLINK';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_IDENTITYLINK cascade constraints';
+  end if;
+  execute immediate '
+     create table ACT_HI_IDENTITYLINK
+ (
+   id_           NVARCHAR2(64) not null,
+   group_id_     NVARCHAR2(255),
+   type_         NVARCHAR2(255),
+   user_id_      NVARCHAR2(255),
+   task_id_      NVARCHAR2(64),
+   proc_inst_id_ NVARCHAR2(64)
+ )
+  ';
+   execute immediate 'create index ACT_IDX_HI_IDENT_LNK_PROCINST on ACT_HI_IDENTITYLINK (PROC_INST_ID_)';
+   execute immediate 'create index ACT_IDX_HI_IDENT_LNK_TASK on ACT_HI_IDENTITYLINK (TASK_ID_)';
+   execute immediate 'create index ACT_IDX_HI_IDENT_LNK_USER on ACT_HI_IDENTITYLINK (USER_ID_)';
+   execute immediate 'alter table ACT_HI_IDENTITYLINK
+   add primary key (ID_)';
+   
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HI_PROCINST';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_PROCINST cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HI_PROCINST
+ (
+   id_                        NVARCHAR2(64) not null,
+   proc_inst_id_              NVARCHAR2(64) not null,
+   business_key_              NVARCHAR2(255),
+   proc_def_id_               NVARCHAR2(64) not null,
+   start_time_                TIMESTAMP(6) not null,
+   end_time_                  TIMESTAMP(6),
+   duration_                  NUMBER(19),
+   start_user_id_             NVARCHAR2(255),
+   start_act_id_              NVARCHAR2(255),
+   end_act_id_                NVARCHAR2(255),
+   super_process_instance_id_ NVARCHAR2(64),
+   delete_reason_             NVARCHAR2(2000)
+ )
+  ';
+ execute immediate 'create index ACT_IDX_HI_PRO_INST_END on ACT_HI_PROCINST (END_TIME_)';
+ execute immediate 'create index ACT_IDX_HI_PRO_I_BUSKEY on ACT_HI_PROCINST (BUSINESS_KEY_)';
+ execute immediate 'alter table ACT_HI_PROCINST
+   add primary key (ID_)';
+ execute immediate 'alter table ACT_HI_PROCINST
+   add unique (PROC_INST_ID_)';
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HI_TASKINST';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_TASKINST cascade constraints';
+  end if;
+  execute immediate '
+     create table ACT_HI_TASKINST
+ (
+   id_             NVARCHAR2(64) not null,
+   proc_def_id_    NVARCHAR2(64),
+   task_def_key_   NVARCHAR2(255),
+   proc_inst_id_   NVARCHAR2(64),
+   execution_id_   NVARCHAR2(64),
+   parent_task_id_ NVARCHAR2(64),
+   name_           NVARCHAR2(255),
+   description_    NVARCHAR2(2000),
+   owner_          NVARCHAR2(255),
+   assignee_       NVARCHAR2(255),
+   start_time_     TIMESTAMP(6) not null,
+   claim_time_     TIMESTAMP(6),
+   end_time_       TIMESTAMP(6),
+   duration_       NUMBER(19),
+   delete_reason_  NVARCHAR2(2000),
+   priority_       INTEGER,
+   due_date_       TIMESTAMP(6),
+   form_key_       NVARCHAR2(255)
+ )
+  ';
+ execute immediate 'alter table ACT_HI_TASKINST
+   add primary key (ID_)';
+   
+   
+   
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HI_VARINST';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_VARINST cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HI_VARINST
+ (
+   id_           NVARCHAR2(64) not null,
+   proc_inst_id_ NVARCHAR2(64),
+   execution_id_ NVARCHAR2(64),
+   task_id_      NVARCHAR2(64),
+   name_         NVARCHAR2(255) not null,
+   var_type_     NVARCHAR2(100),
+   rev_          INTEGER,
+   bytearray_id_ NVARCHAR2(64),
+   double_       NUMBER(*,10),
+   long_         NUMBER(19),
+   text_         NVARCHAR2(2000),
+   text2_        NVARCHAR2(2000)
+ )
+  ';
+   execute immediate 'create index ACT_IDX_HI_PROCVAR_NAME_TYPE on ACT_HI_VARINST (NAME_, VAR_TYPE_)';
+   execute immediate 'create index ACT_IDX_HI_PROCVAR_PROC_INST on ACT_HI_VARINST (PROC_INST_ID_)';
+   execute immediate 'alter table ACT_HI_VARINST
+   add primary key (ID_)';
+  
+ 
+ 
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_CODE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_CODE cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_CODE
+ (
+   id        VARCHAR2(32) not null,
+   code_key  VARCHAR2(64),
+   code_name VARCHAR2(200),
+   super_id  VARCHAR2(32),
+   code_type VARCHAR2(64),
+   order_id  NUMBER(10)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_CODE
+   add primary key (ID)';
+  
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_CUSTOM_BUTTON';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_CUSTOM_BUTTON cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HQ_CUSTOM_BUTTON
+ (
+   id           VARCHAR2(32) not null,
+   button_name  VARCHAR2(32),
+   button_key   VARCHAR2(32),
+   button_type  NUMBER(10),
+   button_order NUMBER(10),
+   js_function  VARCHAR2(200)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_CUSTOM_BUTTON
+   add primary key (ID)';
+  
+  
+    select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_DELEGATE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_DELEGATE cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HQ_DELEGATE
+ (
+   id         VARCHAR2(32) not null,
+   user_id    VARCHAR2(255),
+   to_user_id VARCHAR2(255),
+   start_time TIMESTAMP(6),
+   end_time   TIMESTAMP(6),
+   state      NUMBER,
+   bpmn_type  VARCHAR2(1000)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_DELEGATE
+   add constraint PK_ACT_HQ_BPMNDELEGATE primary key (ID)';
+   
+  
+    select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_FIELD';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_FIELD cascade constraints';
+  end if;
+  execute immediate '
+     create table ACT_HQ_FIELD
+ (
+   id          VARCHAR2(32) not null,
+   name        VARCHAR2(64),
+   dbname      VARCHAR2(32),
+   description VARCHAR2(255),
+   tableid     VARCHAR2(32)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_FIELD
+   add primary key (ID)';
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_FIELD_PRIVILEGE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_FIELD_PRIVILEGE cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_FIELD_PRIVILEGE
+ (
+   id                    VARCHAR2(32) not null,
+   process_definition_id VARCHAR2(32),
+   task_def_key          VARCHAR2(255),
+   runtime_bpmn_role     VARCHAR2(32),
+   table_id              VARCHAR2(32),
+   table_dbname          VARCHAR2(32),
+   field_id              VARCHAR2(32),
+   field_dbname          VARCHAR2(32),
+   can_not_visble        INTEGER,
+   can_not_modify        INTEGER,
+   must_fill_in          INTEGER
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_FIELD_PRIVILEGE
+   add primary key (ID)';
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_HI_READING';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_HI_READING cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_HI_READING
+ (
+   id           VARCHAR2(32) not null,
+   business_key VARCHAR2(32),
+   task_id      VARCHAR2(32),
+   bpmn_type    VARCHAR2(32),
+   create_time  TIMESTAMP(6),
+   title        VARCHAR2(200),
+   assignee     VARCHAR2(32),
+   comment_     VARCHAR2(2000),
+   proc_inst_id VARCHAR2(32),
+   proc_def_id  VARCHAR2(32),
+   task_name    VARCHAR2(200),
+   task_key     VARCHAR2(200),
+   end_time     TIMESTAMP(6),
+   type_        NUMBER,
+   launch_user  VARCHAR2(32)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_HI_READING
+   add constraint PK_ACT_HQ_HI_READING primary key (ID)';
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_HI_TASK';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_HI_TASK cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HQ_HI_TASK
+ (
+   id_             NVARCHAR2(64) not null,
+   proc_def_id_    NVARCHAR2(64),
+   task_def_key_   NVARCHAR2(255),
+   proc_inst_id_   NVARCHAR2(64),
+   execution_id_   NVARCHAR2(64),
+   parent_task_id_ NVARCHAR2(64),
+   name_           NVARCHAR2(255),
+   description_    NVARCHAR2(2000),
+   owner_          NVARCHAR2(255),
+   assignee_       NVARCHAR2(255),
+   start_time_     TIMESTAMP(6) not null,
+   claim_time_     TIMESTAMP(6),
+   end_time_       TIMESTAMP(6),
+   duration_       NUMBER(19),
+   delete_reason_  NVARCHAR2(2000),
+   priority_       INTEGER,
+   due_date_       TIMESTAMP(6),
+   form_key_       NVARCHAR2(255)
+ )
+  ';
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_PERSONNEL_ALLOCATION';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_PERSONNEL_ALLOCATION cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_PERSONNEL_ALLOCATION
+ (
+   id_                   NVARCHAR2(64) not null,
+   typeid_               NVARCHAR2(255),
+   typename_             NVARCHAR2(255),
+   prev_step_            NVARCHAR2(2000),
+   prev_step_expression_ NVARCHAR2(2000),
+   next_step_            NVARCHAR2(2000),
+   next_step_expression_ NVARCHAR2(2000)，
+   order_id              NUMBER(10)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_PERSONNEL_ALLOCATION
+   add primary key (ID_)';
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_RU_READING';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_RU_READING cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_RU_READING
+ (
+   id           VARCHAR2(32) not null,
+   business_key VARCHAR2(32),
+   task_id      VARCHAR2(32),
+   bpmn_type    VARCHAR2(32),
+   create_time  TIMESTAMP(6),
+   title        VARCHAR2(200),
+   assignee     VARCHAR2(32),
+   comment_     VARCHAR2(2000),
+   proc_inst_id VARCHAR2(32),
+   proc_def_id  VARCHAR2(32),
+   task_name    VARCHAR2(200),
+   task_key     VARCHAR2(200),
+   type_        NUMBER,
+   launch_user  VARCHAR2(32)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_RU_READING
+   add constraint PK_ACT_HQ_RU_READING primary key (ID)';
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_SEQUENCE_EXTEND';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_SEQUENCE_EXTEND cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_SEQUENCE_EXTEND
+ (
+   id                     VARCHAR2(32) not null,
+   process_definition_id  VARCHAR2(255),
+   sequence_key           VARCHAR2(255),
+   is_need_comment        NUMBER,
+   open_panel             VARCHAR2(64),
+   is_candidate_users     INTEGER,
+   is_candidate_groups    INTEGER,
+   bath_complete_variable VARCHAR2(64),
+   sequence_type          VARCHAR2(32),
+   sequence_sort_number   VARCHAR2(32)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_SEQUENCE_EXTEND
+   add primary key (ID)';
+  
+  
+  
+  
+      select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_SEQUENCE_IDENTITYLINK';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_SEQUENCE_IDENTITYLINK cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_SEQUENCE_IDENTITYLINK
+ (
+   id           VARCHAR2(64) not null,
+   sequence_key VARCHAR2(255),
+   group_id     VARCHAR2(255),
+   proc_def_id  VARCHAR2(64),
+   user_id      VARCHAR2(255)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_SEQUENCE_IDENTITYLINK
+   add primary key (ID)';
+  
+  
+  
+  
+      select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_SUBTASK';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_SUBTASK cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_SUBTASK
+ (
+   id          VARCHAR2(32) not null,
+   subtask_id_ NVARCHAR2(64),
+   isproxy     VARCHAR2(2)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_SUBTASK
+   add primary key (ID)';
+  
+  
+  
+       select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TABLE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TABLE cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HQ_TABLE
+ (
+   id        VARCHAR2(32) not null,
+   name      VARCHAR2(100),
+   dbname    VARCHAR2(30),
+   parentid  VARCHAR2(32),
+   bpmn_type VARCHAR2(200)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_TABLE
+   add primary key (ID)';
+  
+  
+        select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TABLE_PRIVILEGE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TABLE_PRIVILEGE cascade constraints';
+  end if;
+  execute immediate '
+    create table ACT_HQ_TABLE_PRIVILEGE
+ (
+   id                    VARCHAR2(32) not null,
+   process_definition_id VARCHAR2(32),
+   task_def_key          VARCHAR2(255),
+   runtime_bpmn_role     VARCHAR2(32),
+   table_id              VARCHAR2(32),
+   table_dbname          VARCHAR2(32),
+   can_not_add           INTEGER,
+   can_not_delete        INTEGER,
+   can_not_visble        INTEGER,
+   can_not_modify        INTEGER
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_TABLE_PRIVILEGE
+   add primary key (ID)';
+  
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TASK_BUTTON';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TASK_BUTTON cascade constraints';
+  end if;
+  execute immediate '
+   create table ACT_HQ_TASK_BUTTON
+ (
+   id                    VARCHAR2(32) not null,
+   process_definition_id VARCHAR2(32),
+   task_key              VARCHAR2(1000),
+   button_key            VARCHAR2(32),
+   button_name           VARCHAR2(100),
+   processor_expression  VARCHAR2(1000),
+   button_order          NUMBER,
+   lunch_type            NUMBER
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_TASK_BUTTON
+   add constraint PK_ACT_HQ_TASK_BUTTON primary key (ID)';
+  
+  
+  
+    select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TASK_EXTEND';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TASK_EXTEND cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_TASK_EXTEND
+ (
+   id                    VARCHAR2(32) not null,
+   process_definition_id VARCHAR2(255),
+   task_key              VARCHAR2(255),
+   is_create_sub_task    VARCHAR2(64),
+   custom_button         VARCHAR2(1000),
+   is_to_be_received     NUMBER(10),
+   is_to_be_revoked      NUMBER(10),
+   is_to_be_returned     NUMBER(10),
+   task_type             VARCHAR2(32),
+   processor             VARCHAR2(1000),
+   processor_expression  VARCHAR2(500),
+   show_type             VARCHAR2(32),
+   is_to_all_user        NUMBER(10)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_TASK_EXTEND
+   add primary key (ID)';
+  
+  
+    select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TASK_READING';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TASK_READING cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_TASK_READING
+ (
+   id           VARCHAR2(32) not null,
+   business_key VARCHAR2(32),
+   task_id      VARCHAR2(32),
+   bpmn_type    VARCHAR2(32),
+   create_time  VARCHAR2(20),
+   title        VARCHAR2(200),
+   is_read      NUMBER,
+   assignee     VARCHAR2(20),
+   comment_     VARCHAR2(2000),
+   proc_inst_id VARCHAR2(32),
+   proc_def_id  VARCHAR2(32),
+   task_name    VARCHAR2(200),
+   task_key     VARCHAR2(200)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_TASK_READING
+   add constraint PK_ACT_HQ_TASK_READING primary key (ID)';
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TEM_CATEGORY';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TEM_CATEGORY cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_TEM_CATEGORY
+ (
+   id            VARCHAR2(32) not null,
+   name          VARCHAR2(64),
+   category      VARCHAR2(255),
+   parentid      VARCHAR2(32),
+   description   VARCHAR2(32),
+   proc_def_key_ VARCHAR2(255)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_TEM_CATEGORY
+   add primary key (ID)';
+  
+ 
+ 
+     select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TEM_CODE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TEM_CODE cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_TEM_CODE
+ (
+   id        VARCHAR2(32) not null,
+   code_type VARCHAR2(64),
+   type_name VARCHAR2(200),
+   super_id  VARCHAR2(32),
+   type      NUMBER(10),
+   order_id  NUMBER(10)
+ )
+  ';
+ execute immediate 'alter table ACT_HQ_TEM_CODE
+   add primary key (ID)';
+  
+  
+      select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_VARIABLE';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_VARIABLE cascade constraints';
+  end if;
+  execute immediate '
+  create table ACT_HQ_VARIABLE
+ (
+   id                    VARCHAR2(32) not null,
+   category              VARCHAR2(255),
+   type                  VARCHAR2(255),
+   name                  VARCHAR2(255),
+   process_definition_id VARCHAR2(100)
+ )
+  ';
+  execute immediate 'alter table ACT_HQ_VARIABLE
+   add primary key (ID)';
+  
+  
+      select count(*) into i from user_tables t where t.table_name = 'ACT_ID_GROUP';
+  if i > 0 then
+  execute immediate 'drop table ACT_ID_GROUP  cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_ID_GROUP
+ (
+   id_       NVARCHAR2(64) not null,
+   rev_      INTEGER,
+   name_     NVARCHAR2(255),
+   type_     NVARCHAR2(255),
+   pid_      NVARCHAR2(64),
+   category_ NVARCHAR2(64)
+ )
+  ';
+  execute immediate 'alter table ACT_ID_GROUP
+   add primary key (ID_)';
+  
+      select count(*) into i from user_tables t where t.table_name = 'ACT_ID_USER';
+  if i > 0 then
+  execute immediate 'drop table ACT_ID_USER cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_ID_USER
+ (
+   id_         NVARCHAR2(64) not null,
+   rev_        INTEGER,
+   first_      NVARCHAR2(255),
+   last_       NVARCHAR2(255),
+   email_      NVARCHAR2(255),
+   pwd_        NVARCHAR2(255),
+   picture_id_ NVARCHAR2(64)
+ )
+  ';
+ execute immediate 'alter table ACT_ID_USER
+   add primary key (ID_)';
+  
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_ID_MEMBERSHIP';
+  if i > 0 then
+  execute immediate 'drop table ACT_ID_MEMBERSHIP cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_ID_MEMBERSHIP
+ (
+   user_id_  NVARCHAR2(64) not null,
+   group_id_ NVARCHAR2(64) not null
+ )
+  ';
+  execute immediate 'create index ACT_IDX_MEMB_GROUP on ACT_ID_MEMBERSHIP(GROUP_ID_)';
+  execute immediate 'create index ACT_IDX_MEMB_USER on ACT_ID_MEMBERSHIP(USER_ID_)';
+  execute immediate 'alter table ACT_ID_MEMBERSHIP add primary key (USER_ID_, GROUP_ID_)';
+  execute immediate 'alter table ACT_ID_MEMBERSHIP
+   add constraint ACT_FK_MEMB_GROUP foreign key (GROUP_ID_)
+   references ACT_ID_GROUP (ID_)
+   disable';
+  execute immediate 'alter table ACT_ID_MEMBERSHIP
+   add constraint ACT_FK_MEMB_USER foreign key (USER_ID_)
+   references ACT_ID_USER (ID_)
+   disable';
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_RE_DEPLOYMENT';
+  if i > 0 then
+  execute immediate 'drop table ACT_RE_DEPLOYMENT cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RE_DEPLOYMENT
+ (
+   id_          NVARCHAR2(64) not null,
+   name_        NVARCHAR2(255),
+   category_    NVARCHAR2(255),
+   deploy_time_ TIMESTAMP(6)
+ )
+  ';
+   execute immediate 'alter table ACT_RE_DEPLOYMENT
+   add primary key (ID_)';
+  
+  
+  
+        select count(*) into i from user_tables t where t.table_name = 'ACT_GE_BYTEARRAY';
+  if i > 0 then
+  execute immediate 'drop table ACT_GE_BYTEARRAY cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_GE_BYTEARRAY
+ (
+   id_            NVARCHAR2(64) not null,
+   rev_           INTEGER,
+   name_          NVARCHAR2(255),
+   deployment_id_ NVARCHAR2(64),
+   bytes_         BLOB,
+   generated_     NUMBER(1)
+ )
+  ';
+  execute immediate 'create index ACT_IDX_BYTEAR_DEPL on ACT_GE_BYTEARRAY (DEPLOYMENT_ID_)';
+  execute immediate 'alter table ACT_GE_BYTEARRAY 
+   add primary key (ID_)';
+  execute immediate 'alter table ACT_GE_BYTEARRAY
+   add constraint ACT_FK_BYTEARR_DEPL foreign key (DEPLOYMENT_ID_)
+   references ACT_RE_DEPLOYMENT (ID_)';
+  execute immediate 'alter table ACT_GE_BYTEARRAY
+   add check (GENERATED_ IN (1,0))';
+  
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_RE_MODEL';
+  if i > 0 then
+  execute immediate 'drop table ACT_RE_MODEL cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RE_MODEL
+ (
+   id_                           NVARCHAR2(64) not null,
+   rev_                          INTEGER,
+   name_                         NVARCHAR2(255),
+   key_                          NVARCHAR2(255),
+   category_                     NVARCHAR2(255),
+   create_time_                  TIMESTAMP(6),
+   last_update_time_             TIMESTAMP(6),
+   version_                      INTEGER,
+   meta_info_                    NVARCHAR2(2000),
+   deployment_id_                NVARCHAR2(64),
+   editor_source_value_id_       NVARCHAR2(64),
+   editor_source_extra_value_id_ NVARCHAR2(64)
+ )
+  ';
+  execute immediate 'create index ACT_IDX_MODEL_DEPLOYMENT on ACT_RE_MODEL (DEPLOYMENT_ID_)';
+  execute immediate 'create index ACT_IDX_MODEL_SOURCE on ACT_RE_MODEL (EDITOR_SOURCE_VALUE_ID_)';
+  execute immediate 'create index ACT_IDX_MODEL_SOURCE_EXTRA on ACT_RE_MODEL (EDITOR_SOURCE_EXTRA_VALUE_ID_)';
+  execute immediate 'alter table ACT_RE_MODEL
+   add primary key (ID_)';
+  execute immediate 'alter table ACT_RE_MODEL
+   add constraint ACT_FK_MODEL_DEPLOYMENT foreign key (DEPLOYMENT_ID_)
+   references ACT_RE_DEPLOYMENT (ID_)';
+  execute immediate 'alter table ACT_RE_MODEL
+   add constraint ACT_FK_MODEL_SOURCE foreign key (EDITOR_SOURCE_VALUE_ID_)
+   references ACT_GE_BYTEARRAY (ID_)';
+  execute immediate 'alter table ACT_RE_MODEL
+   add constraint ACT_FK_MODEL_SOURCE_EXTRA foreign key (EDITOR_SOURCE_EXTRA_VALUE_ID_)
+   references ACT_GE_BYTEARRAY (ID_)';
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_RE_PROCDEF';
+  if i > 0 then
+  execute immediate 'drop table ACT_RE_PROCDEF cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RE_PROCDEF
+ (
+   id_                 NVARCHAR2(64) not null,
+   rev_                INTEGER,
+   category_           NVARCHAR2(255),
+   name_               NVARCHAR2(255),
+   key_                NVARCHAR2(255) not null,
+   version_            INTEGER not null,
+   deployment_id_      NVARCHAR2(64),
+   resource_name_      NVARCHAR2(2000),
+   dgrm_resource_name_ VARCHAR2(4000),
+   description_        NVARCHAR2(2000),
+   has_start_form_key_ NUMBER(1),
+   suspension_state_   INTEGER
+ )
+  ';
+  execute immediate 'alter table ACT_RE_PROCDEF
+   add primary key (ID_)';
+  execute immediate 'alter table ACT_RE_PROCDEF
+   add constraint ACT_UNIQ_PROCDEF unique (KEY_, VERSION_)';
+  execute immediate 'alter table ACT_RE_PROCDEF
+   add check (HAS_START_FORM_KEY_ IN (1,0))';
+  
+  select count(*) into i from user_tables t where t.table_name = 'ACT_RU_EXECUTION';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_EXECUTION cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_EXECUTION
+ (
+   id_               NVARCHAR2(64) not null,
+   rev_              INTEGER,
+   proc_inst_id_     NVARCHAR2(64),
+   business_key_     NVARCHAR2(255),
+   parent_id_        NVARCHAR2(64),
+   proc_def_id_      NVARCHAR2(64),
+   super_exec_       NVARCHAR2(64),
+   act_id_           NVARCHAR2(255),
+   is_active_        NUMBER(1),
+   is_concurrent_    NUMBER(1),
+   is_scope_         NUMBER(1),
+   is_event_scope_   NUMBER(1),
+   suspension_state_ INTEGER,
+   cached_ent_state_ INTEGER
+ )
+  ';
+   execute immediate 'create index ACT_IDX_EXEC_BUSKEY on ACT_RU_EXECUTION (BUSINESS_KEY_)';
+   execute immediate 'create index ACT_IDX_EXE_PARENT on ACT_RU_EXECUTION (PARENT_ID_)';
+   execute immediate 'create index ACT_IDX_EXE_PROCDEF on ACT_RU_EXECUTION (PROC_DEF_ID_)';
+   execute immediate 'create index ACT_IDX_EXE_PROCINST on ACT_RU_EXECUTION (PROC_INST_ID_)';
+   execute immediate 'create index ACT_IDX_EXE_SUPER on ACT_RU_EXECUTION (SUPER_EXEC_)';
+   execute immediate 'create unique index ACT_UNIQ_RU_BUS_KEY on ACT_RU_EXECUTION (CASE  WHEN BUSINESS_KEY_ IS NULL THEN NULL ELSE PROC_DEF_ID_ END, CASE  WHEN BUSINESS_KEY_ IS NULL THEN NULL ELSE BUSINESS_KEY_ END)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add primary key (ID_)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add constraint ACT_FK_EXE_PARENT foreign key (PARENT_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add constraint ACT_FK_EXE_PROCDEF foreign key (PROC_DEF_ID_)
+   references ACT_RE_PROCDEF (ID_)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add constraint ACT_FK_EXE_PROCINST foreign key (PROC_INST_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add constraint ACT_FK_EXE_SUPER foreign key (SUPER_EXEC_)
+   references ACT_RU_EXECUTION (ID_)';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add check (IS_ACTIVE_ IN (1,0))';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add check (IS_CONCURRENT_ IN (1,0))';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add check (IS_SCOPE_ IN (1,0))';
+   execute immediate 'alter table ACT_RU_EXECUTION
+   add check (IS_EVENT_SCOPE_ IN (1,0))';
+ 
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_RU_EVENT_SUBSCR';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_EVENT_SUBSCR cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_EVENT_SUBSCR
+ (
+   id_            NVARCHAR2(64) not null,
+   rev_           INTEGER,
+   event_type_    NVARCHAR2(255) not null,
+   event_name_    NVARCHAR2(255),
+   execution_id_  NVARCHAR2(64),
+   proc_inst_id_  NVARCHAR2(64),
+   activity_id_   NVARCHAR2(64),
+   configuration_ NVARCHAR2(255),
+   created_       TIMESTAMP(6) not null
+ )
+  ';
+    execute immediate 'create index ACT_IDX_EVENT_SUBSCR on ACT_RU_EVENT_SUBSCR (EXECUTION_ID_)';
+    execute immediate 'create index ACT_IDX_EVENT_SUBSCR_CONFIG_ on ACT_RU_EVENT_SUBSCR (CONFIGURATION_)';
+    execute immediate 'alter table ACT_RU_EVENT_SUBSCR
+   add primary key (ID_)';
+    execute immediate 'alter table ACT_RU_EVENT_SUBSCR
+   add constraint ACT_FK_EVENT_EXEC foreign key (EXECUTION_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+  
+  
+  
+   select count(*) into i from user_tables t where t.table_name = 'ACT_RU_TASK';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_TASK cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_TASK
+ (
+   id_               NVARCHAR2(64) not null,
+   rev_              INTEGER,
+   execution_id_     NVARCHAR2(64),
+   proc_inst_id_     NVARCHAR2(64),
+   proc_def_id_      NVARCHAR2(64),
+   name_             NVARCHAR2(255),
+   parent_task_id_   NVARCHAR2(64),
+   description_      NVARCHAR2(2000),
+   task_def_key_     NVARCHAR2(255),
+   owner_            NVARCHAR2(255),
+   assignee_         NVARCHAR2(255),
+   delegation_       NVARCHAR2(64),
+   priority_         INTEGER,
+   create_time_      TIMESTAMP(6),
+   due_date_         TIMESTAMP(6),
+   suspension_state_ INTEGER
+ )
+  ';
+    execute immediate 'create index ACT_IDX_TASK_CREATE on ACT_RU_TASK (CREATE_TIME_)';
+    execute immediate 'create index ACT_IDX_TASK_EXEC on ACT_RU_TASK (EXECUTION_ID_)';
+    execute immediate 'create index ACT_IDX_TASK_PROCDEF on ACT_RU_TASK (PROC_DEF_ID_)';
+    execute immediate 'create index ACT_IDX_TASK_PROCINST on ACT_RU_TASK (PROC_INST_ID_)';
+    execute immediate 'alter table ACT_RU_TASK
+   add primary key (ID_)';
+    execute immediate 'alter table ACT_RU_TASK
+   add constraint ACT_FK_TASK_EXE foreign key (EXECUTION_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+    execute immediate 'alter table ACT_RU_TASK
+   add constraint ACT_FK_TASK_PROCDEF foreign key (PROC_DEF_ID_)
+   references ACT_RE_PROCDEF (ID_)';
+    execute immediate 'alter table ACT_RU_TASK
+   add constraint ACT_FK_TASK_PROCINST foreign key (PROC_INST_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+ 	   
+  
+  
+    select count(*) into i from user_tables t where t.table_name = 'ACT_RU_IDENTITYLINK';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_IDENTITYLINK cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_IDENTITYLINK
+ (
+   id_           NVARCHAR2(64) not null,
+   rev_          INTEGER,
+   group_id_     NVARCHAR2(255),
+   type_         NVARCHAR2(255),
+   user_id_      NVARCHAR2(255),
+   task_id_      NVARCHAR2(64),
+   proc_inst_id_ NVARCHAR2(64),
+   proc_def_id_  NVARCHAR2(64)
+ )
+  ';
+   execute immediate 'create index ACT_IDX_ATHRZ_PROCEDEF on ACT_RU_IDENTITYLINK (PROC_DEF_ID_)';
+   execute immediate 'create index ACT_IDX_IDENT_LNK_GROUP on ACT_RU_IDENTITYLINK (GROUP_ID_)';
+   execute immediate 'create index ACT_IDX_IDENT_LNK_USER on ACT_RU_IDENTITYLINK (USER_ID_)';
+   execute immediate 'create index ACT_IDX_IDL_PROCINST on ACT_RU_IDENTITYLINK (PROC_INST_ID_)';
+   execute immediate 'create index ACT_IDX_TSKASS_TASK on ACT_RU_IDENTITYLINK (TASK_ID_)';
+   execute immediate 'alter table ACT_RU_IDENTITYLINK
+   add primary key (ID_)';
+   execute immediate 'alter table ACT_RU_IDENTITYLINK
+   add constraint ACT_FK_ATHRZ_PROCEDEF foreign key (PROC_DEF_ID_)
+   references ACT_RE_PROCDEF (ID_)';
+   execute immediate 'alter table ACT_RU_IDENTITYLINK
+   add constraint ACT_FK_IDL_PROCINST foreign key (PROC_INST_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+   execute immediate 'alter table ACT_RU_IDENTITYLINK
+   add constraint ACT_FK_TSKASS_TASK foreign key (TASK_ID_)
+   references ACT_RU_TASK (ID_)';
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_RU_JOB';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_JOB cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_JOB
+ (
+   id_                  NVARCHAR2(64) not null,
+   rev_                 INTEGER,
+   type_                NVARCHAR2(255) not null,
+   lock_exp_time_       TIMESTAMP(6),
+   lock_owner_          NVARCHAR2(255),
+   exclusive_           NUMBER(1),
+   execution_id_        NVARCHAR2(64),
+   process_instance_id_ NVARCHAR2(64),
+   proc_def_id_         NVARCHAR2(64),
+   retries_             INTEGER,
+   exception_stack_id_  NVARCHAR2(64),
+   exception_msg_       NVARCHAR2(2000),
+   duedate_             TIMESTAMP(6),
+   repeat_              NVARCHAR2(255),
+   handler_type_        NVARCHAR2(255),
+   handler_cfg_         NVARCHAR2(2000)
+ )
+  ';
+   execute immediate 'create index ACT_IDX_JOB_EXCEPTION on ACT_RU_JOB (EXCEPTION_STACK_ID_)';
+   execute immediate 'alter table ACT_RU_JOB
+   add primary key (ID_)';
+   execute immediate 'alter table ACT_RU_JOB
+   add constraint ACT_FK_JOB_EXCEPTION foreign key (EXCEPTION_STACK_ID_)
+   references ACT_GE_BYTEARRAY (ID_)';
+   execute immediate 'alter table ACT_RU_JOB
+   add check (EXCLUSIVE_ IN (1,0))';
+  
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_RU_VARIABLE';
+  if i > 0 then
+  execute immediate 'drop table ACT_RU_VARIABLE cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_RU_VARIABLE
+ (
+   id_           NVARCHAR2(64) not null,
+   rev_          INTEGER,
+   type_         NVARCHAR2(255) not null,
+   name_         NVARCHAR2(255) not null,
+   execution_id_ NVARCHAR2(64),
+   proc_inst_id_ NVARCHAR2(64),
+   task_id_      NVARCHAR2(64),
+   bytearray_id_ NVARCHAR2(64),
+   double_       NUMBER(*,10),
+   long_         NUMBER(19),
+   text_         NVARCHAR2(2000),
+   text2_        NVARCHAR2(2000)
+ )
+  ';
+  execute immediate 'create index ACT_IDX_VARIABLE_TASK_ID on ACT_RU_VARIABLE (TASK_ID_)';
+  execute immediate 'create index ACT_IDX_VAR_BYTEARRAY on ACT_RU_VARIABLE (BYTEARRAY_ID_)';
+  execute immediate 'create index ACT_IDX_VAR_EXE on ACT_RU_VARIABLE (EXECUTION_ID_)';
+  execute immediate 'create index ACT_IDX_VAR_PROCINST on ACT_RU_VARIABLE (PROC_INST_ID_)';
+  execute immediate 'alter table ACT_RU_VARIABLE
+   add primary key (ID_)';
+  execute immediate 'alter table ACT_RU_VARIABLE
+   add constraint ACT_FK_VAR_BYTEARRAY foreign key (BYTEARRAY_ID_)
+   references ACT_GE_BYTEARRAY (ID_)';
+  execute immediate 'alter table ACT_RU_VARIABLE
+   add constraint ACT_FK_VAR_EXE foreign key (EXECUTION_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+  execute immediate 'alter table ACT_RU_VARIABLE
+   add constraint ACT_FK_VAR_PROCINST foreign key (PROC_INST_ID_)
+   references ACT_RU_EXECUTION (ID_)';
+   
+   
+   select count(*) into i from user_tables t where t.table_name = 'ACT_HI_COMMENT';
+  if i > 0 then
+  execute immediate 'drop table ACT_HI_COMMENT cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_HI_COMMENT
+ (
+   id_           NVARCHAR2(64) not null,
+   type_         NVARCHAR2(255),
+   time_         TIMESTAMP(6) not null,
+   user_id_      NVARCHAR2(255),
+   task_id_      NVARCHAR2(64),
+   proc_inst_id_ NVARCHAR2(64),
+   action_       NVARCHAR2(255),
+   message_      NVARCHAR2(2000),
+   full_msg_     BLOB
+ )
+  ';
+  execute immediate 'alter table ACT_HI_COMMENT
+   add primary key (ID_)';
+  
+  
+     select count(*) into i from user_tables t where t.table_name = 'ACT_HQ_TEM_DEF';
+  if i > 0 then
+  execute immediate 'drop table ACT_HQ_TEM_DEF cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_HQ_TEM_DEF
+ (
+   id            VARCHAR2(32) not null,
+   name          VARCHAR2(64),
+   category      VARCHAR2(255),
+   version       INTEGER,
+   create_by     VARCHAR2(64),
+   modify_by     VARCHAR2(64),
+   create_time   TIMESTAMP(6),
+   modify_time   TIMESTAMP(6),
+   deploy_state  INTEGER,
+   version_state INTEGER,
+   deployment_id VARCHAR2(255),
+   content_bytes BLOB,
+   init_num      INTEGER,
+   canvaswidth   VARCHAR2(32),
+   canvasheight  VARCHAR2(32),
+   table_ids     VARCHAR2(255),
+   table_names   VARCHAR2(255)
+ )
+  ';
+   execute immediate 'alter table ACT_HQ_TEM_DEF
+   add primary key (ID)';
+   
+      select count(*) into i from user_tables t where t.table_name = 'ACT_ID_INFO';
+  if i > 0 then
+  execute immediate 'drop table ACT_ID_INFO cascade constraints';
+  end if;
+  execute immediate '
+ create table ACT_ID_INFO
+ (
+   id_        NVARCHAR2(64) not null,
+   rev_       INTEGER,
+   user_id_   NVARCHAR2(64),
+   type_      NVARCHAR2(64),
+   key_       NVARCHAR2(255),
+   value_     NVARCHAR2(255),
+   password_  BLOB,
+   parent_id_ NVARCHAR2(255)
+ )
+  ';
+   execute immediate 'alter table ACT_ID_INFO
+   add primary key (ID_)';
+  
+ commit;
+ 
+end;
+      ]]></SQL_CONTENT>
+    </SQL>
+  </TABLE>
+  <DATA>
+    <SQL>
+          <OBJECT_NAME>WORKFLOW_INITDATA</OBJECT_NAME>
+          <SQL_COMMENT>工作流初始数据</SQL_COMMENT>
+          <SQL_CONTENT><![CDATA[
+declare 
+i integer;
+begin
+
+
+delete from ACT_GE_PROPERTY;
+insert into ACT_GE_PROPERTY
+values ('schema.version', '5.14', 1);
+
+insert into ACT_GE_PROPERTY
+values ('schema.history', 'create(5.14)', 1);
+
+insert into ACT_GE_PROPERTY
+values ('next.dbid', '1', 1);
+
+delete from ACT_ID_USER;
+insert into ACT_ID_USER(ID_, REV_, FIRST_, LAST_, EMAIL_, PWD_, PICTURE_ID_)
+values ('gonzo', 2, 'Gonzo', 'The Great', 'gonzo@activiti.org', 'gonzo', '18');
+
+insert into ACT_ID_USER(ID_, REV_, FIRST_, LAST_, EMAIL_, PWD_, PICTURE_ID_)
+values ('kermit', 2, 'Kermit', 'The Frog', 'kermit@activiti.org', 'kermit', '7');
+
+insert into ACT_ID_USER(ID_, REV_, FIRST_, LAST_, EMAIL_, PWD_, PICTURE_ID_)
+values ('fozzie', 2, 'Fozzie', 'Bear', 'fozzie@activiti.org', 'fozzie', '22');
+
+delete from ACT_ID_GROUP;
+insert into ACT_ID_GROUP (ID_, REV_, NAME_, TYPE_)
+values ('user', 1, 'User', 'security-role');
+
+delete from ACT_ID_MEMBERSHIP;
+insert into ACT_ID_MEMBERSHIP (USER_ID_, GROUP_ID_)
+values ('gonzo', 'user');
+
+insert into ACT_ID_MEMBERSHIP (USER_ID_, GROUP_ID_)
+values ('kermit', 'user');
+
+insert into ACT_ID_MEMBERSHIP (USER_ID_, GROUP_ID_)
+values ('fozzie', 'user');
+
+delete from act_hq_tem_category ;
+insert into act_hq_tem_category (ID, NAME, CATEGORY, PARENTID, DESCRIPTION)
+values ('1', '工作流类型', 'bpmn', '#', null);
+
+delete from act_hq_code ;
+insert into act_hq_code (ID, CODE_KEY, CODE_NAME, SUPER_ID, CODE_TYPE, ORDER_ID)
+values ('C1705605B35B43C28D385D8EC252BC44', '0', '未部署', '#', 'deploystate', 0);
+
+insert into act_hq_code (ID, CODE_KEY, CODE_NAME, SUPER_ID, CODE_TYPE, ORDER_ID)
+values ('71DB3FF993C54BD08D3723A06C0E36CB', '1', '已部署', '#', 'deploystate', 1);
+
+insert into act_hq_code (ID, CODE_KEY, CODE_NAME, SUPER_ID, CODE_TYPE, ORDER_ID)
+values ('850C3107273B4356A95B7E24780FA83B', '0', '停用', '#', 'versionstate', 0);
+
+insert into act_hq_code (ID, CODE_KEY, CODE_NAME, SUPER_ID, CODE_TYPE, ORDER_ID)
+values ('562F5B09FFBB4E77A838DF3A328D6AA8', '1', '启用', '#', 'versionstate', 1);
+
+insert into act_hq_code (ID, CODE_KEY, CODE_NAME, SUPER_ID, CODE_TYPE, ORDER_ID)
+values ('5E5CACE4F42840DDBC524A0486F137AA', '2', '禁用', '#', 'versionstate', 2);
+
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('1', 'deploystate', '部署状态', '#', 1, 0);
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('2', 'versionstate', '版本状态', '#', 1, 1);
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('3', 'taskDescription', '节点描述', '#', 1, 2);
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('4', 'taskListenerClass', '节点监听器', '#', 0, 4);
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('5', 'executionListenerClass', '执行监听器', '#', 1, 5);
+insert into ACT_HQ_TEM_CODE (id, code_type, type_name, super_id, type, order_id)
+values ('0E053F770A903E72E050007F01007F7D', 'personnelAllocation', '人员关系', '#', 0, 1);
+
+end;
+          ]]></SQL_CONTENT>
+    </SQL>
+  </DATA>
+</INSTALL_SQL>
+

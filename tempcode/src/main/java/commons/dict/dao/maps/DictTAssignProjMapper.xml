@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTAssignProjMapper">
+	<select id="selectDictTAssignProj" resultType="string">
+		SELECT TABLEID FROM DICT_T_ASSIGNPROJ
+	</select>
+	<insert id="insertDictTAssignProj" parameterType="java.lang.String">
+	    INSERT INTO DICT_T_ASSIGNPROJ 
+			  (TABLEID)
+	    <foreach collection="list" item="item" index="index" separator="UNION ALL"> 
+	        SELECT #{item} FROM DUAL
+	    </foreach> 
+	</insert>
+	<delete id="deleteDictTAssignProj">
+		DELETE FROM DICT_T_ASSIGNPROJ 
+	</delete>  
+</mapper>
+ <!--2015-04-23-->

@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.billdef.dao.IBillDefinedMapper">
+	<select id="getBillDefList" parameterType="map" resultType="com.tjhq.commons.setting.billdef.po.BillDefinedPO">
+		select APPID,
+		       to_char(APPROVEDCOLS) APPROVEDCOLS,
+		       BILLCOL,
+		       (select name from dict_t_factor a where a.COLUMNID = BILLCOL) billcolname,
+		       BILLDEFNAME,
+		       to_char(CHECKSQL) CHECKSQL,
+		       GUID,
+		       OFFSETCOL,
+		       (select name from dict_t_factor a where a.COLUMNID = OFFSETCOL) offsetcolname,
+		       SRCDBTABID,
+		       (select name from dict_t_model a where a.TABLEID = SRCDBTABID) srcdbname,
+		       SRCTABID,
+		       (select name from dict_t_model a where a.TABLEID = SRCTABID) srcname,
+		       to_char(SRCWHERE) SRCWHERE,
+		       to_char(wheredesc) wheredesc,
+		       (select name from dict_t_model a where a.TABLEID = TGTTABID) tgtname,
+		       TGTTABID,
+		       PROCNAME,
+		       GENSRCTABID,
+		       SUMCOL,
+		       ISINCR,
+		       INCLUDEDEL,
+		       (select name from dict_t_factor a where a.COLUMNID = SUMCOL) sumcolname
+		  from dict_t_billdef
+		  where appid=#{appId}
+	</select>
+	
+	<insert id="insertBillDef" parameterType="com.tjhq.commons.setting.billdef.po.BillDefinedPO">
+		insert into dict_t_billdef
+		    (GUID,
+		     APPID,
+		     APPROVEDCOLS,
+		     BILLCOL,
+		     BILLDEFNAME,
+		     CHECKSQL,
+		     OFFSETCOL,
+		     SRCDBTABID,
+		     SRCTABID,
+		     <!-- SRCWHERE, -->
+		     TGTTABID,
+		     PROCNAME,
+		     GENSRCTABID,
+		     ISINCR,
+		     INCLUDEDEL,
+		     SUMCOL)
+		  values
+		    (#{guid,jdbcType = VARCHAR},
+		     #{appId,jdbcType = VARCHAR},
+		     #{approvedCols,jdbcType = CLOB},
+		     #{billCol,jdbcType = VARCHAR},
+		     #{billDefName,jdbcType = VARCHAR},
+		     #{checkSql,jdbcType = CLOB},
+		     #{offsetCol,jdbcType = VARCHAR},
+		     #{srcDbTabId,jdbcType = VARCHAR},
+		     #{srcTabId,jdbcType = VARCHAR},
+		     <!-- #{srcWhere,jdbcType = CLOB}, -->
+		     #{tgtTabId,jdbcType = VARCHAR},
+		     #{procName,jdbcType = VARCHAR},
+		     #{genSrcTabId,jdbcType = VARCHAR},
+		     #{isIncr,jdbcType = VARCHAR},
+		      #{includeDel,jdbcType = VARCHAR},
+		     #{sumCol,jdbcType = VARCHAR})
+	</insert>
+	
+	<delete id="deleteBillDef" parameterType="com.tjhq.commons.setting.billdef.po.BillDefinedPO">
+		delete from dict_t_billdef where guid=#{guid}
+	</delete>
+	
+	<update id="updateBillDef" parameterType="com.tjhq.commons.setting.billdef.po.BillDefinedPO">
+		update dict_t_billdef
+		<set>
+			<if test="approvedCols!=null">
+				APPROVEDCOLS =  #{approvedCols,jdbcType = CLOB},
+			</if>
+			<if test="billCol!=null">
+				BILLCOL =  #{billCol,jdbcType = VARCHAR},
+			</if>
+			<if test="billDefName!=null">
+				BILLDEFNAME =  #{billDefName,jdbcType = VARCHAR},
+			</if>
+			<if test="offsetCol!=null">
+				OFFSETCOL =  #{offsetCol,jdbcType = VARCHAR},
+			</if>
+			<if test="sumCol!=null">
+				SUMCOL =  #{sumCol,jdbcType = VARCHAR},
+			</if>
+			<if test="srcDbTabId!=null">
+				SRCDBTABID =  #{srcDbTabId,jdbcType = VARCHAR},
+			</if>
+			<if test="srcTabId!=null">
+				SRCTABID =  #{srcTabId,jdbcType = VARCHAR},
+			</if>
+			<if test="tgtTabId!=null">
+				TGTTABID =  #{tgtTabId,jdbcType = VARCHAR},
+			</if>
+			<if test="srcWhere!=null and srcWhere!=''">
+				SRCWHERE =  #{srcWhere,jdbcType = CLOB},
+			</if>
+			<if test="whereDesc!=null and whereDesc!=''">
+				wheredesc =  #{whereDesc,jdbcType = CLOB},
+			</if>
+			<if test="checkSql!=null">
+				CHECKSQL =  #{checkSql,jdbcType = CLOB},
+			</if>
+			<if test="procName!=null">
+				PROCNAME =  #{procName,jdbcType = VARCHAR},
+			</if>
+			<if test="genSrcTabId!=null">
+				GENSRCTABID =  #{genSrcTabId,jdbcType = CLOB},
+			</if>
+			<if test="isIncr!=null">
+				ISINCR =  #{isIncr,jdbcType = VARCHAR},
+			</if>
+			<if test="includeDel!=null">
+				INCLUDEDEL =  #{includeDel,jdbcType = VARCHAR},
+			</if>
+		</set>
+		where guid=#{guid}
+	</update>
+	<select id="getProcList" parameterType="map" resultType="map">
+		select a.PROCID,a.PROCNAME from dict_t_billproc a where a.APPID=#{appId}
+	</select>
+	<select id="getCheckBasic" parameterType="map" resultType="map">
+		select a.BILLDEFID,a.COLUMNID,a.GUID from dict_t_billbasic a where a.BILLDEFID=#{billDefId}
+	</select>
+	<select id="execProc" parameterType="map" statementType="CALLABLE">
+		<![CDATA[
+			CALL ${procName}('${srcTabId}','${billDefId}','${genSrcTabId}')
+		]]>
+	</select>
+	<select id="getBillDefById" parameterType="string" resultType="map">
+		select APPID,
+		       to_char(APPROVEDCOLS) APPROVEDCOLS,
+		       BILLCOL,
+		       BILLDEFNAME,
+		       to_char(CHECKSQL) CHECKSQL,
+		       GUID,
+		       OFFSETCOL,
+		       SRCDBTABID,
+		       SRCTABID,
+		       to_char(SRCWHERE) SRCWHERE,
+		       TGTTABID,
+		       PROCNAME,
+		       ISINCR,
+		       INCLUDEDEL,
+		       GENSRCTABID
+		  from DICT_T_BILLDEF
+		  where guid=#{billDefId}
+	</select>
+	<delete id="deleteBasicData" parameterType="string">
+		delete from dict_t_billbasic where BILLDEFID=#{billDefId}
+	</delete>
+	<insert id="insertBasicData" parameterType="map">
+		insert into dict_t_billbasic
+		  (BILLDEFID, COLUMNID)
+		values
+		  (#{billDefId}, #{columnId})
+	</insert>
+	<delete id="deleteTgtRelaData" parameterType="string">
+		delete from dict_t_tgtrelation a where a.BILLDEFID=#{billDefId}
+	</delete>
+	<select id="getPropData" resultType="map">
+		select a.COLUMNNAME, a.DBCOLNAME, a.GUID from dict_t_billcols a
+	</select>
+	<select id="getColsData" resultType="map" parameterType="map">
+		select #{billDefId} BILLDEFID,
+		       b.GUID,
+		       b.ISDELETE,
+		       b.ISUPDATE,
+		       to_char(b.SRCSQL) SRCSQL,
+		       to_char(b.SRCSQLDESC) SRCSQLDESC,
+		       b.TGTCOLID,
+		       a.COLUMNID,
+		       a.name COLUMNNAME
+		  from dict_t_factor a
+		  left join dict_t_tgtrelation b
+		  on a.COLUMNID=b.TGTCOLID and b.BILLDEFID = #{billDefId} 
+		  where a.TABLEID = #{tgtColId}
+		   and a.ISLEAF = '1'
+	</select>
+	<select id="checkSql" parameterType="map" resultType="map">
+		select ${columns} 
+		from ${tableName} 
+		<if test="aliasName!=null and aliasName!=''">
+		     ${aliasName}
+		</if>
+		<where>
+			${whereStr}
+		</where>
+	</select>
+	<select id="checkColumnSql" parameterType="map" resultType="map">
+		select *
+		  from (select ${tgtCols}
+		          from ${tgtTableName}
+		           where rownum =1
+		        union all
+		        select ${srcSql} 
+		          from ${srcTableName}
+		           where rownum =1)
+		
+	</select>
+	<insert id="insertColsRela" parameterType="map">
+		 insert into dict_t_tgtrelation
+		   (BILLDEFID, ISDELETE, ISUPDATE, SRCSQL, SRCSQLDESC, TGTCOLID)
+		 values
+		   (#{BILLDEFID}, 
+		   #{ISDELETE,jdbcType = VARCHAR}, 
+		   #{ISUPDATE,jdbcType = VARCHAR}, 
+		   #{SRCSQL, jdbcType = CLOB}, 
+		   #{SRCSQLDESC, jdbcType = CLOB}, 
+		   #{TGTCOLID})
+	</insert>
+	<update id="updateColsRela" parameterType="map">
+		 update dict_t_tgtrelation a
+		 <set>
+		 	<if test="SRCSQL!=null and SRCSQL!=''">
+		 		a.SRCSQL = #{SRCSQL},
+		 	</if>
+		 	<if test="SRCSQLDESC!=null and SRCSQLDESC!=''">
+		 		a.SRCSQLDESC = #{SRCSQLDESC},
+		 	</if>
+		 	<if test="ISDELETE!=null and ISDELETE!=''">
+		 		a.ISDELETE = #{ISDELETE},
+		 	</if>
+		 	<if test="ISUPDATE!=null and ISUPDATE!=''">
+		 		a.ISUPDATE = #{ISUPDATE}
+		 	</if>
+		 </set>
+		  where a.GUID = #{GUID}
+	</update>
+	<delete id="deleteColsRela" parameterType="map">
+		delete from dict_t_tgtrelation a where a.GUID = #{GUID}
+	</delete>
+	
+	<select id="getDefSrcTableCount" parameterType="map" resultType="int">
+		select count(1) from dict_t_billdef a where a.SRCTABID=#{tableId}
+	</select>
+	<select id="getConfirmfuncById" parameterType="string" resultType="map">
+		select guid,name from BGT_T_CONFIRMFUNC   where  guid = #{confirmFunc}  
+		and exists (select * from CDT_T_TASKTYPE   where CONFIRMFUNC = GUID )
+	</select>
+	<select id="getGenSrcTableIdByGuid" parameterType="string" resultType="string">
+		select gensrctabid from dict_t_billdef where guid = #{guid}
+	</select>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.billdef.dao.IBillDefTypeMapper">
+	<select id="getBillTypeList" parameterType="map" resultType="map">
+		select a.GUID,
+		       a.BILLTYPE,
+		       a.BILLTYPENAME,
+		       a.DEFID,
+		       (select d.BILLDEFNAME from dict_t_billdef d where d.GUID = a.DEFID) SNAME_DEFID ,
+		       a.APPID,
+		       a.REMARK,
+		       a.BUSIKEY
+		  from dict_t_billdeftype a
+		  where a.APPID = #{appId}
+	</select>
+	<select id="getBillDefList" parameterType="string" resultType="com.tjhq.commons.inputcomponent.po.TreePO">
+		select a.GUID id, a.BILLDEFNAME name, '0' pid
+		    from dict_t_billdef a
+		   where a.APPID = #{appId}
+	</select>
+	<update id="updateData" parameterType="map">
+		update dict_t_billdeftype 
+		<set>
+			<if test="DEFID!=null and DEFID!=''">
+				DEFID = #{DEFID},
+			</if>
+			BUSIKEY = #{BUSIKEY},
+			REMARK = #{REMARK, jdbcType = VARCHAR}
+		</set>
+		where guid = #{GUID}
+	</update>
+	<insert id="insertData" parameterType="map">
+		insert into dict_t_billdeftype
+		(DEFID, REMARK, BUSIKEY)
+		values
+		(#{DEFID, jdbcType = VARCHAR}, 
+		#{REMARK, jdbcType = VARCHAR}, 
+		#{BUSIKEY, jdbcType = VARCHAR})
+	</insert>
+</mapper>

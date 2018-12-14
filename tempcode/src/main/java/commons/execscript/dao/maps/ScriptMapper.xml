@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.execscript.dao.IScriptMapper">
+    <select id="getLogDataList"  resultType="map" parameterType="map">        
+	    SELECT 
+	    	   l.GUID,
+	    	   l.TYPEID,
+	           l.KEYID,
+	           l.USERLOGID,
+	           l.RESULTFLAG,
+	           l.BATCHCODE,
+	           l.REMARK,
+	           l.KEYNAME,
+       		   l.APPID,
+	           TO_CHAR(L.EXECTIME, 'YYYY-MM-DD HH24:MI:SS_FF6') EXECTIME
+	      FROM efm_t_dbupdate_log l
+	     where ((typeid = 'common'  and (appid='*' or appid=#{appID}) )
+	        or (typeid = global_multyear_cz.Secu_f_GLOBAL_PARM('DIVID') and (appid='*' or appid=#{appID}) )
+	        or typeid = 'DBUpdate')
+	        <if test="sqlWhere!=null and sqlWhere!='' ">
+	        	${sqlWhere}
+	        </if>
+	     ORDER BY appid,typeid, to_number(keyid)
+    </select>
+    <select id="getScriptCount"  resultType="int" parameterType="map">
+		SELECT count(1) FROM efm_t_dbupdate_log 
+			where typeId= #{typeId} 
+				and keyId= #{keyId}
+				and appID= #{appID}
+    </select>
+    <select id="getOldScriptCount"  resultType="int" parameterType="map">
+		SELECT count(1) FROM efm_t_dbupdate_4bs where typeId= #{typeId} and keyId= #{keyId}
+    </select>
+	<insert id="insertDbTable" parameterType="map">
+		INSERT INTO EFM_T_DBUPDATE_4BS(
+			TYPEID, 
+			KEYID, 
+			TYPENAME, 
+			KEYNAME,
+			APPID
+		)
+		VALUES(
+			#{typeId,jdbcType=VARCHAR},
+			#{keyId,jdbcType=VARCHAR},
+			#{typeName,jdbcType=VARCHAR},
+			#{keyName,jdbcType=VARCHAR},
+			#{appID,jdbcType=VARCHAR}
+		)
+	</insert>
+	<insert id="insertLogTable" parameterType="com.tjhq.commons.execscript.po.DbTablePO">
+		INSERT INTO efm_t_dbupdate_log(
+			GUID,
+			TYPEID, 
+			KEYID, 
+			KEYNAME,
+			CONTENT, 
+			USERLOGID, 
+			RESULTFLAG, 
+			BATCHCODE, 
+			REMARK,
+			APPID
+		)
+		VALUES(
+			#{logid,jdbcType=VARCHAR},
+			#{typeId,jdbcType=VARCHAR},
+			#{keyId,jdbcType=VARCHAR},
+			#{keyName,jdbcType=VARCHAR},
+			#{content,jdbcType=CLOB},
+			#{userlogid,jdbcType=VARCHAR},
+			#{resultflag,jdbcType=VARCHAR},
+			#{batchcode,jdbcType=VARCHAR},
+			#{remark,jdbcType=VARCHAR},
+			#{appID,jdbcType=VARCHAR}
+		)
+	</insert>
+	<update id="compileInvalidObjects" statementType="CALLABLE" >  
+		<![CDATA[  
+			 BEGIN
+			    COMPILE_INVALID();
+			 END;  
+		]]>  
+	</update>  
+	<update id="execSql" statementType="CALLABLE" parameterType="string">  
+		<![CDATA[  
+			 BEGIN
+			    ${sql}
+			 END;  
+		]]>  
+	</update>
+	<update id="executeScript" statementType="CALLABLE"
+		parameterType="java.lang.String">  
+		<![CDATA[  
+				 BEGIN
+				    EXEC_SCRIPT(#{logid,mode=IN,jdbcType=VARCHAR});
+				 END;  
+		]]>
+	</update>
+	<update id="initScript" statementType="CALLABLE"  parameterType="string">  
+		<![CDATA[  
+			 BEGIN
+			   execute immediate '
+			   		${sql}
+			   	';  
+			 END;  
+		]]>  
+	</update>  
+	<update id="updateLogTable" parameterType="map">
+		UPDATE EFM_T_DBUPDATE_LOG
+		   SET RESULTFLAG = #{resultflag},
+		       REMARK     = #{remark}
+		 WHERE GUID = #{logid}
+	</update>
+	<update id="updateLogTableInvalidObjects" parameterType="map">
+		UPDATE EFM_T_DBUPDATE_LOG
+		   SET RESULTFLAG = #{resultflag},
+		       REMARK     = #{remark}
+		WHERE RESULTFLAG = '1' 
+	</update>
+	<resultMap type="java.util.Map" id="scriptMap">
+	    <result property="TYPEID" column="TYPEID" />
+	    <result property="KEYID" column="KEYID" />
+	    <result property="USERLOGID" column="USERLOGID" />
+	    <result property="KEYNAME" column="KEYNAME" />
+	    <result property="CONTENT" column="CONTENT"  jdbcType="CLOB"  javaType = "java.lang.String" />
+  </resultMap>
+    <select id="getScriptMap"  resultMap="scriptMap" parameterType="map">          
+      SELECT L.TYPEID, L.KEYID, L.USERLOGID, L.CONTENT, L.KEYNAME
+		  FROM EFM_T_DBUPDATE_LOG L
+	       WHERE L.GUID = #{logId}
+    </select>
+    <select id="getBatchCodeList"  resultType="string" parameterType="map">          
+     		select distinct batchcode from efm_t_dbupdate_log order by batchcode desc
+    </select>
+    <select id="getUserObjectsCount"  resultType="int"  parameterType="map">
+		select count(1)
+		  from user_objects
+		 where object_name = #{objectName}
+		   and object_type = #{objectType}
+    </select>
+    <select id="getUserTabColumnsCount"  resultType="int"  parameterType="map">
+    	select count(1)
+		  from user_tab_columns
+		 where table_name = #{tableName}
+		   and column_name = #{columnName}
+    </select>
+    <select id="getAllExecScriptMap"  resultType="map"  parameterType="map">
+     select  keyid,count(1) as counts from (
+         SELECT keyid from efm_t_dbupdate_log   where  typeId= #{typeId}  and appID= #{appID}
+          union all
+         SELECT keyid from efm_t_dbupdate_4bs   where  typeId= #{typeId}  and appID= #{appID}
+     ) group by keyid  order by  to_number(keyid)
+    
+    </select>
+      <select id="getAllVersionList"  resultType="string" parameterType="map">          
+     		select distinct #{apptype}||sysversion from efm_t_dbupdate_log   where appId=#{appID}
+    </select>
+</mapper>

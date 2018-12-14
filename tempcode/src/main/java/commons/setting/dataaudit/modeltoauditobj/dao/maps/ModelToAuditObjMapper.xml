@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.modeltoauditobj.dao.IModelToAuditObjDAO">
+	<select id="getObjTree" parameterType="String" resultType="com.tjhq.commons.setting.input.po.TreeNode">
+		SELECT * FROM (
+      		SELECT  APPID CODE, APPID ID, APPNAME NAME,'0' DEALTYPE,'' PID,'0' ISLEAF,0 LEVELNO,
+            ORDERID,1 OPEN FROM DICT_T_APPREGISTER
+          UNION ALL  
+         	 SELECT  
+	            SUITID ,  
+	            SUITID , 
+	            SUITNAME , 
+	            '0' ,  
+	            CASE WHEN SUPERID='0'
+	            THEN APPID
+	            ELSE
+	            SUPERID END,
+            	CASE WHEN 
+             		 (SELECT COUNT(*) FROM DICT_T_SUIT WHERE SUPERID=T.SUITID)>0
+           		 THEN 
+              		'0'
+           		 ELSE
+              		'1' 
+           		 END ISLEAF,         
+           		 LEVELNO ,
+            	ORDERID ,  
+           		 0 
+         	 FROM  DICT_T_SUIT T
+           UNION ALL
+	           SELECT 
+	            M.TABLEID,
+	            M.TABLEID,
+	            M.NAME,
+	            M.DEALTYPE, 
+	            M.SUITID ,
+	            '1' ,
+	            (SELECT LEVELNO+1 FROM DICT_T_SUIT WHERE SUITID = M.SUITID) ,
+	            M.ORDERID,
+	            0 OPEN
+	            FROM DICT_T_MODEL M 
+           <if test="tableType != 0 ">
+			 WHERE M.TABLETYPE=#{tableType}
+		   </if>      
+		 ) CONNECT BY PID = PRIOR ID 
+	            START WITH LEVELNO = 0
+	   		ORDER SIBLINGS BY ORDERID ASC  
+
+	</select>
+	<insert id="saveModelToAuditobj" parameterType="String">
+		INSERT INTO BGT_T_INPUTRELATONMODEL(MODELID,INPUTTABLEID) VALUES(#{modelID},#{inputTableID})
+	</insert>
+	<select id="getMidByInpID" parameterType="String" resultType="String">
+		SELECT IRM.MODELID FROM BGT_T_INPUTRELATONMODEL IRM WHERE IRM.INPUTTABLEID=#{inputTableID}
+	</select>
+	<delete id="delModelToAuditobj" parameterType="String">
+		DELETE FROM BGT_T_INPUTRELATONMODEL IRM WHERE IRM.MODELID= #{modelID} AND IRM.INPUTTABLEID=#{inputTableID}
+	</delete>
+</mapper>

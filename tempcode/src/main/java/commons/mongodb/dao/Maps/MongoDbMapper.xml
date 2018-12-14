@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- MONGODB -->
+<mapper namespace="com.tjhq.commons.mongodb.dao.IMongoDbDAO">
+	
+	<select id="getMongoDB" resultType="com.tjhq.commons.mongodb.po.MongoDBPO">
+	
+	 SELECT APPID, ipAddress,dBase,port FROM DICT_T_MONGODB where ISUSE=1 and APPID=#{appid}
+	</select>
+	
+	<select id="getTaskNameByID" parameterType="String" resultType="String">
+	
+	select taskname from CDT_T_TASKINFO where taskid=#{taskID}
+	</select>
+</mapper>

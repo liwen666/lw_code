@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.fileserver.dao.FileServerCtrlMapper">
+	<insert id="insertAttachment" parameterType="com.tjhq.commons.fileserver.po.AttachmentPO">
+		INSERT INTO pub_t_attach
+		(attachid, attachname, filename, filepath, filesize)
+		VALUES
+		(#{attachmentID}, #{attachmentName},
+		#{attachmentFileName}, #{attachmentPath}, #{attachmentSize})
+	</insert>
+	
+	<select id="getAttachmentByID" resultType="com.tjhq.commons.fileserver.po.AttachmentPO">
+		SELECT attachid as attachmentID, attachname as attachmentName, 
+		filename as attachmentFileName, filepath as attachmentPath, 
+		filesize as attachmentSize, uploadDate
+         FROM pub_t_attach 
+		WHERE attachid = #{attachmentID}
+	</select>
+	
+	<select id="getTestTableData1"  resultType="java.util.HashMap">
+	   SELECT * FROM cache_t_code 
+	</select>
+	
+	<select id="getTestTableData2"  resultType="java.util.HashMap">
+	   SELECT * FROM CACHE_T_QREPORT 
+	</select>
+	
+</mapper>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.grid.commonGrid.dao.ICommonGridMapper">
+	<select id="getGroupGridData" parameterType="java.util.Map" resultType="java.util.HashMap">
+		SELECT	'0' C_STATUS, ${rowWriteSecu} AS ROWSECU,
+		 <foreach collection="leafColumnList" index="index" item="column" separator=",">
+			<if test="groupcols.indexOf('{'+column.columnDBName+'}')==-1">
+				${column.columnDBName}
+				<if test="column.refTableDBName != null">
+					,SNAME_${column.columnDBName}
+				</if>
+			</if>
+			<if test="groupcols.indexOf('{'+column.columnDBName+'}')!=-1">
+				<if test="column.refTableDBName == null">
+					${column.columnDBName}
+				</if>
+				<if test="column.refTableDBName != null">
+					SUBSTR(G_${column.columnDBName},INSTR(G_${column.columnDBName},'@#$') + 3) ${column.columnDBName}
+					,SUBSTR(G_${column.columnDBName},1,INSTR(G_${column.columnDBName},'@#$') - 1) SNAME_${column.columnDBName}
+				</if>
+			</if> 
+		 </foreach>
+		  FROM (SELECT 
+				 <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+				    <if test="groupcol.refTableDBName == null">
+						grouping(${groupcol.columnDBName}) 	
+					</if> 
+					<if test="groupcol.refTableDBName != null">
+						grouping(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}) 		
+					</if> 
+				 </foreach> 
+			  	 GROUPORDER ,
+			 	<foreach collection="leafColumnList" index="index" item="column" separator=",">
+			       <if test="groupcols.indexOf('{'+column.columnDBName+'}')!=-1">
+			            <if test="column.refTableDBName == null">
+							${column.columnDBName}
+						</if> 
+						<if test="column.refTableDBName != null">
+							SNAME_${column.columnDBName} ||'@#$'|| ${column.columnDBName} G_${column.columnDBName} 		
+						</if> 
+			       </if>
+			       <if test="groupcols.indexOf('{'+column.columnDBName+'}')==-1">
+			               <if test="sumcols.indexOf('{'+column.columnDBName+'}')!=-1">
+						       SUM(NVL(${column.columnDBName},0)) ${column.columnDBName}
+						    </if>
+						    <if test="sumcols.indexOf('{'+column.columnDBName+'}')==-1">
+						     DECODE(
+							    <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+							     	<if test="groupcol.refTableDBName == null">
+										GROUPING(${groupcol.columnDBName})
+									</if> 
+									<if test="groupcol.refTableDBName != null">
+										GROUPING(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName})		
+									</if> 
+							    </foreach> 
+						        ,'${groupflag}', 
+						        MAX(${column.columnDBName}),'') ${column.columnDBName} 
+						        <if test="column.refTableDBName != null">
+						        	,DECODE(
+									    <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+									     	<if test="groupcol.refTableDBName == null">
+												GROUPING(${groupcol.columnDBName})
+											</if> 
+											<if test="groupcol.refTableDBName != null">
+												GROUPING(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName})		
+											</if>
+									    </foreach> 
+								        ,'${groupflag}', 
+								        MAX(SNAME_${column.columnDBName}),'') SNAME_${column.columnDBName} 
+						        </if>
+						   </if>	
+			       </if>
+			 	</foreach>
+			  	FROM (
+		  	 SELECT * FROM (SELECT t.*,ROWNUM RNUM FROM   
+		  	 	(SELECT 
+		  	 		${selectElement} 
+		  	 	 FROM
+                     ${tableName} TBASE
+                      WHERE  1=1
+                        <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+						 	AND ${rowVisibleSecu}
+						</if> 
+				        <if test="sqlWhere!=null and sqlWhere!=''" > 
+					       AND ${sqlWhere}  
+					    </if>	
+                   ORDER BY 
+                   <if test="sortSQL != null and sortSQL != ''">
+		             ${sortSQL} ,  
+		           </if>
+                   <foreach collection="groupColumns" index="index" item="groupcol" separator=","> 
+			    		<if test="groupcol.refTableDBName == null">
+							${groupcol.columnDBName} ${groupcol.extProperties.GROUPORDER_1} 	
+						</if> 
+						<if test="groupcol.refTableDBName != null">
+							SNAME_${groupcol.columnDBName} ${groupcol.extProperties.GROUPORDER_1}	
+						</if> 
+			   	 	</foreach>) T  
+			   	 	WHERE 1=1 
+		           <if test="isNeedPage!=null"> 
+			          <![CDATA[
+			          	AND ROWNUM <= #{endRow}
+			          ]]> 
+		          </if>
+	          ) A 
+	          <if test="isNeedPage!=null">
+		         <![CDATA[
+		          	WHERE RNUM > #{startRow} 
+		         ]]> 
+	          </if>
+			 ) WHERE 1=1 
+			 GROUP BY ROLLUP(
+			    <foreach collection="groupColumns" index="index" item="groupcol" separator=",">
+			     	<if test="groupcol.refTableDBName == null">
+						${groupcol.columnDBName} 	
+					</if> 
+					<if test="groupcol.refTableDBName != null">
+						SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}		
+					</if> 
+			    </foreach> 
+			  )
+			 ORDER BY 
+			 <foreach collection="groupColumns" index="index" item="groupcol" separator=",">
+			    <if test="groupcol.refTableDBName == null">
+					grouping(${groupcol.columnDBName}) DESC, ${groupcol.columnDBName} ${groupcol.extProperties.GROUPORDER_1}
+				</if> 
+				<if test="groupcol.refTableDBName != null">
+					grouping(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}) DESC, SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName} ${groupcol.extProperties.GROUPORDER_1} 	
+				</if> 
+			 </foreach> 
+			 ) B
+			 
+			 WHERE grouporder != '${grouporder}'
+			 
+	</select>
+	
+    <select id="getGroupGridDataCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT	COUNT(1) 
+		  FROM (SELECT 
+				 <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+				    <if test="groupcol.refTableDBName == null">
+						grouping(${groupcol.columnDBName}) 	
+					</if> 
+					<if test="groupcol.refTableDBName != null">
+						grouping(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}) 		
+					</if> 
+				 </foreach> 
+			  	 GROUPORDER ,
+			 	<foreach collection="leafColumnList" index="index" item="column" separator=",">
+			       <if test="groupcols.indexOf('{'+column.columnDBName+'}')!=-1">
+			            <if test="column.refTableDBName == null">
+							${column.columnDBName}
+						</if> 
+						<if test="column.refTableDBName != null">
+							SNAME_${column.columnDBName} ||'@#$'|| ${column.columnDBName} G_${column.columnDBName} 		
+						</if> 
+			       </if>
+			       <if test="groupcols.indexOf('{'+column.columnDBName+'}')==-1">
+			               <if test="sumcols.indexOf('{'+column.columnDBName+'}')!=-1">
+						       SUM(NVL(${column.columnDBName},0)) ${column.columnDBName}
+						    </if>
+						    <if test="sumcols.indexOf('{'+column.columnDBName+'}')==-1">
+						     DECODE(
+							    <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+							     	<if test="groupcol.refTableDBName == null">
+										GROUPING(${groupcol.columnDBName})
+									</if> 
+									<if test="groupcol.refTableDBName != null">
+										GROUPING(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName})		
+									</if> 
+							    </foreach> 
+						        ,'${groupflag}', 
+						        MAX(${column.columnDBName}),'') ${column.columnDBName} 
+						        <if test="column.refTableDBName != null">
+						        	,DECODE(
+									    <foreach collection="groupColumns" index="index" item="groupcol" separator="||">
+									     	<if test="groupcol.refTableDBName == null">
+												GROUPING(${groupcol.columnDBName})
+											</if> 
+											<if test="groupcol.refTableDBName != null">
+												GROUPING(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName})		
+											</if>
+									    </foreach> 
+								        ,'${groupflag}', 
+								        MAX(SNAME_${column.columnDBName}),'') SNAME_${column.columnDBName} 
+						        </if>
+						   </if>	
+			       </if>
+			 	</foreach>
+			  	FROM (
+		  	 	SELECT 
+		  	 		${selectElement} 
+		  	 	 FROM
+                     ${tableName} TBASE
+                      WHERE  1=1
+                        <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+						 	AND ${rowVisibleSecu}
+						</if> 
+				        <if test="sqlWhere!=null and sqlWhere!=''" > 
+					       AND ${sqlWhere}  
+					    </if>	
+                   ORDER BY 
+                   <if test="sortSQL != null and sortSQL != ''">
+		             ${sortSQL} ,  
+		           </if>
+                   <foreach collection="groupColumns" index="index" item="groupcol" separator=","> 
+			    	 ${groupcol.columnDBName} 
+			   	 	</foreach>
+	          ) WHERE 1=1 
+			 GROUP BY ROLLUP(
+			    <foreach collection="groupColumns" index="index" item="groupcol" separator=",">
+			     	<if test="groupcol.refTableDBName == null">
+						${groupcol.columnDBName} 	
+					</if> 
+					<if test="groupcol.refTableDBName != null">
+						SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}		
+					</if> 
+			    </foreach> 
+			  )
+			 ORDER BY 
+			 <foreach collection="groupColumns" index="index" item="groupcol" separator=",">
+			    <if test="groupcol.refTableDBName == null">
+					grouping(${groupcol.columnDBName}) DESC, ${groupcol.columnDBName} 	
+				</if> 
+				<if test="groupcol.refTableDBName != null">
+					grouping(SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}) DESC, SNAME_${groupcol.columnDBName} ||'@#$'|| ${groupcol.columnDBName}	 	
+				</if> 
+			 </foreach> 
+			 ) B
+			 
+			 WHERE grouporder != '${grouporder}'
+	</select>
+
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.task.external.dao.TaskExternalOaMapper">
+
+	<select id="getDistrictInfoByAgencyId" resultType="map">
+		select province,guid,code,name,superguid,isleaf,levelno from code_t_district t where t.GUID=#{agencyId}
+	</select>
+	<select id="getDistrictTreeByAgencyId" resultType="string">
+		select guid from code_t_district t start with t.guid=#{agencyId} connect by prior t.guid=t.superguid
+	</select>
+	<select id="getTaskInfosByDistrictIdList" resultType="com.tjhq.commons.task.po.TaskPO">
+		select * from cdt_t_taskinfo t where t.districtId in(
+		<foreach collection="districtIdList" separator="," item="districtId">
+		#{districtId}
+		</foreach>)
+		<if test="appId != null and appId != ''">
+			and t.appid = #{appId}
+		</if>
+	</select>
+	<select id="getTaskInfosByAgencyId" resultType="com.tjhq.commons.task.po.TaskPO">
+		select * from cdt_t_taskinfo t where t.receiveId=#{agencyId}
+		<if test="appId != null and appId != ''">
+			and t.appid = #{appId}
+		</if>
+	</select>
+	
+</mapper>

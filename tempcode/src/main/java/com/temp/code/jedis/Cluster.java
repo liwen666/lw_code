@@ -262,7 +262,7 @@ public class Cluster {
         map.put("key2","value2");
         map.put("key3","value3");
         map.put("key4","value4");
-        jedis.hmset("hash",map);
+        System.out.println(jedis.hmset("hash",map));
         jedis.hset("hash", "key5", "value5");
         System.out.println("散列hash的所有键值对为："+jedis.hgetAll("hash"));//return Map<String,String>
         System.out.println("散列hash的所有键为："+jedis.hkeys("hash"));//return Set<String>
@@ -346,4 +346,6 @@ public class Cluster {
         sortingParameters.get("user:*->add");
         System.out.println(jedis.sort("userlist",sortingParameters));*/
     }
+
+
 }

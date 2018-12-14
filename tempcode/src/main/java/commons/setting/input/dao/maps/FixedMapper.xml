@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.FixedMapper">
+
+	<sql id="fix_sql">
+		GUID,TABLEID,TYPEID,LVLNANMECOL,FDCODETOCOLS,LAYERINDENT,REFID,REFWHERE,COLORDER
+  	</sql>
+  	<insert id="insertFixedWhole" parameterType="com.tjhq.commons.setting.input.po.DictTSetFixPO">
+  		<selectKey resultType="String" order="BEFORE" keyProperty="guID">  
+        	SELECT SYS_GUID() AS guID FROM DUAL  
+   	 	</selectKey>
+        INSERT INTO dict_t_setfix(<include refid="fix_sql"/>) VALUES(
+        	#{guID,jdbcType = VARCHAR},
+        	#{tableID,jdbcType = VARCHAR},
+        	#{typeID,jdbcType = VARCHAR},
+        	#{lvlNanmeCol,jdbcType = VARCHAR},
+        	#{fdCodeToCols,jdbcType = VARCHAR},	
+        	#{layerIndent,jdbcType = VARCHAR},
+        	#{refID,jdbcType = VARCHAR},
+        	#{refWhere,jdbcType = VARCHAR},
+        	#{colOrder,jdbcType = VARCHAR})
+  	</insert>
+ 
+   	<update id="updateFixedWhole" parameterType="com.tjhq.commons.setting.input.po.DictTSetFixPO">
+  		 update dict_t_setfix
+    		<set>
+    			<if test="lvlNanmeCol != null">
+    				LVLNANMECOL=#{lvlNanmeCol,jdbcType=VARCHAR},
+    			</if>
+    			<if test="fdCodeToCols != null">
+    				FDCODETOCOLS=#{fdCodeToCols,jdbcType=VARCHAR},
+    			</if>
+    			<if test="layerIndent != null">
+    				LAYERINDENT=#{layerIndent,jdbcType=VARCHAR},
+    			</if>
+    			<if test="refID != null">
+    				REFID=#{refID,jdbcType=VARCHAR},
+    			</if>
+    			<if test="refWhere != null">
+    				REFWHERE=#{refWhere,jdbcType=VARCHAR},
+    			</if>
+    		</set>
+    		where GUID = #{guID,jdbcType=VARCHAR}
+   	</update>
+   	
+   	<select id="selectAgencyTableName" parameterType="String" resultType="String">  
+        	select TABLENAME from dict_t_appcode where APPID = #{appID} and UPPER(OBJECTID) = 'AGENCYID'
+   	</select>
+   	
+   	<update id="updateSynStatus" parameterType="String">
+   		UPDATE ${dbTableName} SET SYNSTATUS = '1' WHERE SYNSTATUS = '0'
+   	</update>
+  	<select id="selectAgencyTableData" parameterType="String" resultType="Map">
+			select GUID, CODE, NAME, SUPERGUID, ISLEAF, LEVELNO from ${dbTableName} where GUID = '000093B071D445C69F75A02F0F626757'
+  	</select>
+  	<select id="getLvlNameColByTableID" parameterType="String" resultType="String">
+  	select t.LVLNANMECOL  from dict_t_setfix t
+         where t.TABLEID =#{tableID}
+  	</select>
+  	<select id="getCodeNameBycolID" parameterType="String" resultType="Map">
+  		SELECT CSID,   (SELECT DBTABLENAME FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME
+ 		 FROM dict_t_factor WHERE COLUMNID = #{colID}
+ 	</select>
+  	 <sql id="fd_sql">
+		DATAKEY,AGENCYID,ORDERID,ISTEMPLATE,SYNSTATUS,TEMPLATEID
+  	</sql>
+  	<insert id="setFixData" parameterType="map">
+  	 
+   	 	 insert into ${fixName}(<include refid="fd_sql"/>
+   	 	 <if test="colName_1 != null">
+   	 	 	,${colName_1},SUPERID_1,FDCODE_1,LEVELNO_1,ISLEAF_1,ISQZX_1, ISDJ_1,ISHZ_1,ISUPDATE_1
+   	 	 </if>
+   	 	 <if test="colName_2 != null">
+   	 	 	,${colName_2},SUPERID_2,FDCODE_2,LEVELNO_2,ISLEAF_2,ISQZX_2, ISDJ_2,ISHZ_2,ISUPDATE_2
+   	 	 </if>
+   	 	 <if test="colName_3 != null">
+   	 	 	,${colName_3} ,SUPERID_3,FDCODE_3,LEVELNO_3,ISLEAF_3,ISQZX_3, ISDJ_3,ISHZ_3，ISUPDATE_3
+   	 	 </if>
+   	 	 )
+		<foreach collection="fixDatas" item="item" index="index" separator="UNION ALL"> 
+	        SELECT SYS_GUID(),#{item.AGENCYID},#{item.ORDERID}, #{item.ISTEMPLATE},#{item.SYNSTATUS},#{item.TEMPLATEID}
+	         <if test="colName_1 != null">
+   	 	 		,#{item.GUID_1},#{item.SUPERID_1},#{item.FDCODE_1},
+	        #{item.LEVELNO_1},#{item.ISLEAF_1},#{item.ISQZX_1},#{item.ISDJ_1},#{item.ISHZ_1},#{item.ISUPDATE_1}
+	   	 	 </if>
+	   	 	 <if test="colName_2 != null">
+	   	 	 	,#{item.GUID_2},#{item.SUPERID_2},#{item.FDCODE_2},#{item.LEVELNO_2},
+	        #{item.ISLEAF_2},#{item.ISQZX_2},#{item.ISDJ_2},#{item.ISHZ_2},#{item.ISUPDATE_2}
+	   	 	 </if>
+	   	 	 <if test="colName_3 != null">
+	   	 	 	,#{item.GUID_3},#{item.SUPERID_3},#{item.FDCODE_3},#{item.LEVELNO_3},#{item.ISLEAF_3},
+	        #{item.ISQZX_3},#{item.ISDJ_3},#{item.ISHZ_3},#{item.ISUPDATE_3}
+	   	 	 </if>
+	        FROM DUAL
+	    </foreach>     	
+  	</insert>
+  		<select id="clearFloatErrData"  statementType="CALLABLE"  parameterType="String">
+		{call  SYS_P_CLEAR_ERROR_DATA(#{tableID,mode=IN,jdbcType=VARCHAR})}
+	</select>
+	
+ 	<select id="getMaxFdCol" parameterType="java.util.Map" resultType="java.lang.String">
+	 	SELECT CASE WHEN COUNT(SUPERID_1) > COUNT(SUPERID_2) AND COUNT(SUPERID_2) > COUNT(SUPERID_3)
+	            THEN '1' 
+	            WHEN COUNT(SUPERID_2) > COUNT(SUPERID_1) AND COUNT(SUPERID_2) > COUNT(SUPERID_3)
+	            THEN '2' 
+	            WHEN COUNT(SUPERID_3) > COUNT(SUPERID_1) AND COUNT(SUPERID_3) > COUNT(SUPERID_2)
+	            THEN '3' 
+	            ELSE '1'
+	            END
+	       FROM ${tableName}  
+	      WHERE ISTEMPLATE = '1'
+    </select>  
+</mapper>

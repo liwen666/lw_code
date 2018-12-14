@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTUpdateviewMapper">
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTUpdateview" resultType="com.tjhq.commons.dict.external.po.DictTUpdateviewPO">
+		SELECT TABLEID,COLUMNID,TOCOLUMNID,BGTLVL,GUID FROM  dict_t_updateview 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTUpdateview"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTUpdateviewPO">
+		SELECT TABLEID,COLUMNID,TOCOLUMNID,BGTLVL,GUID  FROM  dict_t_updateview 
+	  <where> 
+            GUID  = #{guid}     
+       </where>
+	</select>  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTUpdateview" parameterType="com.tjhq.commons.dict.external.po.DictTUpdateviewPO">
+		INSERT INTO  dict_t_updateview  ( TABLEID, COLUMNID, TOCOLUMNID, BGTLVL )
+		VALUES ( 
+		  #{tableid,jdbcType=VARCHAR},
+		  #{columnid,jdbcType=VARCHAR},
+		  #{tocolumnid,jdbcType=VARCHAR},
+		  #{bgtlvl,jdbcType=CHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTUpdateview" parameterType="com.tjhq.commons.dict.external.po.DictTUpdateviewPO">
+    UPDATE  dict_t_updateview  
+   <set>
+		<if test="tableid!=null and tableid!=''">
+		     TABLEID  = #{tableid},
+	        </if>
+		<if test="columnid!=null and columnid!=''">
+		     COLUMNID  = #{columnid},
+	        </if>
+		<if test="tocolumnid!=null and tocolumnid!=''">
+		     TOCOLUMNID  = #{tocolumnid},
+	        </if>
+		<if test="bgtlvl!=null and bgtlvl!=''">
+		     BGTLVL  = #{bgtlvl}
+	        </if>
+  </set>
+  <where>
+    GUID  = #{guid}
+  </where>    
+</update>
+    
+    
+
+      
+     <delete id="deleteDictTUpdateview" parameterType="java.lang.String">
+		DELETE FROM  dict_t_updateview WHERE GUID  = #{guid}
+    </delete>   
+    
+     <delete id="deleteDictTUpdateviewByTableID" parameterType="java.lang.String">
+		DELETE FROM  dict_t_updateview WHERE TABLEID  = #{tableID}
+    </delete> 
+    
+
+	<select id="findDictTUpdateview" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTUpdateviewPO">
+		SELECT TABLEID,COLUMNID,TOCOLUMNID,BGTLVL,GUID,(select dbcolumnname from dict_t_factor t2 where t2.columnid = u.COLUMNID) as SNAME_columnid,(select dbcolumnname from dict_t_factor t2 where t2.columnid = u.TOCOLUMNID) as SNAME_tocolumnid FROM  dict_t_updateview  u  
+                <where>
+                       <if test="tableid!=null and tableid!=''">
+                             TABLEID  = #{tableid}
+                       </if>
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             TABLEID  like #{tableid_like}
+                        </if>
+                       <if test="columnid!=null and columnid!=''">
+                             AND  COLUMNID  = #{columnid}
+                       </if>
+                        <if test="columnid_like!=null and columnid_like!=''">
+                             AND  COLUMNID  like #{columnid_like}
+                        </if>
+                       <if test="tocolumnid!=null and tocolumnid!=''">
+                             AND  TOCOLUMNID  = #{tocolumnid}
+                       </if>
+                        <if test="tocolumnid_like!=null and tocolumnid_like!=''">
+                             AND  TOCOLUMNID  like #{tocolumnid_like}
+                        </if>
+                       <if test="bgtlvl!=null and bgtlvl!=''">
+                             AND  BGTLVL  = #{bgtlvl}
+                       </if>
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                             AND  BGTLVL  like #{bgtlvl_like}
+                        </if>
+                       <if test="guid!=null and guid!=''">
+                             AND  GUID  = #{guid}
+                       </if>
+                        <if test="guid_like!=null and guid_like!=''">
+                             AND  GUID  like #{guid_like}
+                        </if>
+                 </where>
+	
+	</select>
+
+	<select id="findDictTUpdateviewCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_updateview  u
+	    <where>
+                        <if test="tableid!=null and tableid!=''">
+                              TABLEID  = #{tableid}
+                        </if>
+
+                        <if test="tableid_like!=null and tableid_like!=''">
+                              TABLEID  like #{tableid_like}
+                        </if>
+                        <if test="columnid!=null and columnid!=''">
+                              AND  COLUMNID  = #{columnid}
+                        </if>
+
+                        <if test="columnid_like!=null and columnid_like!=''">
+                              AND  COLUMNID  like #{columnid_like}
+                        </if>
+                        <if test="tocolumnid!=null and tocolumnid!=''">
+                              AND  TOCOLUMNID  = #{tocolumnid}
+                        </if>
+
+                        <if test="tocolumnid_like!=null and tocolumnid_like!=''">
+                              AND  TOCOLUMNID  like #{tocolumnid_like}
+                        </if>
+                    
+                        <if test="bgtlvl!=null and bgtlvl!=''">
+                              AND  BGTLVL  = #{bgtlvl}
+                        </if>
+
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                              AND  BGTLVL  like #{bgtlvl_like}
+                        </if>
+                        <if test="guid!=null and guid!=''">
+                              AND  GUID  = #{guid}
+                        </if>
+
+                        <if test="guid_like!=null and guid_like!=''">
+                              AND  GUID  like #{guid_like}
+                        </if>
+	      </where>
+	</select>
+	
+	<select id="getDictTFactorByFromTableID"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor
+		 WHERE COLUMNID IN
+       (SELECT FRMCOLID
+          FROM dict_T_factor
+         WHERE FRMTABID = #{fromTableID} AND TABLEID = #{tableID})
+  	</select>
+ </mapper>
+ <!--2014-03-04 17:58:59-->

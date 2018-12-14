@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.external.dao.AccountRuleOutMapper">
+	<resultMap type="com.tjhq.commons.setting.external.po.AccountRuleOutPO" id="AccountRuleOutPO">
+		<id column="BILLDEFID" property="billDefId"/>
+		<result column="SRCTABLEID" property="srcTableId"/>
+		<result column="SRCTABLENAME" property="srcTableName"/>
+		<result column="SRCDBTABLENAME" property="srcDBTableName"/>
+		<result column="SRCWHERE" property="srcWhere"/>
+		<result column="TGTTABLEID" property="tgtTableId"/>
+		<result column="TGTDBTABLENAME" property="tgtDBTableName"/>
+		<result column="OFFSETCOLNAME" property="offsetColName"/>
+		<result column="BILLCOLNAME" property="billColName"/>
+		<result column="SUMCOLNAME" property="sumColName"/>
+		<result column="ISINCR" property="isIncr"/>
+		<result column="BUSIKEY" property="busiKey"/>
+		<result column="INCLUDEDEL" property="includeDel"/>
+		<collection property="billRelas" column="BILLDEFID_RELA" ofType="com.tjhq.commons.setting.external.po.AccountRuleRelaPO">
+			<id  column="RELAID" property="relaId"/>
+			<result column="BILLDEFID" property="billDefId"/>
+			<result column="TGTDBCOLNAME" property="tgtDBColName"/>
+			<result column="SRCSQL" property="srcSql"/>
+			<result column="ISUPDATEKEY" property="isUpdateKey"/>
+			<result column="ISDELETEKEY" property="isDeleteKey"/>
+		</collection>
+	</resultMap>
+	
+	<select id="getBillDefinedData" parameterType="map" resultMap="AccountRuleOutPO">
+		SELECT  A.GUID BILLDEFID,
+		        A.GENSRCTABID SRCTABLEID,
+		        A.ISINCR ISINCR,
+		       (SELECT C.DBTABLENAME
+		          FROM DICT_T_MODEL C
+		         WHERE TABLEID = A.GENSRCTABID) SRCTABLENAME,
+		       (SELECT C.DBTABLENAME
+		          FROM DICT_T_MODEL C
+		         WHERE TABLEID = decode(A.SRCDBTABID,null,a.SRCTABID,A.SRCDBTABID)) SRCDBTABLENAME,
+		       TO_CHAR(A.SRCWHERE) SRCWHERE,
+		       A.TGTTABID TGTTABLEID,
+		       (SELECT C.DBTABLENAME FROM DICT_T_MODEL C WHERE TABLEID = A.TGTTABID) TGTDBTABLENAME,
+		       (SELECT F.DBCOLUMNNAME
+		          FROM DICT_T_FACTOR F
+		         WHERE F.COLUMNID = A.OFFSETCOL) OFFSETCOLNAME,
+		       (SELECT F.DBCOLUMNNAME
+		          FROM DICT_T_FACTOR F
+		         WHERE F.COLUMNID = A.BILLCOL) BILLCOLNAME,
+		         (SELECT F.DBCOLUMNNAME
+		          FROM DICT_T_FACTOR F
+		         WHERE F.COLUMNID = A.SUMCOL) SUMCOLNAME,
+		         B.GUID RELAID,
+		        B.BILLDEFID DEFID,
+		       (SELECT F.DBCOLUMNNAME
+		          FROM DICT_T_FACTOR F
+		         WHERE F.COLUMNID = B.TGTCOLID) TGTDBCOLNAME,
+		       TO_CHAR(B.SRCSQL) SRCSQL,
+		       B.ISUPDATE ISUPDATEKEY,
+		       B.ISDELETE ISDELETEKEY,
+		       c.busikey,
+		       a.includeDel
+		  FROM DICT_T_BILLDEF A
+		  LEFT JOIN DICT_T_TGTRELATION B
+		    ON A.GUID = B.BILLDEFID
+		  left join DICT_T_BILLDEFTYPE c 
+		    on  A.GUID = c.defid 
+		 WHERE A.APPID = #{appId}
+		 <if test="billDefId!=null and billDefId!=''">
+		 	and A.GUID = #{billDefId}
+		 </if>
+		 <if test="typeId!=null and typeId!=''">
+		 	 AND c.BILLTYPE = #{typeId}
+		 </if>
+	</select>
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.form.baseform.dao.IBaseFormMapper">
+ 
+  <select id="getFormData" parameterType="java.util.Map" resultType="hashmap">
+		SELECT '0' C_STATUS, ${rowWriteSecu} AS ROWSECU, ${selectElement} FROM (${tableName}) WHERE ${sqlWhere}
+		<if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+		 	AND ${rowVisibleSecu}
+		</if> 
+  </select>
+    
+  
+</mapper>

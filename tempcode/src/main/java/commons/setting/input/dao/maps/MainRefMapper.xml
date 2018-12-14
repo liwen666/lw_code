@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.MainRefMapper">
+
+	<!-- 录入表实体保存 -->
+	<insert id="insertProjTabEntity" parameterType="java.lang.String">	    	
+		insert into spf_t_setprojtab (guid,OBJECTID,TYPEFLAG,ORDERID,TABLEID,ISRESERVE,ISMAINTABLE,ISREADONLY,PROCESSID) 
+    	values (sys_guid(),#{OBJECTID},#{TYPEFLAG},#{ORDERID},#{TABLEID},#{ISRESERVE},#{ISMAINTABLE},#{ISREADONLY},#{PROCESSID})
+	</insert>
+	
+	<!-- 更新录入表实体 -->
+	<update id="updateProjTabEntity" parameterType="java.lang.String"> 
+  		update spf_t_setprojtab
+  		SET
+  			OBJECTID = #{OBJECTID}, 
+			ORDERID = #{ORDERID},  
+			TABLEID = #{TABLEID},  
+			ISRESERVE = #{ISRESERVE},
+			ISMAINTABLE = #{ISMAINTABLE},
+			ISREADONLY = #{ISREADONLY}
+  		where guid = #{ID} 
+	</update>
+	
+	<!-- 删除录入表实体 -->
+	<delete id="deleteProjTabEntityById" parameterType="java.lang.String">
+    	delete from spf_t_setprojtab
+    	WHERE guid = #{ID}
+    </delete>
+    
+    <!-- 单页面整体设置 -->
+	<select id="getSetRECList"  parameterType="string" resultType="com.tjhq.commons.setting.external.po.RECPO">  
+		select a.OBJECTID,a.TABLEID,a.RECID,a.SHOWCOLS,a.TITLEWIDTH,a.REMARK from dict_t_setrec a,dict_t_model b 
+    	where a.TABLEID=b.TABLEID and a.objectid =#{OBJECTID} and a.tableid =#{TABLEID} 
+		<if test="processId!=null">
+			and a.PROCESSID=#{PROCESSID}
+		</if>
+		
+	</select>
+    
+    <!-- 报表设置表实体保存 -->
+	<insert id="insertSetREC" parameterType="map">	    	
+		insert into dict_t_setrec (OBJECTID,TABLEID,RECID,SHOWCOLS,TITLEWIDTH
+		<if test="PROCESSID!=null">
+		,PROCESSID
+		</if>
+		) 
+    	values (#{OBJECTID},#{TABLEID},sys_guid(),#{SHOWCOLS},#{TITLEWIDTH}
+    	<if test="PROCESSID!=null">
+		,#{PROCESSID}
+		</if>
+    	)
+	</insert>
+	
+	<!-- 更新报表设置表 -->
+	<update id="updateSetREC" parameterType="map">
+	update dict_t_setrec
+	set
+	showcols = #{SHOWCOLS},
+	titlewidth = #{TITLEWIDTH}
+	where objectid=#{OBJECTID} and tableid=#{TABLEID} 
+  		<if test="processId!=null">
+			and PROCESSID=#{PROCESSID}
+		</if>
+  		
+	</update>
+	
+	<!-- 删除报表设置表 -->
+	<delete id="deleteSetRECById" parameterType="java.lang.String">
+    	delete from dict_t_setrec
+    	WHERE RECID = #{RECID}
+    </delete>
+    
+    <delete id="deleteSetREC" parameterType="map">
+    	delete from dict_t_setrec a
+    	WHERE a.OBJECTID=#{OBJECTID} and a.TABLEID=#{TABLEID} 
+    	<if test="PROCESSID!=null">
+			and a.PROCESSID=#{PROCESSID}
+		</if>
+    	
+    </delete>
+    
+    
+    <!-- 单页面明细设置保存 -->
+	<insert id="insertSetRECDetail" parameterType="java.lang.String">	    	
+		insert into dict_t_setrecdetail (RECID,CTRLID,CTRLNAME,SUPERID,ISLEAF,LEVELNO,ORDERID,ISTEXT,COLSPAN,ROWSPAN,ISGROUPCTRL,ISSHOW) 
+    	values (#{RECID},#{CTRLID},#{CTRLNAME},#{SUPERID},#{ISLEAF},#{LEVELNO},#{ORDERID},#{ISTEXT},#{COLSPAN},#{ROWSPAN},#{ISGROUPCTRL},#{ISSHOW})
+	</insert>
+	
+	
+	<!-- 更新单页面明细设置 -->
+	<update id="updateSetRECDetail" parameterType="java.lang.String"> 
+  		update dict_t_setrecdetail
+  		<set>
+  			<if test="CTRLNAME !=null">
+  				CTRLNAME = #{CTRLNAME},
+  			</if>
+  			<if test="ORDERID !=null">
+  				ORDERID = #{ORDERID},
+  			</if>
+  			<if test="ISTEXT !=null">
+  				ISTEXT = #{ISTEXT},
+  			</if>
+  			<if test="COLSPAN !=null">
+  				COLSPAN = #{COLSPAN},
+  			</if>
+  			<if test="ISGROUPCTRL !=null">
+  				ISGROUPCTRL = #{ISGROUPCTRL}, 
+  			</if>
+  			<if test="ROWSPAN !=null">
+  				ROWSPAN = #{ROWSPAN},
+  			</if>
+  			<if test="ISSHOW !=null">
+  				ISSHOW = #{ISSHOW}
+  			</if>
+  		
+  		</set>			
+  		where RECID = #{RECID} and CTRLID=#{CTRLID}
+	</update>
+	
+	<!-- 删除单页面明细设置 -->
+	<delete id="deleteSetRECDetail" parameterType="java.lang.String">
+    	delete from dict_t_setrecdetail
+    	WHERE RECID = #{RECID} and CTRLID=#{CTRLID}
+    </delete>
+    
+    <!-- 删除单页面明细设置 by recID -->
+    <delete id="delDetailByRecId" parameterType="java.lang.String">
+    	delete from dict_t_setrecdetail
+    	WHERE RECID = #{RECID}
+    </delete>
+     <select id="getRecIDByMainTabId" parameterType="String" resultType="String">
+	  select recid from dict_t_setrec where  tableid = #{tableID} and objectid=#{code}
+	 </select>
+    <!-- 录入列表设置查询 -->
+    <select id="getProjReportListData" parameterType="map" resultType="map">
+	select a.OBJECTID,
+	a.TYPEFLAG,
+	a.guid as ID,
+	a.ORDERID,
+	a.TABLEID,
+	a.ISRESERVE,
+	a.ISMAINTABLE,
+	a.ISREADONLY,
+  	a.PROCESSID,
+	b.NAME as TABLENAME,
+	b.REMARK,
+	c.DEALNAME,
+	a.flag
+	from (select a1.*,'0' flag
+	from spf_t_setprojtab a1
+	where a1.OBJECTID = #{OBJECTID}
+	and a1.TYPEFLAG = #{TYPEFLAG}
+	and a1.PROCESSID= #{PROCESSID}
+	union all
+	select a2.*,'1' flag
+	from spf_t_setprojtab a2
+	where a2.TYPEFLAG = #{TYPEFLAG}
+	and a2.PROCESSID = #{PROCESSID}
+	and a2.OBJECTID = (select b.projtypeid
+	from spf_t_fbaseinfo b
+	where b.spfid = #{OBJECTID})
+	<if test="spfType!=null">
+	and a2.ISRESERVE='1'
+	</if>
+	and a2.TABLEID not in (select c.TABLEID
+	from spf_t_setprojtab c
+	where c.OBJECTID = #{OBJECTID}
+	and c.TYPEFLAG = #{TYPEFLAG} and c.PROCESSID=#{PROCESSID})) a,
+	dict_t_model b,
+	dict_t_dealtype c
+	where a.TABLEID = b.TABLEID
+	and b.DEALTYPE = c.dealid
+	order by a.ORDERID
+	</select>
+    
+    <!-- 表属性列表设置查询-->
+    <select id="getPageColumnListData" parameterType="map" resultType="map">
+    
+select *
+  from (select t.RECID,
+               t.CTRLID,
+               decode(t.CTRLNAME, '', d.NAME, t.CTRLNAME) CTRLNAME,
+               t.SUPERID,
+               t.ISLEAF,
+               t.LEVELNO,
+               t.ORDERID,
+               t.ISTEXT,
+               decode(t.ISTEXT, '1', '是', '0', '否') SNAME_ISTEXT,
+               t.COLSPAN,
+               t.ROWSPAN,
+               t.ISGROUPCTRL,
+               t.ISSHOW,
+                decode(t.ISSHOW, '1', '是', '0', '否') SNAME_ISSHOW
+          from dict_t_setrecdetail t, dict_t_factor d, dict_t_setrec s
+         where t.CTRLID = d.COLUMNID(+)
+           and s.RECID = t.RECID
+		 and s.OBJECTID=#{OBJECTID} and s.TABLEID=#{TABLEID} 
+		 <if test="PROCESSID!=null">
+		 and s.PROCESSID=#{PROCESSID}
+		 </if>		 
+		 start with t.SUPERID='0' connect by prior t.CTRLID=t.SUPERID
+		 order siblings by t.ORDERID) aa
+ 	where exists (select 1 from dict_t_factor factr where aa.CTRLID=factr.COLUMNID) or aa.ISGROUPCTRL='1'
+	</select>
+	
+	<!-- 主表关系设置 -->
+	<select id="getMainList" parameterType="string" resultType="map">
+		select FKID,GUID,MAINFKID,MAINTABID,PROJTABID,TABLEID from spf_t_settabrelation d where d.PROJTABID=#{ID}
+	</select>
+	
+	<insert id="saveMainTable" parameterType="map">
+		insert into  spf_t_settabrelation(MAINTABID, PROJTABID, TABLEID, MAINFKID, FKID) 
+		values
+		(#{MAINTABID},#{PROJTABID},#{TABLEID},#{MAINFKID},#{FKID})
+	</insert>
+	
+	<update id="updateMainTable">
+		update spf_t_settabrelation 
+		set MAINFKID=#{MAINFKID},FKID=#{FKID}
+		where PROJTABID=#{PROJTABID}
+		
+	</update>
+	
+	<delete id="deleteMainTable" parameterType="string">
+		delete from spf_t_settabrelation d where d.PROJTABID=#{Id} 	
+	</delete>
+	
+	<select id="getMainCount" parameterType="string" resultType="int">
+		select count(*)
+		  from spf_t_setprojtab a
+		 where (a.OBJECTID = #{OBJECTID} or
+		       a.OBJECTID in
+		       (select b.projtypeid
+		           from spf_t_fbaseinfo b
+		          where b.spfid = #{OBJECTID}))
+		   and a.TYPEFLAG = #{TYPEFLAG}
+		   and a.ISMAINTABLE = '1'
+	</select>
+	<!-- 主表关系设置 -->
+	
+	<!-- 获取项目过程环节数据 -->
+	<select id="getProjProcess" resultType="map">
+		select a.CODE,a.NAME from spf_t_pprojstep a
+	</select>
+	
+	<!-- 获取专项资金过程环节数据  -->
+	<select id="getSPFjProcess" resultType="map">
+		select a.CODE,a.NAME from spf_t_fspfstep a
+	</select>
+	
+	<!-- 复制过程环节数据 -->
+	<select id="getTabList" parameterType="map" resultType="map">
+		 select GUID,ISMAINTABLE,ISREADONLY,ISRESERVE,OBJECTID,a.ORDERID,PROCESSID,a.TABLEID,TYPEFLAG
+	      from spf_t_setprojtab a,dict_t_model b 
+	     where a.TABLEID=b.TABLEID 
+	       and a.OBJECTID = #{OBJECTID}
+		   and a.TYPEFLAG = #{TYPEFLAG}
+		   and a.PROCESSID = #{PROCESSID}
+	</select>
+	
+	<select id="getTabRecList" parameterType="map" resultType="map">
+		 select OBJECTID,PROCESSID,RECID,REMARK,SHOWCOLS,TABLEID,TITLEWIDTH
+		  from dict_t_setrec a
+		 where  a.OBJECTID = #{OBJECTID}
+		   and a.TABLEID = #{TABLEID}
+		   and a.PROCESSID = #{PROCESSID}
+	
+	</select>
+	
+	<select id="getTabDetail" parameterType="string" resultType="map">
+	select * from (
+		 select COLSPAN,CTRLID,CTRLNAME,GUID,ISGROUPCTRL,ISLEAF,ISSHOW,ISTEXT,LEVELNO,ORDERID,RECID,ROWSPAN,SUPERID
+		  from dict_t_setrecdetail a
+		 where a.RECID = #{RECID} ) rec
+     where exists (select 1 from dict_t_factor f where rec.ctrlid=f.COLUMNID) or rec.isgroupctrl='1'
+	</select>
+	
+	<insert id="insertTab">
+		insert into spf_t_setprojtab
+		  (guid,ismaintable,isreserve,objectid,orderid,tableid,processid,isreadonly,typeflag)
+		values
+		  (#{GUID},#{ISMAINTABLE},#{ISRESERVE},#{OBJECTID},#{ORDERID},#{TABLEID},#{PROCESSID},#{ISREADONLY},#{TYPEFLAG})
+	</insert>
+	
+	<insert id="insertRec">
+		insert into dict_t_setrec 
+			(OBJECTID,RECID,SHOWCOLS,TABLEID,TITLEWIDTH,PROCESSID)
+		values
+			(#{OBJECTID},#{RECID},#{SHOWCOLS},#{TABLEID},#{TITLEWIDTH},#{PROCESSID})
+	</insert>
+	
+	<!-- 获取详细信息记录数 -->
+	<select id="getDetailCountByRecId" parameterType="string" resultType="int">
+		select count(*) from dict_t_setrecdetail a where a.RECID=#{RECID}
+	</select>
+	
+	<!-- 获取报表设置主表 by ID -->
+	<select id="getProjTabById" parameterType="string" resultType="map">
+		select objectid,
+	       typeflag,
+	       guid,
+	       orderid,
+	       tableid,
+	       isreserve,
+	       ismaintable,
+	       processid,
+	       isreadonly
+	  from spf_t_setprojtab a 
+	  where a.GUID=#{guid}
+	</select>
+		
+</mapper>

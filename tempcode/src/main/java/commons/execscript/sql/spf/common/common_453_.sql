@@ -1,0 +1,54 @@
+BEGIN
+DELETE FROM FASP_T_PUBMENU WHERE GUID ='1200020033333';
+insert into fasp_t_pubmenu
+  (GUID,
+   LEVELNO,
+   ISLEAF,
+   STATUS,
+   CODE,
+   NAME,
+   PARENTID,
+   URL,
+   MENUORDER,
+   REMARK,
+   APPSYSID,
+   PROVINCE,
+   YEAR,
+   APPID,
+   PARAM1,
+   PARAM2,
+   PARAM3,
+   PARAM4,
+   PARAM5,
+   SSOFLAG,
+   ADMINTYPE,
+   ALIAS,
+   ISPTADMIN)
+values
+  ('1200020033333',
+   2,
+   1,
+   '1',
+   '004002026',
+   '项目综合处理',
+   '120002',
+   '/spf/project/query/queryMain.do?dealtype=PROJZHCL' || CHR(38) ||
+   'btShow={isAdd:''y'',isAudit:''y''}',
+   1,
+   'remark',
+   1,
+   null,
+   null,
+   'spf',
+   null,
+   null,
+   null,
+   null,
+   null,
+   null,
+   1,
+   null,
+   null);
+
+END;
+--综合处理菜单

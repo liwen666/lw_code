@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTLimitcolMapper">
+	<resultMap id="secutlimittab" type="com.tjhq.commons.secu.po.SecuTLimitcolPO">
+		<result property="tableId" column="tableId" />
+		<result property="columnId" column="columnId" />
+		<result property="limitCon" column="limitCon" />
+		<result property="limitCon" column="limitCon" />
+		<result property="limitConFunc" column="limitConFunc" />
+		<result property="showLimit" column="showLimit" />
+	</resultMap>
+	<delete id="deleteColInputLimit" parameterType="java.lang.String"> 
+		delete from secu_t_limitcol where tableId=#{tableId}
+	</delete>
+	<select id="getTableCellLimits" parameterType="java.lang.String"
+		resultType="map">
+		select t.*,t2.DBCOLUMNNAME from secu_t_limitcol t, dict_t_factor t2 where t.columnId = t2.columnId and t2.tableId=#{tableId}
+	</select>
+	<select id="queryInputColLimit" parameterType="java.util.Map"
+		resultMap="secutlimittab">
+		select * from secu_t_limitcol where tableId=#{tableId} and columnId=#{columnId}
+	</select>
+	<insert id="saveColLimitData" parameterType="java.util.Map">
+		insert into
+		secu_t_limitcol(tableId,columnId,limitCon,LIMITCONFUNC,SHOWLIMIT)
+		values(#{tableId},#{columnId},#{limitCon},#{limitConFunc},#{showWhere})
+	</insert>
+	<update id="updateColLimitData" parameterType="java.util.Map">
+		update secu_t_limitcol set limitCon=#{limitCon},LIMITCONFUNC=#{limitConFunc},SHOWLIMIT=#{showWhere} where tableId=#{tableId} and columnId=#{columnId}
+	</update>
+	<delete id="clearLimitWindow" parameterType="java.util.Map">
+		delete from secu_t_limitcol where tableId=#{tableId} and columnId=#{columnId}
+	</delete>
+	<select id="getRowCellSecuBy" parameterType="java.util.Map"
+		resultType="map">
+		select  ${resultSet} as cellSecu from ${tableData}
+	</select>
+	<select id="getBeAffectedColumnListForTableCellLimit" parameterType="java.lang.String"
+		resultType="string">
+		select (select t.DBCOLUMNNAME from dict_t_factor t where t.COLUMNID=t2.COLUMNID and t.TABLEID=#{tableId}) as DBCOLUNMNNAME from secu_t_limitcol t2 where t2.tableId=#{tableId}
+	</select>
+</mapper>

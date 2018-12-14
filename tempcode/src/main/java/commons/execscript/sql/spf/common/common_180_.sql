@@ -1,0 +1,59 @@
+BEGIN
+UPDATE P#dict_t_modelcode SET DYNAMICWHERE = 'GUID IN(SELECT GUID FROM CODE_T_AGENCY_SPFDL  START WITH GUID IN( SELECT GUID FROM CODE_T_AGENCY_SPFDL WHERE 
+ ((SELECT DISTRICTID
+           FROM SPF_T_FBASEINFO
+          WHERE SPFID = ''$SPFID$'') =
+       (SELECT DISTRICTID
+           FROM CODE_T_AGENCY_SPF
+          WHERE GUID =
+                (SELECT UPAGENCYID
+                   FROM SECU_T_USER
+                  WHERE GUID = GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_PARM(''USER''))) AND
+       GUID IN
+       (
+         SELECT GUID
+           FROM CODE_T_AGENCY_SPF
+          START WITH GUID IN
+                     (SELECT AGENCYID
+                        FROM SPF_T_FDECLAREAGENCY
+                       WHERE SPFID = ''$SPFID$'')
+         CONNECT BY PRIOR GUID = SUPERGUID))
+    OR
+       ((SELECT DISTRICTID
+           FROM SPF_T_FBASEINFO
+          WHERE SPFID = ''$SPFID$'') <>
+       (SELECT DISTRICTID
+           FROM CODE_T_AGENCY_SPF
+          WHERE GUID =
+                (SELECT UPAGENCYID
+                   FROM SECU_T_USER
+                  WHERE GUID = GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_PARM(''USER'')))
+     
+       AND ISDISTRICT = ''0'')
+    OR
+      ((
+       ((SELECT FIRAGENCYID
+           FROM SPF_T_FBASEINFO
+          WHERE SPFID = ''$SPFID$'') =
+       (SELECT UPAGENCYID
+           FROM SECU_T_USER
+          WHERE GUID = GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_PARM(''USER'')
+            AND ISDISTRICT = ''1''))
+    OR
+       ((SELECT USERTYPE
+           FROM SECU_T_USER
+          WHERE GUID = GLOBAL_MULTYEAR_CZ.SECU_F_GLOBAL_PARM(''USER'')) = ''1'' AND
+       ISDISTRICT = ''1''))
+       AND  GUID IN
+       (
+         SELECT GUID
+           FROM CODE_T_AGENCY_SPF
+          START WITH GUID IN
+                     (SELECT DISTRICTID FROM  SPF_T_FDECLAREREGION
+                       WHERE SPFID = ''$SPFID$'')
+         CONNECT BY PRIOR GUID = SUPERGUID) 
+       )) CONNECT BY PRIOR GUID = SUPERGUID)
+ ORDER BY CODE'
+     WHERE tableid ='223267AA7D472B22E050A8C021057ED5';
+ END;
+--´úÂ¼´úÂë±í

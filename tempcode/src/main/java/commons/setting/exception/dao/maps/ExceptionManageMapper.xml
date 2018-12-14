@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.exception.dao.IExceptionManageDAO">
+	<select id="getExceptionDataByCode" parameterType="String"
+		resultType="map">
+		SELECT DTE.CODE,DTE.GUID,DTE.REMARK,DTE.MESSAGE,DTE.DETAILMESSAGE FROM
+		DICT_T_EXCEPTION DTE
+		<if test="code != null and code != ''">
+			WHERE DTE.CODE = #{code}
+		</if>
+		ORDER BY DTE.CODE
+	</select>
+	<insert id="saveData" parameterType="map">
+	<selectKey resultType="String" order="BEFORE" keyProperty="guid">
+			SELECT SYS_GUID() AS guid FROM DUAL  
+   	 	</selectKey>
+		INSERT INTO DICT_T_EXCEPTION(GUID,CODE,REMARK,MESSAGE,DETAILMESSAGE)
+		VALUES (#{guid}, #{CODE},
+		#{REMARK},#{MESSAGE},#{DETAILMESSAGE})
+	</insert>
+	<update id="updateData" parameterType="map">
+		UPDATE DICT_T_EXCEPTION
+		SET CODE = #{CODE},
+		REMARK = #{REMARK},
+		MESSAGE = #{MESSAGE},
+		DETAILMESSAGE = #{DETAILMESSAGE}
+		WHERE GUID = #{GUID}
+	</update>
+	<delete id="deleteData" parameterType="Map">
+		DELETE FROM DICT_T_EXCEPTION WHERE GUID IN
+		<foreach collection="list" item="lists" index="index" open="("
+			separator="," close=")">
+			#{lists.GUID,jdbcType=VARCHAR}
+	    	</foreach>
+	</delete>
+</mapper>

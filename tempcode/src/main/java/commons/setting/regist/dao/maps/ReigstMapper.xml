@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.regist.dao.IRegistMapper">
+	<select id="getDataList" resultType="map" parameterType="map">
+		SELECT
+			dt.GUID, dt.DBTABLENAME, dt.NAME, dt.REMARK, dt.TABSWHERE,
+		   	dt.APPID, dt.YEARPART, dt.PROVINCEPART, dt.TASKPART,
+			dt.INITIALIZE, dt.ISLEAD, dt.CHANGEDISTRICT
+		FROM DICT_T_SETTINGTABINFO dt
+		WHERE 1 = 1
+		<if test=" queryDBName != null and '' != queryDBName ">  
+			<![CDATA[ AND dt.DBTABLENAME LIKE '%${queryDBName}%' ]]>
+		</if>
+		<if test=" queryTableName != null and '' != queryTableName ">  
+			<![CDATA[ AND dt.NAME LIKE '%${queryTableName}%' ]]>
+		</if>
+	</select>
+
+	<insert id="addData" parameterType="map">
+    	<![CDATA[
+		INSERT INTO DICT_T_SETTINGTABINFO
+			(DBTABLENAME, NAME, REMARK, TABSWHERE, APPID, YEARPART,
+    		PROVINCEPART, TASKPART, INITIALIZE, ISLEAD, CHANGEDISTRICT)
+		VALUES
+			(#{DBTABLENAME}, #{NAME}, #{REMARK}, #{TABSWHERE},
+    		 #{APPID}, #{YEARPART}, #{PROVINCEPART}, #{TASKPART},
+    		 #{INITIALIZE}, #{ISLEAD}, #{CHANGEDISTRICT})
+    	]]>
+	</insert>
+
+	<update id="updateData" parameterType="map">
+		UPDATE DICT_T_SETTINGTABINFO
+		<set>
+			<if test="DBTABLENAME != null">DBTABLENAME=#{DBTABLENAME},</if>
+			<if test="NAME != null">NAME=#{NAME},</if>
+			<if test="TABSWHERE != null">TABSWHERE=#{TABSWHERE},</if>
+			<if test="APPID != null">APPID=#{APPID},</if>
+			<if test="REMARK != null">REMARK=#{REMARK},</if>
+			<if test="YEARPART != null">YEARPART=#{YEARPART},</if>
+			<if test="PROVINCEPART != null">PROVINCEPART=#{PROVINCEPART},</if>
+			<if test="TASKPART != null">TASKPART=#{TASKPART},</if>
+			<if test="INITIALIZE != null">INITIALIZE=#{INITIALIZE},</if>
+			<if test="ISLEAD != null">ISLEAD=#{ISLEAD},</if>
+			<if test="CHANGEDISTRICT != null">CHANGEDISTRICT=#{CHANGEDISTRICT}</if>
+		</set>
+		WHERE GUID=#{GUID}
+	</update>
+
+	<delete id="delData" parameterType="map">
+		DELETE FROM
+		DICT_T_SETTINGTABINFO WHERE GUID = #{GUID} 
+	</delete>
+</mapper>

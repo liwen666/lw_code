@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.excel.dao.ExcelFileMapper">
+	<resultMap id="tjhqXlsxMap" type="com.tjhq.commons.excel.po.ExcelFilePO">
+		<result column="appid" property="appid" jdbcType="VARCHAR" />
+		<result column="dbtablename" property="dbtablename" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="suitid" property="suitid" jdbcType="VARCHAR" />
+		<result column="tableid" property="tableid" jdbcType="VARCHAR" />
+		<result column="originalxlsxname" property="originalxlsxname"
+			jdbcType="VARCHAR" />
+		<result column="originalxlsxtpl" property="originalxlsxtpl"
+			jdbcType="BLOB" typeHandler="org.apache.ibatis.type.BlobTypeHandler" />
+		<result column="nullxlsxtpl" property="nullxlsxtpl" jdbcType="BLOB"
+			typeHandler="org.apache.ibatis.type.BlobTypeHandler" />
+		<result column="datapartxlsx" property="datapartxlsx" jdbcType="CLOB"
+			typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+		<result column="stylepartxlsx" property="stylepartxlsx"
+			jdbcType="CLOB" typeHandler="org.apache.ibatis.type.ClobTypeHandler" />
+	</resultMap>
+	<resultMap id="tjhqXlsmMapBysuitid" type="java.util.Map">
+		<result column="appid" property="appid" jdbcType="VARCHAR" />
+		<result column="tabletype" property="tabletype" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="isshow" property="isshow" jdbcType="VARCHAR" />
+		<result column="suitid" property="suitid" jdbcType="VARCHAR" />
+		<result column="dbversion" property="dbversion" jdbcType="TIMESTAMP" />
+		<result column="tableid" property="tableid" jdbcType="VARCHAR" />
+		<result column="remark" property="datapartxlsx" jdbcType="VARCHAR" />
+		<result column="vbaxlsmBlob" property="vbaxlsmBlob" jdbcType="BLOB"
+			typeHandler="org.apache.ibatis.type.BlobTypeHandler" />
+		<result column="vbaxlaBlob" property="vbaxlaBlob" jdbcType="BLOB"
+			typeHandler="org.apache.ibatis.type.BlobTypeHandler" />
+	</resultMap>
+	<update id="updateXlsx" parameterType="com.tjhq.commons.excel.po.ExcelFilePO">
+		update DICT_T_MODELEXCEL
+		set originalxlsxname=#{originalxlsxname} ,
+		NAME=#{name} ,
+		<!-- 编辑时间：20151102 Start  -->
+		datachangestatus=#{datachangestatus},
+		<if test="relationjsondata != null">relationjsondata=#{relationjsondata},</if>
+		<!-- 编辑时间：20151102 end  -->
+		originalxlsxtpl=#{originalxlsxtpl,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+		nullxlsxtpl=#{nullxlsxtpl,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+		datapartxlsx=#{datapartxlsx,typeHandler=org.apache.ibatis.type.ClobTypeHandler},
+		stylepartxlsx=#{stylepartxlsx,typeHandler=org.apache.ibatis.type.ClobTypeHandler}
+		where tableid=#{tableid}
+	</update>
+	<insert id="insertXlsx" parameterType="com.tjhq.commons.excel.po.ExcelFilePO">
+		INSERT INTO DICT_T_MODELEXCEL
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			tableid,originalxlsxname,name,
+			<!-- 编辑时间：20151102 Start  -->
+			datachangestatus,
+			relationjsondata,
+			<!-- 编辑时间：20151102 end  -->
+			<if test="orderid != null">orderid,</if>
+			<if test="tabletype != null">tabletype,</if>
+			<if test="isshow != null">isshow,</if>
+			<if test="appid != null">appid,</if>
+			<if test="remark != null">remark,</if>
+			<if test="suitid != null">suitid,</if>
+			originalxlsxtpl,nullxlsxtpl,datapartxlsx,stylepartxlsx
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{tableid},#{originalxlsxname} ,#{name},
+			<!-- 编辑时间：20151102 Start  -->
+			#{datachangestatus},
+			#{relationjsondata},
+			<!-- 编辑时间：20151102 end  -->
+			<if test="orderid != null">#{orderid},</if>
+			<if test="tabletype != null">#{tabletype},</if>
+			<if test="isshow != null">#{isshow},</if>
+			<if test="appid != null">#{appid},</if>
+			<if test="remark != null">#{remark},</if>
+			<if test="suitid != null">#{suitid},</if>
+			#{originalxlsxtpl,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			#{nullxlsxtpl,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			#{datapartxlsx,typeHandler=org.apache.ibatis.type.ClobTypeHandler},
+			#{stylepartxlsx,typeHandler=org.apache.ibatis.type.ClobTypeHandler}
+		</trim>
+	</insert>
+	<insert id="mergeXlsmTpl" parameterType="java.util.Map">
+		MERGE INTO dict_t_modelvba a
+		USING (select count(*) cc from
+		dict_t_modelvba where suitid=#{suitid}) b
+		ON (b.cc>0)
+		WHEN MATCHED THEN
+		update <!-- dict_t_modelvba -->
+		<set>
+			name=#{name} ,
+			<if test="orderid != null">orderid=#{orderid}, </if>
+			<if test="tabletype != null">tabletype=#{tabletype} ,</if>
+			<if test="isshow != null">isshow=#{isshow} ,</if>
+			<if test="appid != null">appid=#{appid} ,</if>
+			<if test="dbversion != null">dbversion=#{dbversion} ,</if>
+			<if test="remark != null">remark=#{remark} ,</if>
+			tableid=#{tableid} ,
+			vbaxlsmBlob=#{vbaxlsmBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			vbaxlaBlob=#{vbaxlaBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler}
+		</set>
+		where suitid=#{suitid}
+		WHEN NOT MATCHED THEN
+		INSERT  <!-- INTO dict_t_modelvba -->
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			tableid,name,
+			<if test="orderid != null">orderid,</if>
+			<if test="tabletype != null">tabletype,</if>
+			<if test="isshow != null">isshow,</if>
+			<if test="appid != null">appid,</if>
+			<if test="dbversion != null">dbversion,</if>
+			<if test="remark != null">remark,</if>
+			suitid,vbaxlsmBlob,vbaxlaBlob
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{tableid},#{name},
+			<if test="orderid != null">#{orderid},</if>
+			<if test="tabletype != null">#{tabletype},</if>
+			<if test="isshow != null">#{isshow},</if>
+			<if test="appid != null">#{appid},</if>
+			<if test="dbversion != null">#{dbversion},</if>
+			<if test="remark != null">#{remark},</if>
+			#{suitid},
+			#{vbaxlsmBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			#{vbaxlaBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler}
+		</trim>
+	</insert>
+	<select id="SelectXlsmVBATpl" parameterType="java.lang.String"
+		resultMap="tjhqXlsmMapBysuitid">
+		select tableid,name,suitid,vbaxlsmBlob,vbaxlaBlob from dict_t_modelvba
+		where suitid=#{suitid}
+	</select>
+
+	<update id="updateXlsmTpl" parameterType="java.util.Map">
+		update dict_t_modelvba
+		<set>
+			name=#{name} ,
+			<if test="orderid != null">orderid=#{orderid}, </if>
+			<if test="tabletype != null">tabletype=#{tabletype} ,</if>
+			<if test="isshow != null">isshow=#{isshow} ,</if>
+			<if test="appid != null">appid=#{appid} ,</if>
+			<if test="remark != null">remark=#{remark} ,</if>
+			tableid=#{tableid} ,
+			vbaxlsmBlob=#{vbaxlsmBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			vbaxlaBlob=#{vbaxlaBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler}
+		</set>
+		where suitid=#{suitid}
+	</update>
+	<insert id="insertXlsmTpl" parameterType="java.util.Map">
+		INSERT INTO dict_t_modelvba
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			tableid,name,
+			<if test="orderid != null">orderid,</if>
+			<if test="tabletype != null">tabletype,</if>
+			<if test="isshow != null">isshow,</if>
+			<if test="appid != null">appid,</if>
+			<if test="remark != null">remark,</if>
+			suitid,vbaxlsmBlob,vbaxlaBlob
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			#{tableid},#{name},
+			<if test="orderid != null">#{orderid},</if>
+			<if test="tabletype != null">#{tabletype},</if>
+			<if test="isshow != null">#{isshow},</if>
+			<if test="appid != null">#{appid},</if>
+			<if test="remark != null">#{remark},</if>
+			#{suitid},
+			#{vbaxlsmBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler},
+			#{vbaxlaBlob,typeHandler=org.apache.ibatis.type.BlobTypeHandler}
+		</trim>
+	</insert>
+	<select id="SelectXlsxOgnTpl" parameterType="java.lang.String"
+		resultMap="tjhqXlsxMap">
+		select name,tableid,originalxlsxname,originalxlsxtpl from DICT_T_MODELEXCEL
+		where tableid=#{tableid}
+	</select>
+	<select id="SelectXlsxNullTpl" parameterType="java.lang.String"
+		resultMap="tjhqXlsxMap">
+		select name, tableid,originalxlsxname,nullxlsxtpl from DICT_T_MODELEXCEL
+		where tableid=#{tableid}
+	</select>
+	<select id="SelectXlsxDatapart" parameterType="java.lang.String"
+		resultMap="tjhqXlsxMap">
+		select name,tableid,originalxlsxname,datapartxlsx from DICT_T_MODELEXCEL
+		where tableid=#{tableid}
+	</select>
+	<select id="SelectXlsxStylepart" parameterType="java.lang.String"
+		resultMap="tjhqXlsxMap">
+		select name,tableid,originalxlsxname,stylepartxlsx from DICT_T_MODELEXCEL
+		where tableid=#{tableid}
+	</select>
+	<select id="SelectXlsxSize" parameterType="java.lang.String"
+		resultType="Map">
+		select name,tableid,
+		<!-- 编辑时间：20151102 Start  -->
+		datachangestatus,
+		relationjsondata,
+		<!-- 编辑时间：20151102 end  -->
+		nvl(dbms_lob.getlength(originalxlsxtpl),0) originalxlsxtplSize ,
+		nvl(dbms_lob.getlength(nullxlsxtpl),0) nullxlsxtplsize,
+		nvl(dbms_lob.getlength(datapartxlsx),0) datapartxlsxsize,
+		nvl(dbms_lob.getlength(stylepartxlsx),0) stylepartxlsxsize
+		from DICT_T_MODELEXCEL
+		where tableid=#{tableid}
+	</select>
+	<select id="SelectXlsxColMap" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select DBCOLUMNNAME,XLSXCOLUMNID from DICT_T_FACTOR t where t.tableid = (
+		select tableid from DICT_T_MODEL t2 where tableid=#{tableid}) and
+		(isvisible=1 or DBCOLUMNNAME='AGENCYID' ) order by length(t.XLSXCOLUMNID),t.xlsxcolumnid
+	</select>
+	<select id="SelectDivName" parameterType="java.lang.String" resultType="java.util.Map">
+		select a.code as code, a.name as name, a.guid agencyid, b.code districtcode
+		  from code_t_agency_spf a
+		  left join code_t_district b
+		    on b.guid = a.districtid
+		 where a.guid = #{agencyID}
+	</select>
+	<select id="SelectModelTable" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select * from DICT_T_MODEL t where t.tableid = #{tableid}
+	</select>
+	<select id="selectExcelInfo" parameterType="string" resultType="java.util.Map">
+		${sql}
+	</select>
+	<update id="updateSql" parameterType="string">
+		${sql}
+	</update>
+	<select id="callProcedure" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{ call PKG_FORMULA.P_CALCULATEFORMULA_0(#{tableID}, #{where}) }
+ 		]]>
+ 	</select>
+ 	<select id="callProcedure_p_clear_deleted_data" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{ call P_CLEAR_DELETED_DATA(#{tableName}, #{agencyID}) }
+ 		]]>
+ 	</select>
+</mapper>

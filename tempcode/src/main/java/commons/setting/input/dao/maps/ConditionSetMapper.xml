@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.input.dao.ConditionSetMapper">
+<select id="getCondition" parameterType="String" resultType="com.tjhq.commons.setting.input.po.ConditionSetPo">
+	SELECT S.APPID,S.APPID,S.TABLEID,S.TABLETYPE,S.CONDITION  FROM DICT_T_SETCONDICTION S
+	WHERE S.TABLEID=#{tableID}
+</select>
+<select id="getTableName" parameterType="String" resultType="String">
+SELECT DBTABLENAME FROM DICT_T_MODEL WHERE TABLEID=#{tableID}
+</select>
+<select id="vertifyCon" parameterType="String" resultType="int">
+SELECT COUNT(1) FROM ${tableName}
+	<if test="condition!=null and condition!=''">
+		WHERE ${condition}
+	</if>
+</select>
+<insert id="insertCon" parameterType="map">
+INSERT INTO DICT_T_SETCONDICTION(APPID,CONDITION,TABLEID,TABLETYPE) VALUES(
+        	#{appID,jdbcType = VARCHAR},
+        	#{condition,jdbcType = CLOB},
+        	#{tableID,jdbcType = VARCHAR},
+        	#{tableType,jdbcType = VARCHAR}
+)
+</insert>
+<update id="updateCon" parameterType="map">
+UPDATE DICT_T_SETCONDICTION SET CONDITION =#{condition,jdbcType = CLOB}  WHERE TABLEID=#{tableID}
+</update>
+<delete id="deleteCon" parameterType="String">
+DELETE FROM DICT_T_SETCONDICTION WHERE TABLEID=#{tableID}
+</delete>
+</mapper>

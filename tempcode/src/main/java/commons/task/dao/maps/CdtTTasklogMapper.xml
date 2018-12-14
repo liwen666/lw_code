@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.task.dao.CdtTTasklogMapper">
+
+	<resultMap id="taskPO" type="com.tjhq.commons.task.po.TaskLogPO">
+		<result property="logId" column="logId" />
+		<result property="taskId" column="taskId" />
+		<result property="logDate" column="logDate"/>
+		<result property="districtId" column="districtId" />
+		<result property="operator" column="operator" />
+		<result property="oldStatus" column="oldStatus" />
+		<result property="newStatus" column="newStatus" />
+		<result property="logDesc" column="logDesc" />
+	</resultMap>
+
+	<insert id="recordLog" parameterType="java.util.Map">
+		insert into
+		CDT_T_TASKLOG
+		(taskId,
+		logId,
+		logDate,
+		districtId,
+		operator,
+		oldStatus,
+		newStatus,
+		logDesc
+		)
+		values
+		(#{taskId},
+		sys_guid(),
+		sysdate,
+		#{districtId},
+		#{operator},
+		#{oldStatus},
+		#{newStatus},
+		#{logDesc})
+	</insert>
+	
+	<select id="getTaskLogs"  parameterType="java.lang.String"
+		resultMap="taskPO">
+		<![CDATA[ 
+			select * from CDT_T_TASKLOG where TASKID=#{taskId} order by logdate desc
+		]]>
+	</select>
+	<delete id="deleteLatestTaskLog">
+		delete from cdt_t_tasklog where logdate in (select max(logdate) from cdt_t_tasklog where taskid=#{taskId})
+	</delete>
+</mapper>

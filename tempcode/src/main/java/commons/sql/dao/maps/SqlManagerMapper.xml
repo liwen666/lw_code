@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.sql.dao.SqlManagerMapper">
+<select id="getGridData" parameterType="map" resultType="com.tjhq.commons.sql.po.SqlManagerPO">
+	SELECT T.SQLID, T.SQL_STATEMENT, T.DBVERSION ,T.R
+	  FROM (SELECT N.SQLID, N.SQL_STATEMENT,N.DBVERSION, ROWNUM R
+	          FROM (SELECT SQLID, SQL_STATEMENT,TO_CHAR(DBVERSION, 'yyyy-MM-dd hh24:mi') AS DBVERSION
+	                  FROM SPF_T_SQL
+	                 ORDER BY DBVERSION DESC) N
+	<![CDATA[     WHERE ROWNUM <= #{end}) T
+	 				WHERE T.R > #{start}
+	 ]]>				
+</select>
+<select id="getGridDataCount" parameterType="map" resultType="string">
+	SELECT COUNT(1) FROM SPF_T_SQL 
+</select>
+
+<select id="getSqlstatementById" parameterType="string" resultType="com.tjhq.commons.sql.po.SqlManagerPO">
+	SELECT SQLID, SQL_STATEMENT FROM SPF_T_SQL WHERE SQLID=#{sqlid}      
+</select>
+<insert id="insertSqlstatement" parameterType="java.util.HashMap">
+	INSERT INTO SPF_T_SQL(SQL_STATEMENT) VALUES(#{SQL_STATEMENT})
+</insert>
+<update id="updateSqlstatement" parameterType="java.util.HashMap">
+ 	UPDATE SPF_T_SQL  SET SQL_STATEMENT=#{SQL_STATEMENT} WHERE SQLID=#{SQLID}
+</update>
+<delete id="deleteSqlstatement" parameterType="string">
+	DELETE FROM SPF_T_SQL WHERE SQLID=#{sqlid}
+</delete>
+<insert id="insertSqlLog" parameterType="java.util.HashMap">
+	INSERT INTO SPF_T_SQL_LOG(LOGINNAME,SQLSTATEMENT) VALUES(#{LOGINNAME},#{SQLSTATEMENT,jdbcType=CLOB})
+</insert>
+
+<select id="execSql" statementType="CALLABLE" parameterType="string">  
+	<![CDATA[  
+	    {call EXEC_SQL (#{sql})}  
+	]]>  
+	
+	</select>
+</mapper>

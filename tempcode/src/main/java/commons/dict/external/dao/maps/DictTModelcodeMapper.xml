@@ -1,0 +1,326 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.external.dao.DictTModelcodeMapper">
+    <resultMap id="abatorgenerated_DictTModelcodeResult" type="com.tjhq.commons.dict.external.po.DictTModelcodePO" >
+    <result column="APPID" property="appid" jdbcType="VARCHAR" />
+    <result column="TABLEID" property="tableid" jdbcType="VARCHAR" />
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <result column="DBTABLENAME" property="dbtablename" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="INTEGER" />
+    <result column="ISREPBASE" property="isrepbase" jdbcType="CHAR" />
+    <result column="ISLVL" property="islvl" jdbcType="CHAR" />
+    <result column="SQLCON" property="sqlcon" jdbcType="VARCHAR" />
+    <result column="DYNAMICWHERE" property="dynamicwhere" jdbcType="VARCHAR" />
+    <result column="ISORGID" property="isorgid" jdbcType="CHAR" />
+  <!--   <result column="VERSION" property="version" jdbcType="INTEGER" /> -->
+  </resultMap>
+	
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTModelcode" resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID,FASPCSID FROM  dict_t_modelcode 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTModelcode"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID,FASPCSID, ISFASP,TABLETYPE   FROM  dict_t_modelcode 
+	  <where> 
+              TABLEID  = #{tableid}      
+          </where>
+	</select>
+	
+	  <!-- 根据DBTABLENAME来获取记录 -->
+	 <select id="getDictTModelcodeByDBName"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID,FASPCSID  FROM  dict_t_modelcode 
+	    WHERE DBTABLENAME  = #{dbtablename}  
+	    <![CDATA[
+	      AND ROWNUM < 2 
+	    ]]>   
+	</select>    
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTModelcode" parameterType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		INSERT INTO dict_t_modelcode (
+			APPID, TABLEID, NAME, DBTABLENAME, ORDERID, ISREPBASE,
+			ISLVL, SQLCON, DYNAMICWHERE, ISORGID, FASPCSID, ISFASP
+		) VALUES (
+			#{appid,jdbcType=VARCHAR},
+			#{tableid,jdbcType=VARCHAR},
+			#{name,jdbcType=VARCHAR},
+			#{dbtablename,jdbcType=VARCHAR},
+			#{orderid,jdbcType=INTEGER},
+			#{isrepbase,jdbcType=CHAR},
+			#{islvl,jdbcType=CHAR},
+			#{sqlcon,jdbcType=VARCHAR},
+			#{dynamicwhere,jdbcType=VARCHAR},
+			#{isorgid,jdbcType=CHAR},
+			#{faspcsid,jdbcType=CHAR},
+			#{isfasp,jdbcType=CHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+	<update id="updateDictTModelcode" parameterType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		UPDATE  dict_t_modelcode
+		<set>
+			TABLEID = #{tableid}
+			<if test="appid!=null and appid!=''">
+				,APPID = #{appid}
+			</if>
+			<if test="name!=null and name!=''">
+				,NAME = #{name}
+			</if>
+			<if test="dbtablename!=null and dbtablename!=''">
+				,DBTABLENAME  = #{dbtablename}
+			</if>
+			<if test="orderid!=null">
+				,ORDERID = #{orderid}
+			</if>
+			<if test="isrepbase!=null">
+				,ISREPBASE = #{isrepbase}
+			</if>
+			<if test="islvl!=null">
+				,ISLVL = #{islvl}
+			</if>
+			<if test="sqlcon!=null">
+				,SQLCON = #{sqlcon}
+			</if>
+			<if test="dynamicwhere!=null">
+				,DYNAMICWHERE  = #{dynamicwhere}
+			</if>
+			<if test="isfasp != null">
+				,ISFASP = #{isfasp}
+			</if>
+			<if test="isorgid!=null">
+				,ISORGID  = #{isorgid}
+			</if>
+			<if test="faspcsid!=null">
+				,FASPCSID  = #{faspcsid}
+			</if>
+		</set>
+		<where> TABLEID  = #{tableid} </where>
+	</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTModelcode" parameterType="java.lang.String">
+		DELETE APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID FROM  dict_t_modelcode  
+          <where> 
+		 TABLEID  = #{tableid}
+          </where>
+    </delete>
+
+	<select id="getDictTModelcodeListByAppID" parameterType="java.lang.String"
+		resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID
+		FROM dict_t_modelcode where APPID = #{appID}
+	</select>
+		
+	<select id="findDictTModelcode" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT
+			APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID, ISFASP,TABLETYPE 
+		FROM dict_t_modelcode  u  
+                <where>
+                       <if test="appid!=null and appid!=''">
+                             APPID  = #{appid}
+                       </if>
+                        <if test="appid_like!=null and appid_like!=''">
+                             APPID  like #{appid_like}
+                        </if>
+                       <if test="tableid!=null and tableid!=''">
+                             AND  TABLEID  = #{tableid}
+                       </if>
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             AND  TABLEID  like #{tableid_like}
+                        </if>
+                       <if test="name!=null and name!=''">
+                             AND  NAME  = #{name}
+                       </if>
+                        <if test="name_like!=null and name_like!=''">
+                             AND  NAME  like #{name_like}
+                        </if>
+                       <if test="dbtablename!=null and dbtablename!=''">
+                             AND  DBTABLENAME  = #{dbtablename}
+                       </if>
+                        <if test="dbtablename_like!=null and dbtablename_like!=''">
+                             AND  DBTABLENAME  like #{dbtablename_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND  ORDERID  = #{orderid}
+                       </if>
+                       <if test="isrepbase!=null and isrepbase!=''">
+                             AND  ISREPBASE  = #{isrepbase}
+                       </if>
+                        <if test="isrepbase_like!=null and isrepbase_like!=''">
+                             AND  ISREPBASE  like #{isrepbase_like}
+                        </if>
+                       <if test="islvl!=null and islvl!=''">
+                             AND  ISLVL  = #{islvl}
+                       </if>
+                        <if test="islvl_like!=null and islvl_like!=''">
+                             AND  ISLVL  like #{islvl_like}
+                        </if>
+                       <if test="sqlcon!=null and sqlcon!=''">
+                             AND  SQLCON  = #{sqlcon}
+                       </if>
+                        <if test="sqlcon_like!=null and sqlcon_like!=''">
+                             AND  SQLCON  like #{sqlcon_like}
+                        </if>
+                       <if test="dynamicwhere!=null and dynamicwhere!=''">
+                             AND  DYNAMICWHERE  = #{dynamicwhere}
+                       </if>
+                        <if test="dynamicwhere_like!=null and dynamicwhere_like!=''">
+                             AND  DYNAMICWHERE  like #{dynamicwhere_like}
+                        </if>
+                       <if test="isorgid!=null and isorgid!=''">
+                             AND  ISORGID  = #{isorgid}
+                       </if>
+                        <if test="isorgid_like!=null and isorgid_like!=''">
+                             AND  ISORGID  like #{isorgid_like}
+                        </if>
+                       <if test="tabletype!=null and tabletype!=''">
+                             AND  TABLETYPE  = #{tabletype}
+                       </if>
+                        <if test="tabletype_like!=null and tabletype_like!=''">
+                             AND  TABLETYPE  like #{tabletype}
+                        </if>
+                 </where>
+                 ORDER BY ORDERID
+	</select>
+
+	<select id="findDictTModelcodeCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_modelcode  u
+	    <where>
+                        <if test="appid!=null and appid!=''">
+                              APPID  = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              APPID  like #{appid_like}
+                        </if>
+                        <if test="tableid!=null and tableid!=''">
+                              AND  TABLEID  = #{tableid}
+                        </if>
+
+                        <if test="tableid_like!=null and tableid_like!=''">
+                              AND  TABLEID  like #{tableid_like}
+                        </if>
+                        <if test="name!=null and name!=''">
+                              AND  NAME  = #{name}
+                        </if>
+
+                        <if test="name_like!=null and name_like!=''">
+                              AND  NAME  like #{name_like}
+                        </if>
+                        <if test="dbtablename!=null and dbtablename!=''">
+                              AND  DBTABLENAME  = #{dbtablename}
+                        </if>
+
+                        <if test="dbtablename_like!=null and dbtablename_like!=''">
+                              AND  DBTABLENAME  like #{dbtablename_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+
+                        <if test="isrepbase!=null and isrepbase!=''">
+                              AND  ISREPBASE  = #{isrepbase}
+                        </if>
+
+                        <if test="isrepbase_like!=null and isrepbase_like!=''">
+                              AND  ISREPBASE  like #{isrepbase_like}
+                        </if>
+                        <if test="islvl!=null and islvl!=''">
+                              AND  ISLVL  = #{islvl}
+                        </if>
+
+                        <if test="islvl_like!=null and islvl_like!=''">
+                              AND  ISLVL  like #{islvl_like}
+                        </if>
+                        <if test="sqlcon!=null and sqlcon!=''">
+                              AND  SQLCON  = #{sqlcon}
+                        </if>
+
+                        <if test="sqlcon_like!=null and sqlcon_like!=''">
+                              AND  SQLCON  like #{sqlcon_like}
+                        </if>
+                        <if test="dynamicwhere!=null and dynamicwhere!=''">
+                              AND  DYNAMICWHERE  = #{dynamicwhere}
+                        </if>
+
+                        <if test="dynamicwhere_like!=null and dynamicwhere_like!=''">
+                              AND  DYNAMICWHERE  like #{dynamicwhere_like}
+                        </if>
+                        <if test="isorgid!=null and isorgid!=''">
+                              AND  ISORGID  = #{isorgid}
+                        </if>
+
+                        <if test="isorgid_like!=null and isorgid_like!=''">
+                              AND  ISORGID  like #{isorgid_like}
+                        </if>
+
+	      </where>
+	</select>
+	<select id="findDictTModelName"   parameterType="java.util.Map" 
+	resultType="com.tjhq.commons.dict.external.po.DictTModelcodePO">
+		SELECT APPID,TABLEID,NAME,DBTABLENAME,ORDERID,ISREPBASE,ISLVL,SQLCON,DYNAMICWHERE,ISORGID  FROM  dict_t_modelcode 
+	 	 <where> 
+              APPID  = #{appId} and
+              TABLEID  = #{tableId}      
+          </where>
+	</select>
+	<insert id="copyModelCodeDefineToProvince" parameterType="java.util.Map">
+		INSERT INTO  P#dict_t_modelcode  
+		(year,
+		province,
+		appid,
+		tableid,
+		name,
+		dbtablename,
+		orderid,
+		isrepbase,
+		islvl,
+		sqlcon,
+		dynamicwhere,
+		isorgid,
+		dbversion,
+		status,
+		insertversion)
+		select year,
+		${province},
+		appid,
+		tableid,
+		name,
+		dbtablename,
+		orderid,
+		isrepbase,
+		islvl,
+		sqlcon,
+		dynamicwhere,
+		isorgid,
+		dbversion,
+		status,
+		insertversion from P#dict_t_modelcode t  
+		   where Year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') and t.status='1'   
+		   and  t.PROVINCE=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('DIVID') and   
+		   t.tableid not in(select m.tableid from P#dict_t_modelcode  m where m.year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')  
+		     and m.status='1' and m.province=#{province}
+		 )
+    </insert>
+
+	<!-- 获取当前where条件是否有效 -->
+	<select id="valiWhere" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM ${dbtablename} WHERE ${dynamicwhere}
+	</select>
+	<select id="grantTableToUser" parameterType="java.util.HashMap" >
+		GRANT SELECT ON ${table_name} TO ${user_name} WITH GRANT OPTION 
+	</select>
+	
+	<select id="getAngleCodeTabList" resultType="com.tjhq.commons.inputcomponent.po.TreePO">
+		SELECT T.TABLEID ID,T.NAME FROM DICT_T_MODELCODE T WHERE T.APPID=#{appID}
+	</select>
+</mapper>

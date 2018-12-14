@@ -1,0 +1,9 @@
+DECLARE
+BEGIN
+FOR TAB IN (SELECT TABLEID FROM dict_t_model WHERE appid ='SPF' AND tabletype IN('1','3') AND dealtype NOT IN('4*50','2105','5*05')) LOOP
+  UPDATE P#DICT_T_MODEL SET ISALLYEAR ='1' WHERE TABLEID = TAB.TABLEID;
+  DBMS_OUTPUT.put_line(TAB.TABLEID);
+  sys_p_recreate_views(TAB.TABLEID);
+END LOOP;
+END;
+--刷新全年度访问

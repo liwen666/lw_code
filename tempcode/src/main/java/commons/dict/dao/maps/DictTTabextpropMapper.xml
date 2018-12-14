@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTTabextpropMapper">
+    <resultMap id="abatorgenerated_DictTTabextpropResult" type="com.tjhq.commons.dict.external.po.DictTTabextpropPO" >
+    <result column="APPID" property="appid" jdbcType="VARCHAR" />
+    <result column="EXTID" property="extid" jdbcType="VARCHAR" />
+    <result column="EXTNAME" property="extname" jdbcType="VARCHAR" />
+    <result column="SUPERID" property="superid" jdbcType="VARCHAR" />
+    <result column="ISLEAF" property="isleaf" jdbcType="CHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="INTEGER" />
+  </resultMap>
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTTabextprop" resultType="com.tjhq.commons.dict.external.po.DictTTabextpropPO">
+		SELECT APPID,EXTID,EXTNAME,SUPERID,ISLEAF,REMARK,ORDERID FROM  dict_t_tabextprop 
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTTabextprop"   parameterType="java.lang.String" 
+	resultType="com.tjhq.commons.dict.external.po.DictTTabextpropPO">
+		SELECT APPID,EXTID,EXTNAME,SUPERID,ISLEAF,REMARK,ORDERID  FROM  dict_t_tabextprop 
+	  <where> 
+                  
+          </where>
+	</select>  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTTabextprop" parameterType="com.tjhq.commons.dict.external.po.DictTTabextpropPO">
+		INSERT INTO  dict_t_tabextprop  (  APPID, EXTID, EXTNAME, SUPERID, ISLEAF, REMARK, ORDERID )
+		VALUES ( 
+		  #{appid},
+		  #{extid},
+		  #{extname},
+		  #{superid},
+		  #{isleaf},
+		  #{remark},
+		  #{orderid}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTTabextprop" parameterType="com.tjhq.commons.dict.external.po.DictTTabextpropPO">
+    UPDATE  dict_t_tabextprop  
+   <set>
+		<if test="appid!=null and appid!=''">
+		     APPID  = #{appid},
+	        </if>
+		<if test="extid!=null and extid!=''">
+		     EXTID  = #{extid},
+	        </if>
+		<if test="extname!=null and extname!=''">
+		     EXTNAME  = #{extname},
+	        </if>
+		<if test="superid!=null and superid!=''">
+		     SUPERID  = #{superid},
+	        </if>
+		<if test="isleaf!=null and isleaf!=''">
+		     ISLEAF  = #{isleaf},
+	        </if>
+		<if test="remark!=null and remark!=''">
+		     REMARK  = #{remark},
+	        </if>
+		<if test="orderid!=null and orderid!=''">
+		     ORDERID  = #{orderid}
+	        </if>
+  </set>
+  <where>
+      EXTID  = #{extid}
+  </where>    
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTTabextprop" parameterType="java.lang.String">
+		DELETE FROM  dict_t_tabextprop  
+          <where> 
+		 EXTID  = #{extid}
+          </where>
+    </delete>   
+
+	<select id="findDictTTabextprop" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTTabextpropPO">
+		SELECT APPID,EXTID,EXTNAME,SUPERID,ISLEAF,REMARK,ORDERID FROM  dict_t_tabextprop  u  
+                <where>
+                       <if test="appid!=null and appid!=''">
+                             APPID  = #{appid}
+                       </if>
+                        <if test="appid_like!=null and appid_like!=''">
+                             APPID  like #{appid_like}
+                        </if>
+                       <if test="extid!=null and extid!=''">
+                             AND  EXTID  = #{extid}
+                       </if>
+                        <if test="extid_like!=null and extid_like!=''">
+                             AND  EXTID  like #{extid_like}
+                        </if>
+                       <if test="extname!=null and extname!=''">
+                             AND  EXTNAME  = #{extname}
+                       </if>
+                        <if test="extname_like!=null and extname_like!=''">
+                             AND  EXTNAME  like #{extname_like}
+                        </if>
+                       <if test="superid!=null and superid!=''">
+                             AND  SUPERID  = #{superid}
+                       </if>
+                        <if test="superid_like!=null and superid_like!=''">
+                             AND  SUPERID  like #{superid_like}
+                        </if>
+                       <if test="isleaf!=null and isleaf!=''">
+                             AND  ISLEAF  = #{isleaf}
+                       </if>
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                             AND  ISLEAF  like #{isleaf_like}
+                        </if>
+                       <if test="remark!=null and remark!=''">
+                             AND  REMARK  = #{remark}
+                       </if>
+                        <if test="remark_like!=null and remark_like!=''">
+                             AND  REMARK  like #{remark_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND  ORDERID  = #{orderid}
+                       </if>
+                 </where>
+	
+	</select>
+
+	<select id="findDictTTabextpropCount" parameterType="java.util.Map" resultType="java.lang.Long">
+		SELECT COUNT(*) FROM  dict_t_tabextprop  u
+	    <where>
+                        <if test="appid!=null and appid!=''">
+                              APPID  = #{appid}
+                        </if>
+
+                        <if test="appid_like!=null and appid_like!=''">
+                              APPID  like #{appid_like}
+                        </if>
+                        <if test="extid!=null and extid!=''">
+                              AND  EXTID  = #{extid}
+                        </if>
+
+                        <if test="extid_like!=null and extid_like!=''">
+                              AND  EXTID  like #{extid_like}
+                        </if>
+                        <if test="extname!=null and extname!=''">
+                              AND  EXTNAME  = #{extname}
+                        </if>
+
+                        <if test="extname_like!=null and extname_like!=''">
+                              AND  EXTNAME  like #{extname_like}
+                        </if>
+                        <if test="superid!=null and superid!=''">
+                              AND  SUPERID  = #{superid}
+                        </if>
+
+                        <if test="superid_like!=null and superid_like!=''">
+                              AND  SUPERID  like #{superid_like}
+                        </if>
+                        <if test="isleaf!=null and isleaf!=''">
+                              AND  ISLEAF  = #{isleaf}
+                        </if>
+
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                              AND  ISLEAF  like #{isleaf_like}
+                        </if>
+                        <if test="remark!=null and remark!=''">
+                              AND  REMARK  = #{remark}
+                        </if>
+
+                        <if test="remark_like!=null and remark_like!=''">
+                              AND  REMARK  like #{remark_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND  ORDERID  = #{orderid}
+                        </if>
+
+	      </where>
+	</select>	
+ </mapper>
+ <!--2014-01-17 15:51:04-->

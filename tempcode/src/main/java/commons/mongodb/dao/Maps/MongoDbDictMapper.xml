@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- MONGODB -->
+<mapper namespace="com.tjhq.commons.mongodb.dao.IMongoDbDictDAO">
+	<select id="getAllMongoDbDict" resultType="com.tjhq.commons.mongodb.po.MongoDBPO">
+		SELECT
+		guID,appID,ipAddress,port,dBase,isUse FROM DICT_T_MONGODB
+	</select>
+
+	<insert id="addMongoDbDict" parameterType="map">
+    	<![CDATA[
+		INSERT INTO DICT_T_MONGODB
+			(APPID,IPADDRESS,DBASE,PORT)
+		VALUES
+			(#{appID}, #{ipAddress}, #{dBase},#{port})
+    	]]>
+	</insert>
+
+	<delete id="delMongoDbDict" parameterType="map">
+		DELETE FROM DICT_T_MONGODB
+		WHERE GUID=#{guID}
+	</delete>
+
+	<update id="updateMongoDbDict" parameterType="map">
+		UPDATE DICT_T_MONGODB
+		<set>
+			APPID='${appID}',IPADDRESS='${ipAddress}',DBASE='${dBase}',PORT='${port}',ISUSE='${isUse}'
+		</set>
+		WHERE GUID=#{guID}
+	</update>
+</mapper>

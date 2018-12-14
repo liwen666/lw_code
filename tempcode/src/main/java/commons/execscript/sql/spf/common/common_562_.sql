@@ -1,0 +1,75 @@
+DECLARE
+  v_cnt number;
+BEGIN
+  select count(1) into v_cnt from user_tables WHERE TABLE_NAME = 'P#CODE_T_SPFFUNDMM';
+
+  if v_cnt = 0 THEN 
+      EXECUTE IMMEDIATE Q'/CREATE TABLE P#CODE_T_SPFFUNDMM
+      (
+        GUID      VARCHAR2(32) not null,
+        CODE      VARCHAR2(32) NOT NULL,
+        NAME      VARCHAR2(32) NOT NULL,
+        SUPERGUID VARCHAR2(20) NOT NULL,
+        ISLEAF    CHAR(1) NOT NULL,
+        LEVELNO    CHAR(1),
+        STATUS char(1)
+      )/';  
+        
+      EXECUTE IMMEDIATE 'alter table P#CODE_T_SPFFUNDMM add constraint PK_CODE_T_SPFFUNDMM primary key (GUID)';
+
+  end if;
+
+  --创建视图，不分区
+  EXECUTE immediate Q'/
+    CREATE OR REPLACE VIEW CODE_T_SPFFUNDMM AS
+      SELECT         
+      T.GUID          GUID,
+      T.CODE          CODE,
+      T.NAME          NAME,
+      T.SUPERGUID     SUPERGUID,
+      ISLEAF          ISLEAF,
+      STATUS          STATUS,
+      LEVELNO
+      FROM P#CODE_T_SPFFUNDMM T
+      WHERE T.STATUS = '1'
+    /'; 
+    
+  delete from p#dict_t_modelcode where tableid ='520B3E136391351AE0533906A8C0BA12';
+  delete from p#dict_t_factorcode where tableid ='520B3E136391351AE0533906A8C0BA12';
+  
+  for v_row in(select * from pub_t_partition_divid t where t.year <> '*') loop
+    --p#dict_t_modelcode
+    insert into p#dict_t_modelcode (YEAR, PROVINCE, APPID, TABLEID, NAME, DBTABLENAME, ORDERID, ISREPBASE, ISLVL, SQLCON, DYNAMICWHERE, ISORGID, STATUS, FASPCSID, ISFASP, TABLETYPE)
+    values (v_row.YEAR, v_row.DISTRICTID, 'SPF', '520B3E136391351AE0533906A8C0BA12', '项目库资金管理模式', 'CODE_T_SPFFUNDMM', 1, '0', '0', null, null, '0', '1', '520B3E136391351AE0533906A8C0BA12', '0', '2');
+  
+    --p#dict_t_factorcode
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA11', 'GUID', null, 'GUID', 3, 32, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA12', 'CODE', null, 'CODE', 3, 32, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA13', 'NAME', null, 'NAME', 3, 32, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA14', 'SUPERGUID', null, 'SUPERGUID', 3, 20, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA15', 'ISLEAF', null, 'ISLEAF', 3, 1, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA16', 'STATUS', null, 'STATUS', 3, 1, null, null, null, '0', '0', null, '1');
+
+    insert into p#dict_t_factorcode (YEAR, PROVINCE, TABLEID, DEID, COLUMNID, NAME, ORDERID, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, DEFAULTVALUE, CSID, ISVISIBLE, ISRESERVE, BGTLVL, STATUS)
+    values (v_row.YEAR, v_row.DISTRICTID,'520B3E136391351AE0533906A8C0BA12', null, '520B3E136392351AE0533906A8C0BA17', 'LEVELNO', null, 'LEVELNO', 3, 1, null, null, null, '0', '0', null, '1');
+
+  end loop;
+  
+  --替换代码表
+  update p#dict_t_factor set csid = '520B3E136391351AE0533906A8C0BA12' where csid ='A3BAA565D2E249B39F3E8A015F579A69';
+  
+
+END;
+--项目库资金管理模式
+--项目库资金管理模式表创建

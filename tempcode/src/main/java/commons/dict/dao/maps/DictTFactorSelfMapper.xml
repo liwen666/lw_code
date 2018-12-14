@@ -1,0 +1,609 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.dict.dao.DictTFactorSelfMapper">
+
+<select id="checkFactorIsCopy" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM P#DICT_T_FACTOR T WHERE T.COLUMNID=#{factorId} AND T.YEAR=#{finyear} and T.status='1'
+  </select>
+  
+<update id="updateFactorDefinitionForYear" parameterType="java.util.Map">
+	    UPDATE P#DICT_T_FACTOR 
+   <set>
+		     COLUMNID = #{COLUMNID},
+		    TABLEID = #{TABLEID},
+	    
+		    DEID = #{DEID},
+	     
+		    NAME = #{NAME},
+	       
+		    DBCOLUMNNAME = #{DBCOLUMNNAME},
+	        
+		    DATATYPE = #{DATATYPE},
+	       
+		    DATALENGTH = #{DATALENGTH},
+	        
+		    SCALE = #{SCALE},
+	       
+		    NULLABLE = #{NULLABLE},
+	      
+		    DEFAULTVALUE = #{DEFAULTVALUE},
+	       
+		    CSID = #{CSID},
+	     
+		    ISUPDATE = #{ISUPDATE},
+	        
+		    ORDERID = #{ORDERID},
+	       
+		    SUPERID = #{SUPERID},
+	      
+		    ISLEAF = #{ISLEAF},
+	       
+		    LEVELNO = #{LEVELNO},
+	        
+		    ALIAS = #{ALIAS},
+	        
+		    COLFORMAT = #{COLFORMAT},
+	        
+		    SHOWFORMAT = #{SHOWFORMAT},
+	        
+		    SHOWWIDTH = #{SHOWWIDTH},
+	       
+		    ISKEY = #{ISKEY},
+	        
+		    ISVISIBLE = #{ISVISIBLE},
+	        
+		    ISRESERVE = #{ISRESERVE},
+	       
+		    ISSUM = #{ISSUM},
+	       
+		    ISREGEX = #{ISREGEX},
+	       
+		    REGEXPR = #{REGEXPR},
+	      
+		    REGEXPRINFO = #{REGEXPRINFO},
+	      
+		    ISBANDCOL = #{ISBANDCOL},
+	      
+		    BANDCOLUMNID = #{BANDCOLUMNID},
+	        
+		    BANDREFDWCOL = #{BANDREFDWCOL},
+	        
+		    EXTPROP = #{EXTPROP},
+	      
+		    COLTIPS = #{COLTIPS},
+	       
+		    FRMTABID = #{FRMTABID},
+	      
+		    FRMCOLID = #{FRMCOLID},
+	        
+		    ISVIRTUAL = #{ISVIRTUAL},
+	       
+		    VIRCONTEXT = #{VIRCONTEXT},
+	      
+	        BGTLVL = #{BGTLVL},
+           
+			ISHREF = #{ISHREF},
+		
+			HREFLOC = #{HREFLOC},
+		
+			HREFPARMID = #{HREFPARMID},
+			OPENWINDOWTYPE = #{OPENWINDOWTYPE},
+		
+			PARENTNODECANCHECK = #{PARENTNODECANCHECK},
+		
+			INSERTVERSION = #{INSERTVERSION},
+		
+			YEAR = #{FINYEAR},
+		
+			PROVINCE = #{PROVINCE},
+		
+			DBVERSION = #{DBVERSION}
+		
+  </set>
+  <where>
+    COLUMNID = #{COLUMNID} and TABLEID=#{TABLEID} and  YEAR=#{FINYEAR} and status='1'
+  </where> 
+  
+</update> 
+
+ <insert id="copyFactorDefineToYear" parameterType="java.util.Map">
+		insert into p#dict_t_factor
+  (year,
+   province,
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   isreserve,
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion)
+  select ${finyear},
+   province,
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   isreserve,
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion
+    from p#dict_t_Factor
+   where tableId = #{tableId} and status='1'
+     and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')
+  </insert>
+  
+  <insert id="copyFactorDefineToProvince" parameterType="java.util.Map">
+		insert into p#dict_t_factor
+  (year,
+   province,
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   isreserve,
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion)
+  select year,
+   ${province},
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   ${isreserve},
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion
+    from p#dict_t_Factor
+   where tableId = #{tableId} and status='1' 
+      and PROVINCE=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('DIVID')  
+     and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') and 
+     columnid not in(select  f.columnid from p#dict_t_Factor f where f.province=#{province})
+  </insert>
+  
+  
+  
+  <insert id="copyOneFactorDefineToYear" parameterType="java.util.Map">
+		insert into p#dict_t_factor
+  (year,
+   province,
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   isreserve,
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion)
+  select ${finyear},
+   province,
+   tableid,
+   deid,
+   columnid,
+   name,
+   dbcolumnname,
+   datatype,
+   datalength,
+   scale,
+   nullable,
+   defaultvalue,
+   csid,
+   isupdate,
+   dbversion,
+   orderid,
+   superid,
+   isleaf,
+   levelno,
+   alias,
+   colformat,
+   showformat,
+   showwidth,
+   iskey,
+   isvisible,
+   isreserve,
+   issum,
+   isregex,
+   regexpr,
+   regexprinfo,
+   isbandcol,
+   bandrefdwcol,
+   extprop,
+   coltips,
+   frmtabid,
+   frmcolid,
+   isvirtual,
+   vircontext,
+   ishref,
+   hrefloc,
+   hrefparmid,
+   openwindowtype,
+   bgtlvl,
+   status,
+   bandcolumnid,
+   parentnodecancheck,
+   insertversion
+    from p#dict_t_Factor
+   where columnId = #{factorId} and status='1'
+     and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')
+  </insert>
+  
+  
+  
+  
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTFactor" parameterType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		INSERT INTO dict_t_factor ( TABLEID, DEID, COLUMNID, NAME, DBCOLUMNNAME, DATATYPE, DATALENGTH, SCALE, NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO, ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE, ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP, COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT, BGTLVL,ISHREF,HREFLOC,HREFPARMID,OPENWINDOWTYPE,PARENTNODECANCHECK )
+		VALUES ( 
+		  #{tableid,jdbcType=VARCHAR},
+		  #{deid,jdbcType=VARCHAR},
+		  #{columnid,jdbcType=VARCHAR},
+		  #{name,jdbcType=VARCHAR},
+		  #{dbcolumnname,jdbcType=VARCHAR},
+		  #{datatype,jdbcType=INTEGER},
+		  #{datalength,jdbcType=INTEGER},
+		  #{scale,jdbcType=INTEGER},
+		  #{nullable,jdbcType=CHAR},
+		  #{defaultvalue,jdbcType=VARCHAR},
+		  #{csid,jdbcType=VARCHAR},
+		  #{isupdate,jdbcType=CHAR},
+		  #{orderid,jdbcType=INTEGER},
+		  #{superid,jdbcType=VARCHAR},
+		  #{isleaf,jdbcType=CHAR},
+		  #{levelno,jdbcType=INTEGER},
+		  #{alias,jdbcType=VARCHAR},
+		  #{colformat,jdbcType=VARCHAR},
+		  #{showformat,jdbcType=CHAR},
+		  #{showwidth,jdbcType=INTEGER},
+		  #{iskey,jdbcType=CHAR},
+		  #{isvisible,jdbcType=CHAR},
+		  #{isreserve,jdbcType=CHAR},
+		  #{issum,jdbcType=CHAR},
+		  #{isregex,jdbcType=CHAR},
+		  #{regexpr,jdbcType=VARCHAR},
+		  #{regexprinfo,jdbcType=VARCHAR},
+		  #{isbandcol,jdbcType=CHAR},
+		  #{bandcolumnid,jdbcType=VARCHAR},
+		  #{bandrefdwcol,jdbcType=VARCHAR},
+		  #{extprop,jdbcType=VARCHAR},
+		  #{coltips,jdbcType=VARCHAR},
+		  #{frmtabid,jdbcType=VARCHAR},
+		  #{frmcolid,jdbcType=VARCHAR},
+		  #{isvirtual,jdbcType=CHAR},
+		  #{vircontext,jdbcType=VARCHAR},
+		  #{bgtlvl,jdbcType=CHAR},
+		  #{ishref,jdbcType=CHAR},
+		  #{hrefloc,jdbcType=VARCHAR},
+		  #{hrefparmid,jdbcType=VARCHAR},
+		  #{openwindowtype,jdbcType=CHAR},
+		  #{parentNodeCanCheck,jdbcType=VARCHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTFactor" parameterType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+    UPDATE dict_t_factor 
+    SET
+		    COLUMNID = #{columnid},
+		    TABLEID = #{tableid},
+		    DEID = #{deid},
+		    NAME = #{name},
+		    DBCOLUMNNAME = #{dbcolumnname},
+		    DATATYPE = #{datatype},
+		    DATALENGTH = #{datalength},
+		    SCALE = #{scale},
+		    NULLABLE = #{nullable},
+		    DEFAULTVALUE = #{defaultvalue},
+		    CSID = #{csid},
+		    ISUPDATE = #{isupdate},
+		    ORDERID = #{orderid},
+		    SUPERID = #{superid},
+		    ISLEAF = #{isleaf},
+		    LEVELNO = #{levelno},
+		    ALIAS = #{alias},
+		    COLFORMAT = #{colformat},
+		    SHOWFORMAT = #{showformat},
+		    SHOWWIDTH = #{showwidth},
+		    ISKEY = #{iskey},
+		    ISVISIBLE = #{isvisible},
+		    ISRESERVE = #{isreserve},
+		    ISSUM = #{issum},
+		    ISREGEX = #{isregex},
+		    REGEXPR = #{regexpr},
+		    REGEXPRINFO = #{regexprinfo},
+		    ISBANDCOL = #{isbandcol},
+		    BANDCOLUMNID = #{bandcolumnid},
+		    BANDREFDWCOL = #{bandrefdwcol},
+		    EXTPROP = #{extprop},
+		    COLTIPS = #{coltips},
+		    FRMTABID = #{frmtabid},
+		    FRMCOLID = #{frmcolid},
+		    ISVIRTUAL = #{isvirtual},
+		    VIRCONTEXT = #{vircontext},
+	        BGTLVL = #{bgtlvl},
+			ISHREF = #{ishref},
+			HREFLOC = #{hrefloc},
+			HREFPARMID = #{hrefparmid},
+		    OPENWINDOWTYPE = #{openwindowtype},
+			PARENTNODECANCHECK = #{parentNodeCanCheck}
+  WHERE COLUMNID = #{columnid} 
+</update>
+    
+    
+
+    <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteDictTFactor" parameterType="java.lang.String">
+		DELETE FROM dict_t_factor 
+          <where> 
+		    COLUMNID = #{columnid}
+          </where>
+    </delete>   
+    
+    
+        <!-- 根据主键删除指定记录 --> 
+      
+     <delete id="deleteAllDictTFactorByTableID" parameterType="java.lang.String">
+		DELETE FROM dict_t_factor WHERE TABLEID = #{tableID}
+    </delete> 
+
+
+	 <!--获取制定表中列 的最大ORDERID-->
+   	<select id="getMAXColumnOrderid" parameterType="map" resultType="map">
+		 SELECT MAX(T.ORDERID) AS ORDERID FROM DICT_T_FACTOR  T 
+		 <where>
+		           1=1
+				 <if test="tableid!=null and tableid!=''">
+					AND T.TABLEID = #{tableid}
+				</if>
+				<if test="levelno!=null and levelno!=''">
+			    	AND T.LEVELNO = #{levelno}
+				</if>
+		 
+		 </where> 
+	</select>
+
+   	<select id="getMAXOrderidBySuperID" parameterType="map" resultType="int">
+		 SELECT NVL(MAX(T.ORDERID),0) AS ORDERID FROM DICT_T_FACTOR  T 
+		 WHERE T.TABLEID = #{tableid} AND T.SUPERID = #{superid}
+	</select>
+	
+	<select id="findOtherRepeatNameCount" parameterType="java.util.Map" resultType="int">
+	 select count(*) from P#DICT_T_FACTOR  T WHERE T.STATUS='1'   
+	 <if test="tableid!=null and tableid!=''">
+	   AND T.TABLEID=#{tableid}  
+	 </if>
+	  <if test="dbcolumnname!=null and dbcolumnname!=''">
+	   AND T.DBCOLUMNNAME=#{dbcolumnname}
+	 </if>	
+	</select>
+	
+	<update id="updateDictTFactorLevelNo" parameterType="java.lang.String">
+	   <![CDATA[
+	      BEGIN
+			 FOR C_TAB IN (SELECT TABLEID, NAME, APPID FROM DICT_T_MODEL WHERE TABLEID = #{tableID}) LOOP
+			    UPDATE DICT_T_FACTOR X
+			       SET LEVELNO =
+			           (SELECT LVL
+			              FROM (SELECT TABLEID, COLUMNID, LEVEL LVL
+			                      FROM DICT_T_FACTOR Y
+			                     WHERE TABLEID = C_TAB.TABLEID
+			                    CONNECT BY SUPERID = PRIOR COLUMNID
+			                     START WITH SUPERID = '0') T
+			             WHERE TABLEID = X.TABLEID
+			               AND COLUMNID = X.COLUMNID)
+			     WHERE TABLEID = C_TAB.TABLEID AND LEVELNO <>
+			           (SELECT LVL
+			              FROM (SELECT TABLEID, COLUMNID, LEVEL LVL
+			                      FROM DICT_T_FACTOR Y
+			                     WHERE TABLEID = C_TAB.TABLEID
+			                    CONNECT BY SUPERID = PRIOR COLUMNID
+			                     START WITH SUPERID = '0') T
+			             WHERE TABLEID = X.TABLEID
+			               AND COLUMNID = X.COLUMNID);
+			  END LOOP;
+	      END;
+	   ]]>
+	</update>
+	
+	<select id="getBakTableColumnList" parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+	  <![CDATA[
+		SELECT COLUMNID, DBCOLUMNNAME, MAX(DATATYPE) AS DATATYPE,MAX(DATALENGTH) AS DATALENGTH,ISBANDCOL,
+		   ISVIRTUAL,BANDCOLUMNID,BANDREFDWCOL,VIRCONTEXT,MAX(DEFAULTVALUE) AS DEFAULTVALUE,MAX(SCALE) AS SCALE
+		  FROM P#DICT_T_FACTOR
+		 WHERE TABLEID = #{tableID}
+		   AND ISLEAF = '1' AND STATUS = '1'
+		 GROUP BY COLUMNID,DBCOLUMNNAME,ISBANDCOL,ISVIRTUAL,BANDCOLUMNID,BANDREFDWCOL,VIRCONTEXT
+	  ]]>
+	</select>
+	
+ </mapper>
+ <!--2014-01-08 13:55:46-->

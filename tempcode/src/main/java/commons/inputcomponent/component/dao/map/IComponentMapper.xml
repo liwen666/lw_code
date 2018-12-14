@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.inputcomponent.component.dao.IComponentMapper">
+  
+    <select id="getDataByPk" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select * from ${tableName}	WHERE 
+  		<foreach item="mapField" separator=" AND " collection="pks">
+			${mapField.fieldName} = ${mapField.fieldSqlValue}
+		</foreach>			
+	</select> 
+	 
+    <select id="isHasRepeateData" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+	     select count(datakey) from ${tableName}
+			WHERE 		
+			<foreach item="mapField" separator=" AND " collection="lks">
+				${mapField.fieldName} = ${mapField.fieldSqlValue}
+			</foreach>				
+	 </select>
+
+	<select id="getHrefParmList" parameterType="java.lang.String" resultType="java.util.Map">
+		SELECT PARMNAME,PARMCON FROM DICT_T_SETHREFPARM WHERE HREFPARMID=#{parmID}
+	</select>
+	
+	<select id="isHasRepeateDataAll" parameterType="java.util.HashMap" resultType="int">
+	     SELECT COUNT(1)  FROM ${tableName}  A WHERE 
+			<foreach item="item" separator=" OR " collection="list"  open="("  close=")">
+			  (
+				<if test="item.pks != null">
+					NOT EXISTS (SELECT 1 FROM ${tableName} B WHERE 
+					<foreach item="mapField" separator=" AND " collection="item.pks"  open="("  close=") ">
+						B.${mapField.name} = ${mapField.value} AND A.${mapField.name} = B.${mapField.name} 
+					</foreach>
+					)	
+				</if>
+				<if test="item.pks != null and item.lks != null">
+				    AND   
+				</if>
+				<if test="item.lks != null">
+				 	<foreach item="lkField" separator=" AND " collection="item.lks"  open="(" close=")">
+						A.${lkField.name} = ${lkField.value}
+					</foreach>
+				</if>
+			  )
+			</foreach>				
+	 </select>
+	 
+	 
+	 <insert id="insert" parameterType="java.util.HashMap">
+		INSERT INTO ${tableName} (
+			<foreach item="mapField" separator="," collection="list">
+				${mapField.name}
+			</foreach>
+		)
+		VALUES (
+			<foreach item="mapField" separator="," collection="list">
+				${mapField.value}
+			</foreach>
+		)
+    </insert>
+    
+    <insert id="batchInsert" parameterType="list">
+    	BEGIN
+    		<foreach item="item" separator=" " collection="dataList"  open=""  close="">
+    				INSERT INTO ${item.tableName} (
+					<foreach item="mapField" separator="," collection="item.list">
+						${mapField.name}
+					</foreach>
+						)
+						VALUES (
+							<foreach item="mapField" separator="," collection="item.list">
+								${mapField.value}
+							</foreach>
+						);
+    		</foreach>
+    	END;
+    </insert>
+    
+    <update id="update" parameterType="java.util.HashMap">
+	    UPDATE ${tableName} SET 
+			<foreach item="mapField" separator="," collection="list">
+				${mapField.name} = ${mapField.value}
+			</foreach>
+			where
+	  		<foreach item="mapField" separator=" AND " collection="pks">
+				${mapField.name} = ${mapField.value}
+			</foreach>
+	</update>
+	
+	<update id="batchUpdate" parameterType="list">
+	    BEGIN
+    		<foreach item="item" separator=" " collection="dataList"  open=""  close="">
+	    		UPDATE ${item.tableName} SET 
+				<foreach item="mapField" separator="," collection="item.list">
+					${mapField.name} = ${mapField.value}
+				</foreach>
+				where
+		  		<foreach item="mapField" separator=" AND " collection="item.pks">
+					${mapField.name} = ${mapField.value}
+				</foreach>;
+    		</foreach>
+    	END;
+	</update>
+	
+	<delete id="delete" parameterType="java.util.HashMap">
+		DELETE FROM  ${tableName} WHERE
+	  	<foreach item="mapField" separator=" AND " collection="list">
+			${mapField.name} = ${mapField.value}
+		</foreach>
+    </delete>
+    
+    <update id="batchDelete" parameterType="list">
+    	BEGIN
+    		<foreach item="item" separator=" " collection="dataList"  open=""  close="">
+    			UPDATE  ${item.tableName}  SET STATUS='2'  WHERE
+			  	<foreach item="mapField" separator=" AND " collection="item.list">
+					${mapField.name} = ${mapField.value}
+				</foreach>;
+    		</foreach>
+    	END;
+    </update>
+    
+    <select id="getDataLogicKeyByPk" parameterType="hashmap" resultType="hashmap">
+    	   SELECT 
+			  <foreach item="lkField" separator=" , " collection="logicKeys"  open="" close="">
+				   ${lkField}
+			  </foreach>
+		   FROM ${tableName}
+			WHERE 
+			<foreach item="mapField" separator=" AND " collection="primaryKes"  open=""  close="">
+				 ${mapField.name} = ${mapField.value}
+			</foreach>
+    </select>
+
+
+</mapper>

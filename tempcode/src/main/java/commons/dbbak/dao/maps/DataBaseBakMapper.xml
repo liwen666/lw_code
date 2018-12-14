@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dbbak.dao.IDataBaseBakMapper">
+	
+	<resultMap id="bakFilePO" type="com.tjhq.commons.dbbak.po.DataBaseFilePO">
+		<result property="file_Name" column="FILE_NAME" />
+		<result property="file_dmp" column="DMP" />
+	</resultMap>
+	
+	<update id="backUpDataBase" statementType="CALLABLE">
+		<![CDATA[
+		    {call PKG_UTILS.EXPDP()}
+		]]>
+	</update>
+	
+	<select id="getDataBaseBakInfoList" resultType="com.tjhq.commons.dbbak.po.BackupInfoPO">
+		SELECT ORDERID, COMMAND_LINE, to_char(START_TIME, 'yyyy-mm-dd hh24:MI:ss') START_TIME, EXEC_RESULT, LOGFILE_CONTENT, ELAPSED_TIME FROM DATA_T_DATAPUMP ORDER BY ORDERID
+	</select>
+	
+	<select id="getDataBaseBakList" resultType="hashmap">
+		SELECT CMD_ORDER, FILE_ID, FILE_NAME, FILE_LENGTH, CREATED_TIME, FILE_TYPE FROM DATA_T_DPFILES WHERE CMD_ORDER = #{orderID} ORDER BY CMD_ORDER, FILE_ID
+	</select>
+	
+	<select id="getDataBaseBakFile" resultMap="bakFilePO">
+		SELECT FILE_NAME, PKG_UTILS.READFILE(FILE_NAME) DMP FROM DATA_T_DPFILES WHERE CMD_ORDER = #{orderID} AND FILE_ID = #{fileID}
+	</select>
+	
+	<delete id="deleteBackup" statementType="CALLABLE">
+		<![CDATA[
+		    {call PKG_UTILS.REMOVEBK(#{orderID})}
+		]]>
+	</delete>
+</mapper>

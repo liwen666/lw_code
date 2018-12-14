@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTModelRelaMapper">
+	<select id="selectDictTModelRelaList" parameterType="java.lang.String" resultType="map">
+		SELECT TABLEID, SUBTABLEID FROM DICT_T_MODELRELA MR WHERE MR.TABLEID=#{tableId}
+	</select>
+	<select id="selectDictTModelRelaSubSet" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT SUBTABLEID FROM DICT_T_MODELRELA MR WHERE MR.TABLEID=#{tableId}
+	</select>
+	
+	<insert id="insertDictTModelRela" parameterType="java.util.Map">
+	    INSERT INTO DICT_T_MODELRELA 
+			  (TABLEID, SUBTABLEID)
+	    <foreach collection="list" item="map" index="index" separator="UNION ALL"> 
+	        SELECT #{map.tableId},#{map.subTableId} FROM DUAL
+	    </foreach> 
+	</insert>
+	<delete id="deleteDictTModelRelaByTableId" parameterType="java.lang.String">
+		DELETE FROM DICT_T_MODELRELA WHERE TABLEID = #{tableId}
+	</delete>  
+	<delete id="deleteDictTModelRela" parameterType="java.util.Map">
+	    DELETE FROM DICT_T_MODELRELA MR
+	     <where> 
+	    	<foreach collection="list" item="map" index="index"  separator="OR"> 
+		     	(MR.TABLEID = #{map.tableId} AND MR.SUBTABLEID = #{map.subTableId})
+	    	</foreach> 
+	     </where>   
+	</delete>   
+</mapper>
+ <!--2015-04-20-->

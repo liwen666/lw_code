@@ -1,0 +1,637 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.secu.dao.SecuTLockMapper">
+
+	<resultMap id="secutlock" type="com.tjhq.commons.secu.po.SecuTLockPO">
+		<result column="APPID" property="appId" />
+		<result column="TYPEID" property="typeId" />
+		<result column="OBJECTID" property="objectId" />
+		<result column="TOID" property="toId" />
+		<result column="OBJECTCODE" property="objectcode" />
+		<result column="OBJECTNAME" property="objectName" />
+		<result column="LOCKFLAG" property="lockFlag" />
+	</resultMap>
+
+	<select id="gettableLockedListByParams" parameterType="java.util.Map"
+		resultMap="secutlock"> 
+		SELECT *
+		FROM SECU_T_LOCK u
+		WHERE (u.APPID = #{APPID} and u.OBJECTID = #{TABLEID} and  u.TYPEID = '4')
+		or (u.APPID = #{APPID} and u.TYPEID = '2' and u.OBJECTID = #{AGENCYID})
+		or (u.APPID = #{APPID} and u.TYPEID = '1' and u.OBJECTID = #{DEPTID})
+		or (u.APPID = #{APPID} and u.TYPEID = '3' and u.OBJECTID = #{TABLEID})
+		or (u.APPID = #{APPID} and u.TYPEID = '6' and
+		u.OBJECTID in
+		(select suitid
+		from dict_t_suit t1
+		start with t1.SUITID = 
+		(select t4.SUITID
+		from dict_t_model t4
+		where t4.TABLEID = #{TABLEID}
+		and t4.APPID = #{APPID})
+		connect by prior t1.SUPERID = t1.SUITID) and u.TOID = #{AGENCYID})
+		or (u.APPID = #{APPID} and u.TYPEID = '7' and
+		u.OBJECTID in
+		(select suitid
+		from dict_t_suit t1
+		start with t1.SUITID =
+		(select t4.SUITID
+		from dict_t_model t4
+		where t4.TABLEID = #{TABLEID}
+		and t4.APPID = #{APPID})
+		connect by prior t1.SUPERID = t1.SUITID) and u.TOID = #{DEPTID})
+	</select>
+
+	<select id="getAllDeptLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'1' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM CODE_T_DEPT
+		T
+		where not exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '1'
+		and
+		l.APPID = #{appId}
+		and l.OBJECTID = t.GUID)
+		union
+		SELECT #{appId} as
+		APPID,'1' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as
+		OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM CODE_T_DEPT T
+		where exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '1'
+		and l.APPID = #{appId}
+		and
+		l.OBJECTID = t.GUID) ) order by OBJECTCODE
+	</select>
+
+	<select id="getAcctItemLockList" parameterType="String"
+		resultMap="secutlock">
+		select *
+		from secu_t_lock l
+		where l.TYPEID = '3'
+		and
+		l.APPID = #{appId}
+	</select>
+	<select id="getLockedDeptLockList" parameterType="String"
+		resultMap="secutlock">
+		select *　from (
+		SELECT #{appId} as APPID,'1' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM CODE_T_DEPT
+		T
+		where exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '1'
+		and
+		l.APPID = #{appId}
+		and l.OBJECTID = t.GUID)) order by OBJECTCODE
+	</select>
+
+	<select id="getUnlockDeptLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'1' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM CODE_T_DEPT
+		T
+		where not exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '1'
+		and
+		l.APPID = #{appId}
+		and l.OBJECTID = t.GUID)
+		) order by OBJECTCODE
+	</select>
+
+	<insert id="addLockForDept" parameterType="java.util.Map">
+		INSERT INTO
+		secu_t_lock (APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'1',#{objectId},'*')
+	</insert>
+
+	<delete id="dropLockForDept" parameterType="java.util.Map">
+		delete from secu_t_lock where appId=#{appId} and typeid='1' and
+		objectId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.objectId}
+		</foreach>
+	</delete>
+	<insert id="addLockForAgency" parameterType="java.util.Map">
+		INSERT INTO
+		secu_t_lock (APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'2',#{objectId},'*')
+	</insert>
+
+	<delete id="dropLockForAgency" parameterType="java.util.Map">
+		delete from secu_t_lock where appId=#{appId} and typeid='2' and
+		objectId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.objectId}
+		</foreach>
+	</delete>
+	<insert id="addLockForAcctItem" parameterType="java.util.Map">
+		INSERT INTO
+		secu_t_lock (APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'3',#{objectId},'*')
+	</insert>
+
+	<delete id="dropLockForAcctItem" parameterType="java.util.Map">
+		delete from secu_t_lock where appId=#{appId} and typeid='3' and
+		objectId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.objectId}
+		</foreach>
+	</delete>
+	<insert id="addLockForApp" parameterType="java.util.Map">
+		INSERT INTO secu_t_lock
+		(APPID, TYPEID,OBJECTID,TOID) values
+		(#{objectId},'5',#{objectId},'*')
+	</insert>
+
+	<delete id="dropLockForApp" parameterType="java.util.Map">
+		delete from secu_t_lock where typeid='5' and objectId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.objectId}
+		</foreach>
+	</delete>
+	<insert id="addLockForTable" parameterType="java.util.Map">
+		INSERT INTO secu_t_lock
+		(APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'4',#{objectId},'*')
+	</insert>
+
+	<delete id="dropLockForTable" parameterType="java.util.Map">
+		delete from secu_t_lock where typeid='4' and objectId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.objectId}
+		</foreach>
+	</delete>
+	<insert id="addLockForAgencySuit" parameterType="java.util.Map">
+		INSERT INTO secu_t_lock
+		(APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'6',#{objectId},#{toId})
+	</insert>
+
+	<delete id="dropLockForAgencySuit" parameterType="java.util.Map">
+		delete from secu_t_lock where typeid='6' and objectId=#{tableId} and appId=#{appId} and toId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.toId}
+		</foreach>
+	</delete>
+	
+	
+	<insert id="addLockForDeptSuit" parameterType="java.util.Map">
+		INSERT INTO secu_t_lock
+		(APPID, TYPEID,OBJECTID,TOID) values
+		(#{appId},'7',#{objectId},#{toId})
+	</insert>
+
+	<delete id="dropLockForDeptSuit" parameterType="java.util.Map">
+		delete from secu_t_lock where typeid='7' and objectId=#{tableId} and appId=#{appId} and toId in
+		<foreach collection="unlockDatas" item="lockData" open="("
+			separator="," close=")">
+			#{lockData.toId}
+		</foreach>
+	</delete>
+	
+	
+	<select id="getAllAgencyLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'2' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM
+		${dbNameForAgency} T
+		where T.levelno='3' and not exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '2'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)
+		union
+		SELECT #{appId} as APPID,'2' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM
+		${dbNameForAgency} T
+		where T.levelno='3' and exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '2'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)) order by OBJECTCODE
+	</select>
+
+	<select id="getLockedAgencyLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'2' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM
+		${dbNameForAgency} T
+		where T.levelno='3' and exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '2'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)) order by OBJECTCODE
+
+	</select>
+
+	<select id="getUnlockAgencyLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from(
+		SELECT #{appId} as APPID,'2' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM
+		${dbNameForAgency} T
+		where T.levelno='3' and not exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '2'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)) order by OBJECTCODE
+	</select>
+
+	<select id="getAllAcctItemLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'3' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM
+		${dbNameForAcctItem} T
+		where not exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '3'
+		and l.APPID = #{appId}
+		and
+		l.OBJECTID = t.GUID)
+		union
+		SELECT #{appId} as APPID,'3' as TYPEID,
+		GUID
+		as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM
+		${dbNameForAcctItem} T
+		where exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '3'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)) order by OBJECTCODE
+	</select>
+
+	<select id="getLockedAcctItemLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select * from (SELECT #{appId} as APPID,'3' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM
+		${dbNameForAcctItem} T
+		where exists (select *
+		from
+		secu_t_lock l
+		where l.TYPEID = '3'
+		and l.APPID = #{appId}
+		and l.OBJECTID
+		= t.GUID)) order by OBJECTCODE
+
+	</select>
+
+	<select id="getUnlockAcctItemLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select * from (
+		SELECT #{appId} as APPID,'3' as TYPEID,
+		GUID as OBJECTID,
+		NAME as OBJECTNAME,
+		CODE as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM
+		${dbNameForAcctItem} T
+		where not exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '3'
+		and l.APPID = #{appId}
+		and
+		l.OBJECTID = t.GUID)) order by OBJECTCODE
+	</select>
+
+
+
+	<select id="getAllAppLockList" parameterType="String" resultMap="secutlock">
+		select * from (
+		SELECT '5' as TYPEID,
+		APPID as OBJECTID,
+		APPNAME as OBJECTNAME,
+		APPID as
+		OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM dict_t_appregister T
+		where not exists
+		(select *
+		from secu_t_lock l
+		where l.TYPEID = '5'
+		and l.OBJECTID =
+		t.APPID)
+		union
+		SELECT '5' as TYPEID,
+		APPID as OBJECTID,
+		APPNAME as
+		OBJECTNAME,
+		APPID as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM dict_t_appregister
+		T
+		where exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '5'
+		and
+		l.OBJECTID = t.APPID)) order by OBJECTCODE
+	</select>
+
+	<select id="getLockedAppLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT '5' as TYPEID,
+		APPID as OBJECTID,
+		APPNAME as
+		OBJECTNAME,
+		APPID as OBJECTCODE,
+		'1' as LOCKFLAG
+		FROM dict_t_appregister
+		T
+		where exists (select *
+		from secu_t_lock l
+		where l.TYPEID = '5'
+		and
+		l.OBJECTID = t.APPID)) order by OBJECTCODE
+
+	</select>
+
+	<select id="getUnlockAppLockList" parameterType="String"
+		resultMap="secutlock">
+		select * from (
+		SELECT '5' as TYPEID,
+		APPID as OBJECTID,
+		APPNAME as
+		OBJECTNAME,
+		APPID as OBJECTCODE,
+		'0' as LOCKFLAG
+		FROM dict_t_appregister
+		T
+		where not exists (select * 
+		from secu_t_lock l
+		where l.TYPEID = '5'
+		and
+		l.OBJECTID = t.APPID)) order by OBJECTCODE
+	</select>
+
+
+	<select id="queryTableLockListByTableId" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select *
+	  		from (select '4' as TYPEID,
+	               #{tableId} as OBJECTID,
+	               NAME as OBJECTNAME,
+	               (select count(*)
+	                  from secu_t_lock l
+	                 where l.TYPEID = '4' 
+	                   and l.APPID = #{appId}
+	                   and l.OBJECTID = t.tableId) as LOCKFLAG
+	          from dict_t_model T
+	         where t.TABLEID = #{tableId}
+	           and t.APPID = #{appId}) 
+		<if test="islock!=null">   
+				where lockflag='${islock}' 
+		</if> 
+		order by OBJECTID
+	</select>   
+
+	<select id="queryTableLockListBySuitId" parameterType="java.util.Map"
+		resultMap="secutlock"> 
+		select 
+		'4' as TYPEID,
+		tableId as OBJECTID,
+		NAME as OBJECTNAME,
+		(select count(*)
+		from secu_t_lock l
+		where l.TYPEID = '4'
+		and l.APPID = #{appId}
+		and l.OBJECTID = t.tableId) as LOCKFLAG
+		from dict_t_model T,
+		(select t.suitId
+		from Dict_t_Suit t
+		start with t.SUITID =#{tableId}
+		and t.APPID =#{appId}
+		connect by prior t.SUITID = t.superid) t2
+		where t.SUITID = t2.suitid
+
+	</select>
+
+	<select id="queryTableUnLockListBySuitId" parameterType="java.util.Map"
+			resultMap="secutlock">
+	select '4' as TYPEID,
+       tableId as OBJECTID,
+       NAME as OBJECTNAME,
+       '0' as LOCKFLAG
+  from (select t.*
+          from dict_t_model T,
+               (select t.suitId
+                  from Dict_t_Suit t
+                 start with t.SUITID = #{tableId}
+                        and t.APPID = #{appId}
+                connect by prior t.SUITID = t.superid) t2
+         where t.SUITID = t2.suitid) t3
+ where not exists (select *
+          from (select t5.OBJECTID
+                  from secu_t_lock t5,
+                       (select t.*
+                          from dict_t_model T,
+                               (select t.suitId
+                                  from Dict_t_Suit t
+                                 start with t.SUITID = #{tableId}
+                                        and t.APPID = #{appId}
+                                connect by prior t.SUITID = t.superid) t2
+                         where t.SUITID = t2.suitid) t6
+                 where t5.OBJECTID = t6.tableId
+                   and t5.APPID = #{appId}
+                   and t5.TYPEID = '4') t7
+         where t3.tableId = t7.objectId)
+	</select> 
+	
+	<select id="queryTableLockedListBySuitId" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select '4' as TYPEID,
+		tableId as OBJECTID,
+		NAME as OBJECTNAME,
+		'1' as LOCKFLAG
+    from (select t.*
+            from dict_t_model T,
+                 (select t.suitId
+                    from Dict_t_Suit t
+                   start with t.SUITID = #{tableId}
+                          and t.APPID = #{appId}
+                  connect by prior t.SUITID = t.superid) t2
+           where t.SUITID = t2.suitid) t3
+   where exists
+   (select *
+            from (select t5.OBJECTID
+                    from secu_t_lock t5,
+                         (select t.*
+                            from dict_t_model T,
+                                 (select t.suitId
+                                    from Dict_t_Suit t
+                                   start with t.SUITID =
+                                              #{tableId}
+                                          and t.APPID = #{appId}
+                                  connect by prior t.SUITID = t.superid) t2
+                           where t.SUITID = t2.suitid) t6
+                   where t5.OBJECTID = t6.tableId
+                     and t5.APPID = #{appId}
+                     and t5.TYPEID = '4') t7
+           where t3.tableId = t7.objectId)
+
+	</select>
+	
+	<select id="getAgencySuitLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select t2.guid as toId, '['|| t2.code ||']'||t2.name as objectName,#{tableId} as objectId,'0' as lockFlag
+		  from ${dbNameForAgency} t2
+		 where t2.levelno='3' and not exists (select t1.*
+		          from secu_t_lock t1
+		         where t1.TYPEID = '6' 
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId)
+		union
+		select t2.guid as toId, '['|| t2.code ||']'||t2.name as objectName,#{tableId} as objectId,'1' as lockFlag
+		  from ${dbNameForAgency} t2
+		 where t2.levelno='3' and exists (select t1.*
+		          from secu_t_lock t1
+		         where t1.TYPEID = '6'
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId)
+		
+	</select>
+		<select id="getAgencySuitUnLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select t2.guid as toId, '['|| t2.code ||']'||t2.name as objectName,#{tableId} as objectId,'0' as lockFlag
+		  	from ${dbNameForAgency} t2
+		 where t2.levelno='3' and not exists (select t1.*
+         	from secu_t_lock t1
+         where t1.TYPEID = '6' 
+         	and t1.appId = #{appId}
+         	and t1.OBJECTID = #{tableId}
+         	and t2.guid = t1.toId)
+		
+	</select>
+		<select id="getAgencySuitLockedList" parameterType="java.util.Map"
+		resultMap="secutlock">
+			select t2.guid as toId, '['|| t2.code ||']'||t2.name as objectName,#{tableId} as objectId,'1' as lockFlag
+				from ${dbNameForAgency} t2
+			where t2.levelno='3' and exists (select t1.*
+	        	from secu_t_lock t1
+	        where t1.TYPEID = '6'
+	           and t1.appId = #{appId}
+	           and t1.OBJECTID = #{tableId}
+	           and t2.guid = t1.toId)
+	</select> 
+
+
+	<select id="getDeptSuitLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select t2.guid as toId, t2.name as objectName,#{tableId} as objectId,'0' as lockFlag
+		  from code_t_dept t2
+		 where not exists (select t1.*
+		          from secu_t_lock t1
+		         where t1.TYPEID = '7'
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId)
+		union
+		select t2.guid as toId, t2.name as objectName,#{tableId} as objectId,'1' as lockFlag
+		  from code_t_dept t2
+		 where exists (select t1.* 
+		          from secu_t_lock t1
+		         where t1.TYPEID = '7'
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId)
+		
+	</select>
+	
+	<select id="getDeptSuitUnLockList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select t2.guid as toId,t2.name as objectName,#{tableId} as objectId,'0' as lockFlag
+		  from code_t_dept t2
+		 where not exists (select t1.*
+		          from secu_t_lock t1
+		         where t1.TYPEID = '7'
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId) 
+		
+	</select>
+	
+	<select id="getDeptSuitLockedList" parameterType="java.util.Map"
+		resultMap="secutlock">
+		select t2.guid as toId, t2.name as objectName,#{tableId} as objectId,'1' as lockFlag
+		  from code_t_dept t2
+		 where exists (select t1.* 
+		          from secu_t_lock t1
+		         where t1.TYPEID = '7'
+		           and t1.appId = #{appId}
+		           and t1.OBJECTID = #{tableId}
+		           and t2.guid = t1.toId)
+	</select>
+
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.dict.dao.DictTModelSelfMapper">
+  <select id="checkTableIsCopy" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM P#DICT_T_MODEL T WHERE T.TABLEID=#{tableId} AND T.YEAR=#{finyear} and T.status='1'
+  </select>
+
+   <insert id="copyModelDefineToYear" parameterType="java.util.Map">
+	insert into p#dict_t_model
+	(year, province, tableid, name, orderid, dbtablename, tableType, isshow, istask, appid, dbversion, remark,
+	suitid, dealtype, isreserved, inputlvl, isadd, shorttitle, extprop, bgtlvl, secusql, initsql, initsqltime,
+	issumtab, isman, mainuptab, relatab, tabswhere, ispartition, status, isbak, isalldistrict, isallyear, descfile)
+	select '${finyear}', province, tableid, name, orderid, dbtablename, tableType, isshow, istask, appid, dbversion,
+	remark, suitid, dealtype, isreserved, inputlvl, isadd, shorttitle, extprop, bgtlvl, secusql, initsql, initsqltime,
+	issumtab, isman, mainuptab, relatab, tabswhere, ispartition, status, isbak, isalldistrict, isallyear,initsqlbtnname,isexcelimp,isReadOnly, descfile
+	from p#dict_t_model
+	where tableId = #{tableId}
+	and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') and status='1'
+  </insert>
+
+	<!-- 增加一条新记录 -->
+	<insert id="insertDictTModel" parameterType="com.tjhq.commons.dict.external.po.DictTModelPO" >
+		INSERT INTO dict_t_model
+		(TABLEID, NAME, ORDERID, DBTABLENAME, TABLETYPE, ISSHOW, ISTASK,
+		APPID, REMARK, SUITID, DEALTYPE, ISRESERVED, INPUTLVL, ISADD, SHORTTITLE,
+		EXTPROP, BGTLVL, SECUSQL, INITSQL, INITSQLTIME, ISSUMTAB, ISMAN, RELATAB,
+		TABSWHERE, ISPARTITION, ISBAK, ISALLDISTRICT, ISALLYEAR,INITSQLBTNNAME,ISEXCELIMP, ISREADONLY,DESCFILE
+		,isSaveFormula
+		)
+		VALUES (
+		  #{tableid, jdbcType=VARCHAR},    #{name, jdbcType=VARCHAR},
+		  #{orderid, jdbcType=INTEGER},    #{dbtablename, jdbcType=VARCHAR},
+		  #{tabletype, jdbcType=CHAR},     #{isshow, jdbcType=CHAR},
+		  #{istask, jdbcType=CHAR},        #{appid, jdbcType=VARCHAR},
+		  #{remark, jdbcType=VARCHAR},     #{suitid, jdbcType=VARCHAR},
+		  #{dealtype, jdbcType=VARCHAR},   #{isreserved, jdbcType=CHAR},
+		  #{inputlvl, jdbcType=VARCHAR},   #{isadd, jdbcType=CHAR},
+		  #{shorttitle, jdbcType=VARCHAR}, #{extprop, jdbcType=VARCHAR},
+		  #{bgtlvl, jdbcType=CHAR},        #{secusql, jdbcType=VARCHAR},
+		  #{initsql, jdbcType=VARCHAR},    #{initsqltime, jdbcType=CHAR},
+		  #{issumtab, jdbcType=CHAR},      #{isman, jdbcType=CHAR},
+		  #{relatab, jdbcType=VARCHAR},    #{tabswhere, jdbcType=VARCHAR},
+		  #{ispartition, jdbcType=CHAR},   #{isbak, jdbcType=CHAR},
+		  #{isalldistrict, jdbcType=CHAR}, #{isallyear, jdbcType=CHAR},
+		 #{initsqlbtnname, jdbcType=VARCHAR},#{isexcelimp, jdbcType=CHAR}, 
+		 #{isReadOnly, jdbcType=VARCHAR},#{descfile, jdbcType=VARCHAR},
+		 #{isSaveFormula, jdbcType=VARCHAR}
+		 )
+    </insert>
+
+	<!-- 修改记录 --> 
+   <update id="updateDictTModel" parameterType="com.tjhq.commons.dict.external.po.DictTModelPO">
+    UPDATE dict_t_model 
+    SET 
+	    NAME = #{name},
+	    ORDERID = #{orderid},
+	    DBTABLENAME = #{dbtablename},
+	    TABLETYPE = #{tabletype},
+	    ISSHOW = #{isshow},
+	    APPID = #{appid},
+	    REMARK = #{remark},
+	    SUITID = #{suitid},
+	    DEALTYPE = #{dealtype},
+	    ISRESERVED = #{isreserved},
+	    INPUTLVL = #{inputlvl},
+	    ISADD = #{isadd},
+	    SHORTTITLE = #{shorttitle},
+	    EXTPROP = #{extprop},
+	    BGTLVL = #{bgtlvl},
+	    SECUSQL = #{secusql},
+	    INITSQL = #{initsql},
+	    INITSQLTIME = #{initsqltime},
+	    ISSUMTAB = #{issumtab},
+	    ISMAN = #{isman},
+	    RELATAB = #{relatab},
+	    TABSWHERE = #{tabswhere},
+        ISPARTITION = #{ispartition},
+        ISBAK = #{isbak},
+        ISTASK = #{istask},
+        ISALLDISTRICT = #{isalldistrict},
+         ISALLYEAR = #{isallyear},
+         INITSQLBTNNAME = #{initsqlbtnname},
+         ISEXCELIMP = #{isexcelimp},
+         ISREADONLY = #{isReadOnly},
+        DESCFILE = #{descfile},
+        isSaveFormula = #{isSaveFormula}
+  <where>
+    TABLEID = #{tableid}
+  </where>    
+</update>
+
+	<insert id="copyModelDefineToProvince"  parameterType="java.util.Map">
+		insert into p#dict_t_model
+		(year, province, tableid, name, orderid, dbtablename, tableType, isshow, istask,
+		appid, dbversion, remark, suitid, dealtype, isreserved, inputlvl, isadd, shorttitle,
+		extprop, bgtlvl, secusql, initsql, initsqltime, issumtab, isman, mainuptab, relatab,
+		tabswhere, ispartition, status, isbak, isalldistrict, isallyear, descfile)
+		select year, ${province}, tableid, name, orderid, dbtablename, tableType, isshow,
+		  istask, appid, dbversion, remark, suitid, dealtype, isreserved, inputlvl, isadd,
+		  shorttitle, extprop, bgtlvl, secusql, initsql, initsqltime, issumtab, isman, mainuptab,
+		  relatab, tabswhere, ispartition, status, isbak, isalldistrict, isallyear, initsqlbtnname,isexcelimp,isReadOnly,descfile
+		from p#dict_t_model
+		where tableId = #{tableId} and status='1'  
+		and PROVINCE=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('DIVID')
+		and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR')  and
+		tableid not in(select m.tableid from p#dict_t_model  m where m.province=#{province} and m.tableid=#{tableId}
+		and status='1' and year = Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR'))
+      </insert>
+
+    <!-- 根据主键删除指定记录 -->
+
+	<delete id="deleteDictTModel" parameterType="java.lang.String">
+		DELETE  FROM dict_t_model
+		<where> TABLEID = #{tableid} </where>
+	</delete>   
+
+	<select id="getDictTModelDBName" parameterType="java.util.Map"
+		  resultType="com.tjhq.commons.dict.external.po.DictTModelPO">
+		SELECT DBTABLENAME,APPID,DEALTYPE FROM DICT_T_MODEL  WHERE TABLEID=#{tableid}
+	</select>
+
+	<select id="replicateTable" statementType="CALLABLE" parameterType="java.util.Map">  
+	<![CDATA[  
+	    {CALL SYS_P_REPLICATE_TABLE(#{sourceTableID,mode=IN,jdbcType=VARCHAR},#{newTableName,mode=IN,jdbcType=VARCHAR},#{newTableDBName,mode=IN,jdbcType=VARCHAR},#{dealType,mode=IN,jdbcType=VARCHAR},#{suitID,mode=IN,jdbcType=VARCHAR})}
+	]]> 
+	</select>
+
+	<!-- 更新复制创建表是否任务表字段 -->
+	<update id="updateIsTaskByDBtableName" parameterType="java.util.Map">
+		UPDATE DICT_T_MODEL SET ISTASK = #{isTask}
+		<where> DBTABLENAME = #{dbTableName} </where>
+	</update>
+	
+	<select id="getSubAreas" resultType="com.tjhq.commons.inputcomponent.po.TreePO">
+		SELECT GUID ID, CODE, NAME, SUPERGUID PID, ISLEAF
+	        FROM CODE_T_DISTRICT T2
+	       START WITH T2.GUID = (SELECT CASE
+	                                      WHEN SUBSTR(CODE, -2, 2) = '00' THEN
+	                                       SUPERGUID
+	                                      ELSE
+	                                       GUID
+	                                    END
+	                               FROM CODE_T_DISTRICT
+	                              WHERE GUID = 
+	                              	(SELECT T5.DISTRICTID
+					                    FROM CODE_T_AGENCY_SPF T5
+					                   WHERE T5.GUID = '${agencyID}')
+	                              )
+      		CONNECT BY PRIOR T2.GUID = T2.SUPERGUID
+			order by CODE
+	</select>
+	
+	
+ </mapper>
+ <!--2014-01-08 13:55:43-->

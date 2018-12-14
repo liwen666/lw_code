@@ -1,0 +1,15 @@
+CREATE OR REPLACE VIEW CODE_T_FINYEAR AS
+SELECT GUID,
+       CODE,
+       NAME,
+       SUPERGUID,
+       ISLEAF,
+       CASE
+         WHEN GUID = (SELECT RESERVE_1 FROM Dict_t_Public WHERE appID = 'BGT' AND keyid = '000000' AND TYPEID = 'DEFAULTYEAR') THEN
+          '1'
+         ELSE
+          '0'
+       END ISDEFAULT
+  FROM FASP_V_PUBYEAR
+ WHERE STATUS = '1'
+--CODE_T_FINYEAR

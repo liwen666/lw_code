@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.tjhq.commons.setting.external.dao.EntryOuterMapper">
+
+	<resultMap id="group"
+		type="com.tjhq.commons.setting.external.po.DictTSetGroupPO">
+		<id property="tableID" column="TABLEID" />
+		<result property="orderID" column="ORDERID" />
+		<result property="columnID" column="COLUMNID" />
+		<result property="name" column="NAME" />
+		<result property="dbColumnName" column="DBCOLUMNNAME" />
+		<result property="idShowCol" column="IDSHOWCOL" />
+		<result property="nameShowCol" column="NAMESHOWCOL" />
+		<result property="isasc" column="ISASC" />
+	</resultMap>
+
+	<select id="getDataAngleViewList" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetAngleViewPO">
+		select t.TABLEID,
+		t.ORDERID,
+		t.COLUMNID,
+		f.NAME,
+		f.DBCOLUMNNAME,
+		t.ISDEFAULT
+		from dict_t_setangleview t,dict_t_factor f
+		where t.TABLEID = #{tableID}
+		and t.COLUMNID = f.COLUMNID
+		order by t.ORDERID
+	</select>
+	<select id="getDataGroupList" parameterType="String" resultMap="group">
+		select t.TABLEID,
+		t.ORDERID,
+		t.COLUMNID,
+		f.NAME,
+		f.DBCOLUMNNAME,
+		t.IDSHOWCOL,
+		t.NAMESHOWCOL,
+		t.ISASC
+		from dict_t_setgroup t, dict_t_factor f
+		where t.TABLEID = #{tableID}
+		and t.COLUMNID = f.COLUMNID
+		order by t.ORDERID
+	</select>
+
+	<select id="getDataSortList" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetSortPO">
+		select t.TABLEID,
+		t.ORDERID,
+		t.COLUMNID,
+		t.ASCFLAG,
+		f.NAME,
+		f.DBCOLUMNNAME,
+		t.ISRESERVE,
+		t.ISDEFAULT
+		from dict_t_setsort t, dict_t_factor f
+		where t.TABLEID = #{tableID}
+		and t.COLUMNID = f.COLUMNID
+		order by t.ORDERID
+	</select>
+
+	<!-- 引用关系定义 -->
+	<resultMap id="refrela"
+		type="com.tjhq.commons.setting.external.po.DictTSetRefrelaPO">
+		<id property="relaID" column="RELAID" />
+		<result property="relaName" column="RELANAME" />
+		<result property="relaDbTab" column="RELADBTAB" />
+		<result property="tableID" column="TABLEID" />
+		<result property="condColumnID" column="CONDCOLUMNID" />
+		<result property="columnID" column="COLUMNID" />
+	</resultMap>
+
+	<select id="getDataRefrelaList" parameterType="Map" resultMap="refrela">
+		select t.RELAID,
+		t.RELANAME,
+		t.RELADBTAB,
+		t.TABLEID,
+		t.CONDCOLUMNID,
+		t.COLUMNID
+		from dict_t_setrefrela t
+		where t.TABLEID = #{tableID}
+		<if test="columnID!=null and columnID!=''">
+			and t.COLUMNID = #{columnID}
+		</if>
+	</select>
+
+	<!-- 查询分析引用定义 -->
+	<resultMap id="analy"
+		type="com.tjhq.commons.setting.external.po.DictTSetAnalyPO">
+		<id property="hrefParmID" column="HREFPARMID" />
+		<result property="tableID" column="TABLEID" />
+		<result property="hrefName" column="HREFNAME" />
+		<result property="hrefLoc" column="HREFLOC" />
+		<result property="pictureID" column="PICTUREID" />
+		<result property="pictureUrl" column="pictureUrl" />
+		<collection property="hrefParm" column="HREFPARMID"
+			javaType="ArrayList" select="selectHrefParm" />
+	</resultMap>
+
+	<select id="getDataAnalyList" parameterType="String" resultMap="analy">
+		SELECT T.TABLEID, T.HREFPARMID, T.HREFNAME, T.HREFLOC,
+		T.PICTUREID,PIC.CODE PICTUREURL
+		FROM DICT_T_SETANALY T,CODE_T_QUERYPICLOGO PIC
+		WHERE T.PICTUREID = PIC.GUID
+		AND T.TABLEID = #{tableID}
+	</select>
+
+	<select id="selectHrefParm" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetHrefParmPO">
+		select t.HREFID,t.HREFPARMID, t.ORDERID, t.PARMNAME,
+		t.PARMCON
+		from dict_t_sethrefparm t
+		where t.HREFPARMID = #{hrefParmID}
+		order by t.ORDERID
+	</select>
+
+	<!-- 查询条件设置 -->
+	<resultMap id="queryd"
+		type="com.tjhq.commons.setting.external.po.DictTSetQuerydPO">
+		<id property="recID" column="RECID" />
+		<result property="tableID" column="TABLEID" />
+		<result property="showCols" column="SHOWCOLS" />
+		<result property="titleWidth" column="TITLEWIDTH" />
+		<result property="isShowTitle" column="ISSHOWTITLE" />
+		<collection property="querydDet" column="RECID" javaType="ArrayList"
+			select="selectQuerydDet" />
+	</resultMap>
+
+	<select id="getDataQuerydList" parameterType="String" resultMap="queryd">
+		select t.RECID, t.TABLEID, t.SHOWCOLS, t.TITLEWIDTH, t.ISSHOWTITLE
+		from dict_t_setqueryd t
+		where t.TABLEID = #{tableID}
+	</select>
+
+	<select id="selectQuerydDet" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetQuerydDetPO">
+		select t.GUID,
+		t.RECID,
+		t.CTRLID,
+		t.CTRLNAME,
+		t.COLSPAN,
+		t.OPERATOR,
+		t.DEFVALUE,
+		t.ISSHOW,
+		t.ORDERID
+		from dict_t_setqueryddet t
+		where t.RECID = #{recID} and t.ISSHOW = '1'
+		order by t.ORDERID
+	</select>
+
+	<select id="getDataFddefList" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetFddefPO">
+		select t.TABLEID,
+		t.ISFIX,
+		t.LVLNANMECOL,
+		t.LAYERINDENT,
+		t.REFID,
+		t.REFWHERE,
+		t.COLORDER
+		from dict_t_setfddef t
+		where t.TABLEID = #{tableID}
+	</select>
+
+	<select id="getDataFixList" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetFixPO">
+		select t.TABLEID,
+		t.TYPEID,
+		t.FDCODETOCOLS,
+		t.LVLNANMECOL,
+		t.LAYERINDENT,
+		t.REFID,
+		t.REFWHERE,
+		t.COLORDER
+		from dict_t_setfix t
+		where t.TABLEID = #{tableID}
+	</select>
+
+	<!-- 基本数字表设置 -->
+	<resultMap id="baseNumTab"
+		type="com.tjhq.commons.setting.external.po.DictTSetBaseNumTab">
+		<id property="guID" column="GUID" />
+		<result property="tableID" column="TABLEID" />
+		<result property="columnID" column="COLUMNID" />
+		<result property="columnName" column="COLUMNNAME" />
+		<collection property="baseNumSub" column="COLUMNID"
+			javaType="ArrayList" select="getDataBaseSubList" />
+	</resultMap>
+
+	<select id="getDataBaseTabList" parameterType="String"
+		resultMap="baseNumTab">
+		select t.GUID, t.TABLEID, t.COLUMNID, f.DBCOLUMNNAME as COLUMNNAME
+		from dict_t_setbasenumtab t, dict_t_factor f
+		where t.TABLEID = #{tableID}
+		and t.COLUMNID = f.COLUMNID
+	</select>
+
+	<select id="getDataBaseSubList" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetBaseNumSub">
+		select t.GUID, t.COLUMNID, t.ORDERID, t.COLVALUE
+		from dict_t_setbasenumsub t
+		where t.COLUMNID = #{columnID}
+		order by t.ORDERID
+	</select>
+	<!-- 主子表关系设置 -->
+	<resultMap id="mainSubRela"
+		type="com.tjhq.commons.setting.external.po.DictTSetMainSubTab">
+		<id property="guID" column="GUID" />
+		<result property="orderID" column="ORDERID" />
+		<result property="tableID" column="TABLEID" />
+		<result property="collTypeID" column="COLLTYPEID" />
+		<result property="isMainTable" column="ISMAINTABLE" />
+		<result property="tableName" column="TABLENAME" />
+		<result property="dbTableName" column="DBTABLENAME" />
+		<result property="remark" column="REMARK" />
+		<result property="dealName" column="DEALNAME" />
+		<result property="dealType" column="DEALTYPE" />
+		<collection property="mainSubRela" column="GUID" javaType="ArrayList"
+			select="selectMainSubRela" />
+	</resultMap>
+
+	<select id="getDataMainSubTabList" parameterType="String"
+		resultMap="mainSubRela">
+		select t.GUID,
+		t.ORDERID,
+		t.TABLEID,
+		t.COLLTYPEID,
+		t.ISMAINTABLE,
+		t1.NAME as TABLENAME,
+		t1.DBTABLENAME,
+		t1.REMARK,
+		t2.DEALNAME,
+		t2.DEALID as DEALTYPE
+		from DICT_T_SETMAINSUBTAB t, DICT_T_MODEL t1, DICT_T_DEALTYPE t2
+		where lower(t.collTypeID) = lower(#{collTypeID})
+		and t.TABLEID = t1.TABLEID
+		and t1.DEALTYPE = t2.DEALID
+		order by t.ORDERID
+	</select>
+
+	<select id="selectMainSubRela" parameterType="String"
+		resultType="com.tjhq.commons.setting.external.po.DictTSetMainSubRela">
+		select t.MAINSUBID, t.MAINTABID, t.SUBTABID, t.MAINFKID, t.FKID
+		from DICT_T_SETMAINSUBRELA t
+		where t.MAINSUBID = #{guID}
+	</select>
+
+	<!-- 整体设置 -->
+	<select id="getSetRECList" parameterType="Map"
+		resultType="com.tjhq.commons.setting.external.po.RECPO">
+		select OBJECTID, TABLEID, RECID, SHOWCOLS, TITLEWIDTH, REMARK
+		from dict_t_setrec
+		where OBJECTID = #{objectId}
+		and TABLEID = #{tableId}
+	</select>
+
+	<!-- 明细设置 -->
+	<select id="getSetRECDetailList" parameterType="Map"
+		resultType="com.tjhq.commons.setting.external.po.RECDetailPO">
+		select *
+		from (select t.RECID,
+		t.CTRLID,
+		decode(t.CTRLNAME, '', d.NAME, t.CTRLNAME) CTRLNAME,
+		t.SUPERID,
+		t.ISLEAF,
+		t.LEVELNO,
+		t.ORDERID,
+		t.ISTEXT,
+		t.COLSPAN,
+		t.ROWSPAN,
+		t.ISGROUPCTRL,
+		t.ISSHOW
+		from dict_t_setrecdetail t, dict_t_factor d
+		where t.RECID = #{recId}
+		and t.CTRLID = d.COLUMNID(+)) a
+		where exists
+		(select 1 from dict_t_factor f where a.CTRLID = f.COLUMNID)
+		or a.ISGROUPCTRL = '1'
+	</select>
+	<select id="isTabExits" parameterType="String" resultType="integer">
+	SELECT count(1) FROM CODE_T_COLLECTTYPE WHERE CODE = #{tableDbName}
+	</select>
+</mapper>

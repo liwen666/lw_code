@@ -1,0 +1,726 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.dict.external.dao.DictTFactorMapper">
+
+   <!-- 查找所有记录 -->    
+    <select id="getAllDictTFactor" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor
+  	</select>
+
+    <!-- 根据主键来获取记录 -->
+    <select id="getDictTFactor"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT  TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL, BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK,XLSXCOLUMNID  FROM dict_t_factor
+	  <where> 
+              COLUMNID = #{columnid}     
+          </where>
+	</select>
+	
+	<select id="getDictTFactorsPk"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT  TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL, BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID  ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK  FROM dict_t_factor
+	 	 <where> 
+             TABLEID=#{tableid} and DBCOLUMNNAME in (select DBCOLUMNNAME from dict_t_defaultcol where status = '1' AND dealID =( select DEALTYPE from dict_t_model where tableid=#{tableid}) and ISPRIMARY = '1')
+         </where>
+	</select>  
+	  
+	  <!-- 根据DBCOLUMNNAME来获取记录 -->
+    <select id="getDictTFactorByDBName"   parameterType="java.lang.String" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT  TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL, BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK  FROM dict_t_factor
+	  <where> 
+              DBCOLUMNNAME = #{dbcolumnname}     
+          </where>
+	</select>  
+  
+    <!-- 获取列<获取某个标题中的 多个列>-->
+    <select id="getDictTFactorByColumnid"  parameterType="java.util.Map" resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT  TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL, BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK  FROM dict_t_factor
+	  <where> 
+	                   <if test="columnid!=null and columnid!=''">
+                          SUPERID =  #{columnid}
+                       </if>
+                        <if test="tableid!=null and tableid!=''">
+                          AND TABLEID = #{tableid}
+                        </if>
+               
+          </where>
+	</select>  
+  <select id="getTableidsByGroupByFrmtabid"   parameterType="java.lang.String" resultType="java.lang.String">
+        select t.frmtabid from P#dict_t_factor t  
+         <where>
+         
+           t.tableid = #{tableid}  group by t.frmtabid
+         </where>  
+  </select>
+	<select id="findDictTFactor" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor u  
+                <where>
+                       1 = 1 
+                       <if test="year!=null and year!=''">
+                            AND YEAR = #{year}
+                       </if>
+                        <if test="year_like!=null and year_like!=''">
+                            AND YEAR like #{year_like}
+                        </if>
+                       <if test="admdivcode!=null and admdivcode!=''">
+                             AND ADMDIVCODE = #{admdivcode}
+                       </if>
+                        <if test="admdivcode_like!=null and admdivcode_like!=''">
+                             AND ADMDIVCODE like #{admdivcode_like}
+                        </if>
+                       <if test="tableid!=null and tableid!=''">
+                             AND TABLEID = #{tableid}
+                       </if>
+                        <if test="tableid_like!=null and tableid_like!=''">
+                             AND TABLEID like #{tableid_like}
+                        </if>
+                       <if test="deid!=null and deid!=''">
+                             AND DEID = #{deid}
+                       </if>
+                        <if test="deid_like!=null and deid_like!=''">
+                             AND DEID like #{deid_like}
+                        </if>
+                       <if test="columnid!=null and columnid!=''">
+                             AND COLUMNID = #{columnid}
+                       </if>
+                        <if test="columnid_like!=null and columnid_like!=''">
+                             AND COLUMNID like #{columnid_like}
+                        </if>
+                       <if test="name!=null and name!=''">
+                             AND NAME = #{name}
+                       </if>
+                        <if test="name_like!=null and name_like!=''">
+                             AND NAME like #{name_like}
+                        </if>
+                       <if test="dbcolumnname!=null and dbcolumnname!=''">
+                             AND DBCOLUMNNAME = #{dbcolumnname}
+                       </if>
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                             AND DBCOLUMNNAME like #{dbcolumnname_like}
+                        </if>
+                       <if test="datatype!=null and datatype!=''">
+                             AND DATATYPE = #{datatype}
+                       </if>
+                       <if test="datalength!=null and datalength!=''">
+                             AND DATALENGTH = #{datalength}
+                       </if>
+                       <if test="scale!=null and scale!=''">
+                             AND SCALE = #{scale}
+                       </if>
+                       <if test="nullable!=null and nullable!=''">
+                             AND NULLABLE = #{nullable}
+                       </if>
+                        <if test="nullable_like!=null and nullable_like!=''">
+                             AND NULLABLE like #{nullable_like}
+                        </if>
+                       <if test="defaultvalue!=null and defaultvalue!=''">
+                             AND DEFAULTVALUE = #{defaultvalue}
+                       </if>
+                        <if test="defaultvalue_like!=null and defaultvalue_like!=''">
+                             AND DEFAULTVALUE like #{defaultvalue_like}
+                        </if>
+                       <if test="csid!=null and csid!=''">
+                             AND CSID = #{csid}
+                       </if>
+                        <if test="csid_like!=null and csid_like!=''">
+                             AND CSID like #{csid_like}
+                        </if>
+                       <if test="isupdate!=null and isupdate!=''">
+                             AND ISUPDATE = #{isupdate}
+                       </if>
+                        <if test="isupdate_like!=null and isupdate_like!=''">
+                             AND ISUPDATE like #{isupdate_like}
+                        </if>
+                       <if test="orderid!=null and orderid!=''">
+                             AND ORDERID = #{orderid}
+                       </if>
+                       <if test="superid!=null and superid!=''">
+                             AND SUPERID = #{superid}
+                       </if>
+                        <if test="superid_like!=null and superid_like!=''">
+                             AND SUPERID like #{superid_like}
+                        </if>
+                       <if test="isleaf!=null and isleaf!=''">
+                             AND ISLEAF = #{isleaf}
+                       </if>
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                             AND ISLEAF like #{isleaf_like}
+                        </if>
+                       <if test="levelno!=null and levelno!=''">
+                             AND LEVELNO = #{levelno}
+                       </if>
+                       <if test="alias!=null and alias!=''">
+                             AND ALIAS = #{alias}
+                       </if>
+                        <if test="alias_like!=null and alias_like!=''">
+                             AND ALIAS like #{alias_like}
+                        </if>
+                       <if test="colformat!=null and colformat!=''">
+                             AND COLFORMAT = #{colformat}
+                       </if>
+                        <if test="colformat_like!=null and colformat_like!=''">
+                             AND COLFORMAT like #{colformat_like}
+                        </if>
+                       <if test="showformat!=null and showformat!=''">
+                             AND SHOWFORMAT = #{showformat}
+                       </if>
+                        <if test="showformat_like!=null and showformat_like!=''">
+                             AND SHOWFORMAT like #{showformat_like}
+                        </if>
+                       <if test="showwidth!=null and showwidth!=''">
+                             AND SHOWWIDTH = #{showwidth}
+                       </if>
+                       <if test="iskey!=null and iskey!=''">
+                             AND ISKEY = #{iskey}
+                       </if>
+                        <if test="iskey_like!=null and iskey_like!=''">
+                             AND ISKEY like #{iskey_like}
+                        </if>
+                       <if test="isvisible!=null and isvisible!=''">
+                             AND ISVISIBLE = #{isvisible}
+                       </if>
+                        <if test="isvisible_like!=null and isvisible_like!=''">
+                             AND ISVISIBLE like #{isvisible_like}
+                        </if>
+                       <if test="isreserve!=null and isreserve!=''">
+                             AND ISRESERVE = #{isreserve}
+                       </if>
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                             AND ISRESERVE like #{isreserve_like}
+                        </if>
+                       <if test="issum!=null and issum!=''">
+                             AND ISSUM = #{issum}
+                       </if>
+                        <if test="issum_like!=null and issum_like!=''">
+                             AND ISSUM like #{issum_like}
+                        </if>
+                       <if test="isregex!=null and isregex!=''">
+                             AND ISREGEX = #{isregex}
+                       </if>
+                        <if test="isregex_like!=null and isregex_like!=''">
+                             AND ISREGEX like #{isregex_like}
+                        </if>
+                       <if test="regexpr!=null and regexpr!=''">
+                             AND REGEXPR = #{regexpr}
+                       </if>
+                        <if test="regexpr_like!=null and regexpr_like!=''">
+                             AND REGEXPR like #{regexpr_like}
+                        </if>
+                       <if test="regexprinfo!=null and regexprinfo!=''">
+                             AND REGEXPRINFO = #{regexprinfo}
+                       </if>
+                        <if test="regexprinfo_like!=null and regexprinfo_like!=''">
+                             AND REGEXPRINFO like #{regexprinfo_like}
+                        </if>
+                       <if test="isbandcol!=null and isbandcol!=''">
+                             AND ISBANDCOL = #{isbandcol}
+                       </if>
+                        <if test="isbandcol_like!=null and isbandcol_like!=''">
+                             AND ISBANDCOL like #{isbandcol_like}
+                        </if>
+                       <if test="bandcolumnid!=null and bandcolumnid!=''">
+                             AND BANDCOLUMNID = #{bandcolumnid}
+                       </if>
+                        <if test="bandcolumnid_like!=null and bandcolumnid_like!=''">
+                             AND BANDCOLUMNID like #{bandcolumnid_like}
+                        </if> 
+                       <if test="bandrefdwcol!=null and bandrefdwcol!=''">
+                             AND BANDREFDWCOL = #{bandrefdwcol}
+                       </if>
+                        <if test="bandrefdwcol_like!=null and bandrefdwcol_like!=''">
+                             AND BANDREFDWCOL like #{bandrefdwcol_like}
+                        </if>
+                       <if test="extprop!=null and extprop!=''">
+                             AND EXTPROP = #{extprop}
+                       </if>
+                        <if test="extprop_like!=null and extprop_like!=''">
+                             AND EXTPROP like #{extprop_like}
+                        </if>
+                       <if test="coltips!=null and coltips!=''">
+                             AND COLTIPS = #{coltips}
+                       </if>
+                        <if test="coltips_like!=null and coltips_like!=''">
+                             AND COLTIPS like #{coltips_like}
+                        </if>
+                       <if test="frmtabid!=null and frmtabid!=''">
+                             AND FRMTABID = #{frmtabid}
+                       </if>
+                        <if test="frmtabid_like!=null and frmtabid_like!=''">
+                             AND FRMTABID like #{frmtabid_like}
+                        </if>
+                       <if test="frmcolid!=null and frmcolid!=''">
+                             AND FRMCOLID = #{frmcolid}
+                       </if>
+                        <if test="frmcolid_like!=null and frmcolid_like!=''">
+                             AND FRMCOLID like #{frmcolid_like}
+                        </if>
+                       <if test="isvirtual!=null and isvirtual!=''">
+                             AND ISVIRTUAL = #{isvirtual}
+                       </if>
+                        <if test="isvirtual_like!=null and isvirtual_like!=''">
+                             AND ISVIRTUAL like #{isvirtual_like}
+                        </if>
+                       <if test="vircontext!=null and vircontext!=''">
+                             AND VIRCONTEXT = #{vircontext}
+                       </if>
+                        <if test="vircontext_like!=null and vircontext_like!=''">
+                             AND VIRCONTEXT like #{vircontext_like}
+                        </if>
+                       <if test="bgtlvl!=null and bgtlvl!=''">
+                             AND BGTLVL = #{bgtlvl}
+                       </if>
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                             AND BGTLVL like #{bgtlvl_like}
+                        </if>
+                        <if test="ishref!=null and ishref!=''">
+                             AND ISHREF = #{ishref}
+                       </if>
+                       <if test="hrefloc!=null and hrefloc!=''">
+                             AND HREFLOC = #{hrefloc}
+                       </if>
+                       <if test="hrefparmid!=null and hrefparmid!=''">
+                             AND HREFPARMID = #{hrefparmid}
+                       </if>
+                       <if test="openwindowtype!=null and openwindowtype!=''">
+		               		AND OPENWINDOWTYPE = #{openwindowtype}
+	   					 </if>
+                        
+                       
+                 </where>
+	       	    START WITH (SUPERID = '0' OR SUPERID IS NULL OR SUPERID='')
+				CONNECT BY PRIOR COLUMNID = SUPERID
+ 				ORDER SIBLINGS BY ORDERID,COLUMNID
+	</select>
+	
+	
+	<select id="findDictTFactorBySuperID" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor u  
+        WHERE TABLEID = #{tableID} AND SUPERID = #{superID}
+        ORDER BY ORDERID,COLUMNID
+	</select>
+	
+	<select id="findPDictTFactor" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+	SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM 
+	           P#dict_t_factor u   WHERE u.TABLEID=#{tableid} AND STATUS='1' AND ISLEAF=#{isleaf} AND Year=Global_MultYear_CZ.Secu_f_GLOBAL_PARM('YEAR') AND u.DBCOLUMNNAME NOT IN(select t.DBCOLUMNNAME  from dict_t_factor t where t.TABLEID=#{tableid} AND t.ISLEAF='1')  ORDER BY u.DBVERSION ASC       
+	</select>
+	<select id="findNewPDictTFactor" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT TABLEID,
+		       DEID,
+		       COLUMNID,
+		       NAME,
+		       DBCOLUMNNAME,
+		       DATATYPE,
+		       DATALENGTH,
+		       SCALE,
+		       NULLABLE,
+		       DEFAULTVALUE,
+		       CSID,
+		       ISUPDATE,
+		       ORDERID,
+		       SUPERID,
+		       ISLEAF,
+		       LEVELNO,
+		       ALIAS,
+		       COLFORMAT,
+		       SHOWFORMAT,
+		       SHOWWIDTH,
+		       ISKEY,
+		       ISVISIBLE,
+		       ISRESERVE,
+		       ISSUM,
+		       ISREGEX,
+		       REGEXPR,
+		       REGEXPRINFO,
+		       ISBANDCOL,
+		       BANDCOLUMNID,
+		       BANDREFDWCOL,
+		       EXTPROP,
+		       COLTIPS,
+		       FRMTABID,
+		       FRMCOLID,
+		       ISVIRTUAL,
+		       VIRCONTEXT,
+		       BGTLVL,
+		       ISHREF,
+		       HREFLOC,
+		       HREFPARMID,
+		       OPENWINDOWTYPE,
+		       (SELECT DBTABLENAME FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,
+		       PARENTNODECANCHECK
+		  FROM P#dict_t_factor u
+		 WHERE u.TABLEID = #{tableid}
+		   AND STATUS = '1'
+		   AND u.dbcolumnname is not null
+		   and not exists (select 1
+		          from user_tab_cols a
+		         where a.COLUMN_NAME = u.dbcolumnname
+		           and table_name = upper('${dbtablename}'))
+		 order by u.dbversion asc
+	</select>
+
+	<select id="findDictTFactorCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM dict_t_factor u
+	    <where>
+	                     1 = 1 
+                        <if test="tableid!=null and tableid!=''">
+                              AND TABLEID = #{tableid}
+                        </if>
+
+                        <if test="tableid_like!=null and tableid_like!=''">
+                              AND TABLEID like #{tableid_like}
+                        </if>
+                        <if test="deid!=null and deid!=''">
+                              AND DEID = #{deid}
+                        </if>
+
+                        <if test="deid_like!=null and deid_like!=''">
+                              AND DEID like #{deid_like}
+                        </if>
+                        <if test="columnid!=null and columnid!=''">
+                              AND COLUMNID = #{columnid}
+                        </if>
+
+                        <if test="columnid_like!=null and columnid_like!=''">
+                              AND COLUMNID like #{columnid_like}
+                        </if>
+                        <if test="name!=null and name!=''">
+                              AND NAME = #{name}
+                        </if>
+
+                        <if test="name_like!=null and name_like!=''">
+                              AND NAME like #{name_like}
+                        </if>
+                        <if test="dbcolumnname!=null and dbcolumnname!=''">
+                              AND DBCOLUMNNAME = #{dbcolumnname}
+                        </if>
+
+                        <if test="dbcolumnname_like!=null and dbcolumnname_like!=''">
+                              AND DBCOLUMNNAME like #{dbcolumnname_like}
+                        </if>
+                        <if test="datatype!=null and datatype!=''">
+                              AND DATATYPE = #{datatype}
+                        </if>
+
+                        <if test="datalength!=null and datalength!=''">
+                              AND DATALENGTH = #{datalength}
+                        </if>
+
+                        <if test="scale!=null and scale!=''">
+                              AND SCALE = #{scale}
+                        </if>
+
+                        <if test="nullable!=null and nullable!=''">
+                              AND NULLABLE = #{nullable}
+                        </if>
+
+                        <if test="nullable_like!=null and nullable_like!=''">
+                              AND NULLABLE like #{nullable_like}
+                        </if>
+                        <if test="defaultvalue!=null and defaultvalue!=''">
+                              AND DEFAULTVALUE = #{defaultvalue}
+                        </if>
+
+                        <if test="defaultvalue_like!=null and defaultvalue_like!=''">
+                              AND DEFAULTVALUE like #{defaultvalue_like}
+                        </if>
+                        <if test="csid!=null and csid!=''">
+                              AND CSID = #{csid}
+                        </if>
+
+                        <if test="csid_like!=null and csid_like!=''">
+                              AND CSID like #{csid_like}
+                        </if>
+                        <if test="isupdate!=null and isupdate!=''">
+                              AND ISUPDATE = #{isupdate}
+                        </if>
+
+                        <if test="isupdate_like!=null and isupdate_like!=''">
+                              AND ISUPDATE like #{isupdate_like}
+                        </if>
+                        <if test="orderid!=null and orderid!=''">
+                              AND ORDERID = #{orderid}
+                        </if>
+
+                        <if test="superid!=null and superid!=''">
+                              AND SUPERID = #{superid}
+                        </if>
+
+                        <if test="superid_like!=null and superid_like!=''">
+                              AND SUPERID like #{superid_like}
+                        </if>
+                        <if test="isleaf!=null and isleaf!=''">
+                              AND ISLEAF = #{isleaf}
+                        </if>
+
+                        <if test="isleaf_like!=null and isleaf_like!=''">
+                              AND ISLEAF like #{isleaf_like}
+                        </if>
+                        <if test="levelno!=null and levelno!=''">
+                              AND LEVELNO = #{levelno}
+                        </if>
+
+                        <if test="alias!=null and alias!=''">
+                              AND ALIAS = #{alias}
+                        </if>
+
+                        <if test="alias_like!=null and alias_like!=''">
+                              AND ALIAS like #{alias_like}
+                        </if>
+                        <if test="colformat!=null and colformat!=''">
+                              AND COLFORMAT = #{colformat}
+                        </if>
+
+                        <if test="colformat_like!=null and colformat_like!=''">
+                              AND COLFORMAT like #{colformat_like}
+                        </if>
+                        <if test="showformat!=null and showformat!=''">
+                              AND SHOWFORMAT = #{showformat}
+                        </if>
+
+                        <if test="showformat_like!=null and showformat_like!=''">
+                              AND SHOWFORMAT like #{showformat_like}
+                        </if>
+                        <if test="showwidth!=null and showwidth!=''">
+                              AND SHOWWIDTH = #{showwidth}
+                        </if>
+
+                        <if test="iskey!=null and iskey!=''">
+                              AND ISKEY = #{iskey}
+                        </if>
+
+                        <if test="iskey_like!=null and iskey_like!=''">
+                              AND ISKEY like #{iskey_like}
+                        </if>
+                        <if test="isvisible!=null and isvisible!=''">
+                              AND ISVISIBLE = #{isvisible}
+                        </if>
+
+                        <if test="isvisible_like!=null and isvisible_like!=''">
+                              AND ISVISIBLE like #{isvisible_like}
+                        </if>
+                        <if test="isreserve!=null and isreserve!=''">
+                              AND ISRESERVE = #{isreserve}
+                        </if>
+
+                        <if test="isreserve_like!=null and isreserve_like!=''">
+                              AND ISRESERVE like #{isreserve_like}
+                        </if>
+                        <if test="issum!=null and issum!=''">
+                              AND ISSUM = #{issum}
+                        </if>
+
+                        <if test="issum_like!=null and issum_like!=''">
+                              AND ISSUM like #{issum_like}
+                        </if>
+                        <if test="isregex!=null and isregex!=''">
+                              AND ISREGEX = #{isregex}
+                        </if>
+
+                        <if test="isregex_like!=null and isregex_like!=''">
+                              AND ISREGEX like #{isregex_like}
+                        </if>
+                        <if test="regexpr!=null and regexpr!=''">
+                              AND REGEXPR = #{regexpr}
+                        </if>
+
+                        <if test="regexpr_like!=null and regexpr_like!=''">
+                              AND REGEXPR like #{regexpr_like}
+                        </if>
+                        <if test="regexprinfo!=null and regexprinfo!=''">
+                              AND REGEXPRINFO = #{regexprinfo}
+                        </if>
+
+                        <if test="regexprinfo_like!=null and regexprinfo_like!=''">
+                              AND REGEXPRINFO like #{regexprinfo_like}
+                        </if>
+                        <if test="isbandcol!=null and isbandcol!=''">
+                              AND ISBANDCOL = #{isbandcol}
+                        </if>
+
+                        <if test="isbandcol_like!=null and isbandcol_like!=''">
+                              AND ISBANDCOL like #{isbandcol_like}
+                        </if>
+                        <if test="bandcolumnid!=null and bandcolumnid!=''">
+                              AND BANDCOLUMNID = #{bandcolumnid}
+                        </if>
+
+                        <if test="bandcolumnid_like!=null and bandcolumnid_like!=''">
+                              AND BANDCOLUMNID like #{bandcolumnid_like}
+                        </if>
+                        <if test="bandrefdwcol!=null and bandrefdwcol!=''">
+                              AND BANDREFDWCOL = #{bandrefdwcol}
+                        </if>
+
+                        <if test="bandrefdwcol_like!=null and bandrefdwcol_like!=''">
+                              AND BANDREFDWCOL like #{bandrefdwcol_like}
+                        </if>
+                        <if test="extprop!=null and extprop!=''">
+                              AND EXTPROP = #{extprop}
+                        </if>
+
+                        <if test="extprop_like!=null and extprop_like!=''">
+                              AND EXTPROP like #{extprop_like}
+                        </if>
+                        <if test="coltips!=null and coltips!=''">
+                              AND COLTIPS = #{coltips}
+                        </if>
+
+                        <if test="coltips_like!=null and coltips_like!=''">
+                              AND COLTIPS like #{coltips_like}
+                        </if>
+                        <if test="frmtabid!=null and frmtabid!=''">
+                              AND FRMTABID = #{frmtabid}
+                        </if>
+
+                        <if test="frmtabid_like!=null and frmtabid_like!=''">
+                              AND FRMTABID like #{frmtabid_like}
+                        </if>
+                        <if test="frmcolid!=null and frmcolid!=''">
+                              AND FRMCOLID = #{frmcolid}
+                        </if>
+
+                        <if test="frmcolid_like!=null and frmcolid_like!=''">
+                              AND FRMCOLID like #{frmcolid_like}
+                        </if>
+                        <if test="isvirtual!=null and isvirtual!=''">
+                              AND ISVIRTUAL = #{isvirtual}
+                        </if>
+
+                        <if test="isvirtual_like!=null and isvirtual_like!=''">
+                              AND ISVIRTUAL like #{isvirtual_like}
+                        </if>
+                        <if test="vircontext!=null and vircontext!=''">
+                              AND VIRCONTEXT = #{vircontext}
+                        </if>
+
+                        <if test="vircontext_like!=null and vircontext_like!=''">
+                              AND VIRCONTEXT like #{vircontext_like}
+                        </if>
+                        <if test="bgtlvl!=null and bgtlvl!=''">
+                              AND BGTLVL = #{bgtlvl}
+                        </if>
+
+                        <if test="bgtlvl_like!=null and bgtlvl_like!=''">
+                              AND BGTLVL like #{bgtlvl_like}
+                        </if>
+                         <if test="ishref!=null and ishref!=''">
+                             AND ISHREF = #{ishref}
+                       </if>
+                       <if test="hrefloc!=null and hrefloc!=''">
+                             AND HREFLOC = #{hrefloc}
+                       </if>
+                       <if test="hrefparmid!=null and hrefparmid!=''">
+                             AND HREFPARMID = #{hrefparmid}
+                       </if>
+                       <if test="openwindowtype!=null and openwindowtype!=''">
+		   					AND OPENWINDOWTYPE = #{openwindowtype}
+	    				</if>
+                        
+	      </where>
+	      order by  ORDERID,COLUMNID
+	</select>	
+	
+	<select id="findDictTFactorVisilbeRef" parameterType="java.util.Map"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT   TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor u  
+                <where>
+                       csid is not null                         
+                       <if test="tableid!=null and tableid!=''">
+                             AND TABLEID = #{tableid}
+                       </if>          
+                       <if test="isvisible!=null and isvisible!=''">
+                             AND ISVISIBLE = #{isvisible}
+                       </if>
+                 </where>
+	       	    START WITH (SUPERID = '0' OR SUPERID IS NULL OR SUPERID='')
+				CONNECT BY PRIOR COLUMNID = SUPERID
+ 				ORDER SIBLINGS BY ORDERID,COLUMNID
+	</select>
+	
+	<select id="getAllFactorListTreeByAppID" parameterType="java.lang.String"  flushCache="true"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		WITH SUIT AS (
+			SELECT
+				suitid columnid, suitname name, superid tableid, '' dbcolumnname,
+				'1' nocheck, '1' open, orderid, '0' nodetype, '0' isleaf
+			FROM Dict_t_Suit
+			WHERE appid = #{appID}
+			ORDER BY orderid
+		),
+		DICTMODEL AS (
+		  SELECT
+		    tableid columnid, name, suitid tableid, dbtablename dbcolumnname,
+		    '0' nocheck, '0' open, orderid, '1' nodetype, '0' isleaf
+		  FROM dict_t_model
+		  WHERE suitid IN (SELECT columnid FROM SUIT) AND TABLETYPE = '1'
+		  ORDER BY orderid
+		)
+
+		SELECT * FROM SUIT
+		UNION ALL
+		SELECT * FROM DICTMODEL
+		UNION ALL
+		SELECT
+		  columnid columnid, name, tableid, dbcolumnname,
+		  '0' nocheck, '0' open, orderid, '3' nodetype, '1' isleaf
+		FROM Dict_t_Factor
+		WHERE tableid IN (SELECT columnid FROM DICTMODEL) AND isleaf = '1'
+    </select>
+
+    <select id="getAllFactorListTree"  flushCache="true"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		with appreg as
+			(select appid as columnid, appname as name, '' as tableid,
+				'0' as superid, '' as dbcolumnname, '1' as nocheck,
+				'1' as open, orderid, '0' as nodetype, '0' as isleaf,
+				0 as levelno
+			from dict_t_appregister order by orderid),
+		suit as
+			(select suitid as columnid, suitname as name, '' as tableid,
+				(case superid when '0' then appid else superid end) as superid,
+				'' as dbcolumnname, '1' as nocheck, '1' as open,
+				orderid, '0' as nodetype, '0' as isleaf, 0 as levelno
+			from Dict_t_Suit
+			where appid in (select columnid from appreg) order by orderid),
+		dictmodel as
+			(select tableid as columnid, name, tableid, SUITID as superid,
+				dbtablename as dbcolumnname, '0' as nocheck, '0' as open,
+				orderid, '1' as nodetype, '0' as isleaf, 0 as levelno
+			from dict_t_model
+			where suitid in (select columnid from suit) order by orderid)
+
+		SELECT * FROM (
+			SELECT * FROM APPREG
+			UNION ALL
+			SELECT * FROM SUIT
+			UNION ALL
+			SELECT * FROM DICTMODEL
+			UNION ALL
+			SELECT
+				columnid as columnid, name, tableid,
+				(case superid when '0' then tableid else superid end) as superid,
+				dbcolumnname,
+				(case isleaf when '1' then '0' else '1' end) as nocheck,
+				'0' as open, orderid, '3' as nodetype, isleaf, levelno
+			FROM DICT_T_FACTOR
+			WHERE TABLEID IN (SELECT COLUMNID FROM DICTMODEL)
+		) ORDER BY ORDERID, COLUMNID
+    </select>
+
+    <select id="getLeafFactorListByTableID" parameterType="java.lang.String"  flushCache="true"  resultType="com.tjhq.commons.dict.external.po.DictTFactorPO">
+		SELECT  TABLEID,DEID,COLUMNID, NAME, DBCOLUMNNAME, DATATYPE,  DATALENGTH, SCALE,  NULLABLE, DEFAULTVALUE, CSID, ISUPDATE, ORDERID, SUPERID, ISLEAF, LEVELNO,  ALIAS, COLFORMAT, SHOWFORMAT, SHOWWIDTH, ISKEY, ISVISIBLE, ISRESERVE,ISSUM, ISREGEX, REGEXPR, REGEXPRINFO, ISBANDCOL,BANDCOLUMNID, BANDREFDWCOL, EXTPROP,COLTIPS, FRMTABID, FRMCOLID, ISVIRTUAL, VIRCONTEXT,BGTLVL,ISHREF,HREFLOC,HREFPARMID ,OPENWINDOWTYPE,(SELECT DBTABLENAME  FROM dict_t_modelcode WHERE TABLEID = CSID) as CSDBTABLENAME,PARENTNODECANCHECK FROM dict_t_factor u
+		WHERE  TABLEID = #{tableID} AND ISLEAF = '1'
+    </select>
+
+	<!-- 获取各种数据类型默认的长度设置 -->
+    <select id="getAllDefaultDataLength" resultType="java.util.Map">
+    	SELECT TYPEID, RESERVE_1 FROM DICT_T_PUBLIC WHERE KEYID = '0008'
+    </select>
+
+	<!-- 获取当前系统模式（是否可进行数据长度及删除） -->
+	<select id="getEditMode" resultType="java.lang.String">
+		SELECT RESERVE_1 FROM DICT_T_PUBLIC WHERE KEYID = '0013' AND TYPEID = 'EDITMODE'
+	</select>
+	
+	<!-- 获取当前系统模式（是否可进行数据长度及删除） -->
+	<select id="getTableBakAllColumns"  parameterType="java.lang.String"  resultType="java.util.Map">
+		SELECT t.COLUMN_NAME FROM all_tab_columns t WHERE  t.TABLE_NAME=#{table_bak_name}
+	</select>
+</mapper>

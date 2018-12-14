@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.inputcomponent.grid.fixgrid.dao.IFixGridMapper">
+  	
+  	<select id="getTemplateSetData" parameterType="java.util.Map" resultType="java.util.HashMap">
+     SELECT SUM(ISDJ_1) ISDJ_1, 
+     		SUM(ISDJ_2) ISDJ_2,
+      		SUM(ISDJ_3) ISDJ_3,
+       		SUM(ISQZX_1) ISQZX_1,
+       		SUM(ISQZX_2) ISQZX_2, 
+         	SUM(ISQZX_3) ISQZX_3
+	  FROM ${tableNameTempl}
+	  WHERE ISTEMPLATE = 1 AND SYNSTATUS='1'
+ 	</select> 
+ 	
+ 	<select id="getFixGridData" parameterType="java.util.Map" resultType="java.util.HashMap">
+	   SELECT ${selectElement},
+	    	${rowWriteSecu} AS ROWSECU,
+	    	CASE
+	         WHEN ISTEMPLATE = '1' THEN  '1'
+	         WHEN ISTEMPLATE = '0' THEN  '0'
+	       END C_STATUS
+	    FROM (    
+		    SELECT 
+				<foreach collection="leafColumnList" index="index" item="column" separator=",">
+			    	<if test="column.columnDBName=='CELLSECU' or column.columnDBName=='ORDERID' or column.columnDBName=='FDCODE_1' 
+			    			or column.columnDBName=='LEVELNO_1' or column.columnDBName=='ISQZX_1'
+			    			or column.columnDBName=='ISDJ_1' or column.columnDBName=='ISHZ_1'
+			    			or column.columnDBName=='ISUPDATE_1' or column.columnDBName=='FDCODE_2' 
+			    			or column.columnDBName=='LEVELNO_2' or column.columnDBName=='ISQZX_2'
+			    			or column.columnDBName=='ISDJ_2' or column.columnDBName=='ISHZ_2'
+			    			or column.columnDBName=='ISUPDATE_2' or column.columnDBName=='FDCODE_3' 
+			    			or column.columnDBName=='LEVELNO_3' or column.columnDBName=='ISQZX_3'
+			    			or column.columnDBName=='ISDJ_3' or column.columnDBName=='ISHZ_3'
+			    			or column.columnDBName=='ISUPDATE_3'">
+			    		CASE WHEN ISTEMPLATE='0' AND (SELECT 1 FROM ${tableNameTempl} WHERE TEMPLATEID =d.TEMPLATEID AND ISTEMPLATE='1' and SYNSTATUS='1' AND ROWNUM <![CDATA[< 2]]> )>0
+			    		 THEN
+			    			( 
+			    				SELECT ${column.columnDBName} FROM ${tableNameTempl} WHERE TEMPLATEID =d.TEMPLATEID AND ISTEMPLATE='1' and SYNSTATUS='1'
+			    			)
+			    		ELSE   ${column.columnDBName}  END ${column.columnDBName} 
+					</if>
+					<if test="column.columnDBName!='CELLSECU' and column.columnDBName!='ORDERID' and column.columnDBName!='FDCODE_1' 
+			    			and column.columnDBName!='LEVELNO_1' and column.columnDBName!='ISQZX_1'
+			    			and column.columnDBName!='ISDJ_1' and column.columnDBName!='ISHZ_1'
+			    			and column.columnDBName!='ISUPDATE_1' and column.columnDBName!='FDCODE_2' 
+			    			and column.columnDBName!='LEVELNO_2' and column.columnDBName!='ISQZX_2'
+			    			and column.columnDBName!='ISDJ_2' and column.columnDBName!='ISHZ_2'
+			    			and column.columnDBName!='ISUPDATE_2' and column.columnDBName!='FDCODE_3' 
+			    			and column.columnDBName!='LEVELNO_3' and column.columnDBName!='ISQZX_3'
+			    			and column.columnDBName!='ISDJ_3' and column.columnDBName!='ISHZ_3'
+			    			and column.columnDBName!='ISUPDATE_3'">
+			    		${column.columnDBName}
+			    	</if>		
+				</foreach>	    	
+		     FROM ( SELECT  ${selectElement}
+			    FROM ${tableNameTempl} T 
+			     WHERE SYNSTATUS='1' AND TEMPLATEID NOT IN (
+		           SELECT TEMPLATEID FROM ${tableName} 
+		           WHERE ISTEMPLATE = '0' 
+		           <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+					 	AND ${rowVisibleSecu}
+				   </if> 
+		           <if test = "sqlWhere!=null"> 
+		         	  AND ${sqlWhere}  
+		           </if >)
+			 UNION ALL 
+		        SELECT  ${selectElement}
+		          FROM ${tableName} 
+		         WHERE ISTEMPLATE = '0'  
+		         <if test="rowVisibleSecu != null and rowVisibleSecu != ''">
+				 	AND ${rowVisibleSecu}
+				 </if> 
+		         <if test = "sqlWhere!=null">      
+		         	AND ${sqlWhere}  
+		         </if >
+			) d
+		)
+		ORDER BY FDCODE_${superid}
+ 	</select>       
+ 	
+ 	<select id="getAllFdcode" parameterType="java.util.Map" resultType="java.lang.String">
+	 	SELECT CASE WHEN COUNT(SUPERID_1) > COUNT(SUPERID_2) AND COUNT(SUPERID_2) > COUNT(SUPERID_3)
+	            THEN '1' 
+	            WHEN COUNT(SUPERID_2) > COUNT(SUPERID_1) AND COUNT(SUPERID_2) > COUNT(SUPERID_3)
+	            THEN '2' 
+	            WHEN COUNT(SUPERID_3) > COUNT(SUPERID_1) AND COUNT(SUPERID_3) > COUNT(SUPERID_2)
+	            THEN '3' 
+	            ELSE '1'
+	            END
+	       FROM ${tableName}_CFG  
+	      WHERE ISTEMPLATE = '1'
+    </select>  
+    
+    <select id="getFormulaCell" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{  #{result ,mode=OUT,jdbcType=CURSOR, javaType=ResultSet, resultMap=formulaCellMap} = call PKG_FORMULA.F_GET_FORMULA_CELL(#{tableID,mode=IN,jdbcType=VARCHAR})}
+ 			]]>
+ 	</select>
+</mapper>        
+

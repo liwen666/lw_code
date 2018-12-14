@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjhq.commons.excel2.dao.ExcelMapper">
+
+	<select id="queryAgency" parameterType="java.lang.String" resultType="java.util.Map">
+		select a.code as code, a.name as name, a.guid agencyid, b.code districtcode
+		  from code_t_agency_spf a
+		  left join code_t_district b
+		    on b.guid = a.districtid
+		 where a.guid = #{agencyID}
+	</select>
+	<select id="selectExcelInfo" parameterType="string" resultType="java.util.Map">
+		${sql}
+	</select>
+	<update id="updateSql" parameterType="string">
+		${sql}
+	</update>
+	<select id="callProcedure_p_calculateformula_0" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{ call PKG_FORMULA.P_CALCULATEFORMULA_0(#{tableID}, #{where}) }
+ 		]]>
+ 	</select>
+ 	<select id="callProcedure_p_clear_deleted_data" parameterType="hashmap"  statementType="CALLABLE" >
+ 		<![CDATA[
+ 		{ call P_CLEAR_DELETED_DATA(#{tableName}, #{agencyID}) }
+ 		]]>
+ 	</select>
+	<select id="callProcedure" parameterType="java.util.Map" statementType="CALLABLE">
+		{${sql}}
+	</select>
+ 	
+ 	
+</mapper>

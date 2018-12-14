@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tjhq.commons.setting.dataaudit.viewtotable.dao.IViewToTableDAO">
+	<select id="getViewTree" parameterType="String" resultType="com.tjhq.commons.setting.input.po.TreeNode">
+		SELECT * FROM (
+		      SELECT APPID CODE,APPID ID,  APPNAME NAME, '0' DEALTYPE, '' PID, '0' ISLEAF, 0 LEVELNO,ORDERID, 1 OPEN
+		      FROM DICT_T_APPREGISTER
+	      UNION ALL  
+	          SELECT  SUITID , SUITID , SUITNAME ,'0' ,
+	          CASE WHEN 
+	          	SUPERID='0'
+	          THEN 
+	          	APPID
+	          ELSE
+	            SUPERID END,
+	          CASE WHEN 
+	              (SELECT COUNT(*) FROM DICT_T_SUIT WHERE SUPERID=T.SUITID)>0
+	          THEN 
+	              '0'
+	          ELSE
+	              '1' 
+	          END ISLEAF,         
+	          LEVELNO ,
+	          ORDERID ,  
+	          0 
+	          FROM  DICT_T_SUIT T
+	         UNION ALL
+	           SELECT 
+	            M.TABLEID,
+	            M.TABLEID,
+	            M.NAME,
+	            M.DEALTYPE, 
+	            M.SUITID ,
+	            '1' ,
+	            (SELECT LEVELNO+1 FROM DICT_T_SUIT WHERE SUITID = M.SUITID) ,
+	            M.ORDERID,
+	            0 OPEN
+	            FROM
+	           DICT_T_MODEL M 
+			 WHERE M.TABLETYPE in ${tableType}
+			 ) CONNECT BY PID = PRIOR ID 
+		            START WITH LEVELNO = 0
+		   		ORDER SIBLINGS BY ORDERID ASC  
+
+	</select>
+	<select id="getTableDataByViewID" parameterType="String" resultType="map">
+		SELECT VTB.TABLEID,VTB.TABWHERE,VTB.VIEWID,(SELECT M.NAME FROM DICT_T_MODEL
+		M WHERE M.TABLEID = VTB.TABLEID) NAME FROM BGT_T_VIEWRELATIONTABLE VTB WHERE VTB.VIEWID=#{viewID}
+	</select>
+	<insert id="saveViewToTab" parameterType="String">
+		INSERT INTO BGT_T_VIEWRELATIONTABLE(VIEWID,TABLEID) VALUES (#{viewID},#{tableID})
+	</insert>
+	<delete id="delViewToTab" parameterType="String">
+		DELETE FROM BGT_T_VIEWRELATIONTABLE VTB WHERE VTB.TABLEID=#{tableID} AND VTB.VIEWID=#{viewID}
+	</delete>
+	<update id="updViewToTab" parameterType="String">
+		UPDATE BGT_T_VIEWRELATIONTABLE VTB SET VTB.TABWHERE =#{tabWhere,jdbcType = CLOB} WHERE VTB.TABLEID=#{tableID} AND VTB.VIEWID=#{viewID}
+	</update>
+	<select id="vetifyCon" parameterType="String" resultType="Integer">
+		SELECT COUNT(1) FROM ${dbTableName} M 
+			<if test="con != null and con != ''">
+				WHERE ${con}
+			</if>
+	</select>
+</mapper>

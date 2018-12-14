@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tjhq.commons.setting.input.dao.SinRecMapper">
+
+    <!-- 单页面整体设置 -->
+	<select id="getSetRECList"  parameterType="string" resultType="com.tjhq.commons.setting.external.po.RECPO">  
+		select a.TABLEID, a.RECID, a.SHOWCOLS, a.TITLEWIDTH, a.REMARK, a.ABSOLUTEPOSITION,a.LABLETEXTALIGN
+		  from dict_t_singlRecord a, dict_t_model b
+		 where a.TABLEID = b.TABLEID
+		   and a.tableid = #{tableid}
+	</select>
+	<!-- 单记录form明细设置 -->
+	<select id="getSinRECDetailList"  parameterType="map" 
+		resultType="com.tjhq.commons.setting.external.po.RECDetailPO">
+		SELECT *
+			  FROM (SELECT T.RECID,
+			               T.CTRLID,
+			               DECODE(T.CTRLNAME, '', D.NAME, T.CTRLNAME) CTRLNAME,
+			               T.SUPERID,
+			               T.ISLEAF,
+			               T.LEVELNO,
+			               T.ORDERID,
+			               T.ISTEXT,
+			               T.COLSPAN,
+			               T.ROWSPAN,
+			               T.TOPROWS,
+			               T.TOPGROUPS,
+			               T.BORDER,
+			               T.LEFTCOLS,
+			               T.ISGROUPCTRL,
+			               T.ISSHOW
+			          FROM DICT_T_SINRECDETAIL T, DICT_T_FACTOR D
+			         WHERE RECID = #{recid}
+			           AND T.CTRLID = D.COLUMNID(+)) A
+			 WHERE EXISTS
+			 (SELECT 1 FROM DICT_T_FACTOR FACTR WHERE A.CTRLID = FACTR.COLUMNID)
+			    OR A.ISGROUPCTRL = '1'
+			 ORDER BY ORDERID
+	</select>
+    <!-- 表数据查询-->
+    <select id="getTableData" parameterType="string" resultType="map">
+		select *
+		  from (select t.RECID,
+		               t.CTRLID,
+		               (case t.isleaf when '0' then t.ctrlname when '1' then d.NAME end) CTRLNAME,
+		               t.SUPERID,
+		               t.ISLEAF,
+		               t.LEVELNO,
+		               t.ORDERID,
+		               t.ISTEXT,
+		               decode(t.ISTEXT, '1', '是', '0', '否') SNAME_ISTEXT,
+		               t.COLSPAN,
+		               t.ROWSPAN,
+		               t.LEFTCOLS,
+		               t.TOPROWS,
+		               t.TOPGROUPS,
+		               t.BORDER,
+		               t.ISGROUPCTRL,
+		               t.ISSHOW,
+		               decode(t.ISSHOW, '1', '是', '0', '否') SNAME_ISSHOW
+		          from dict_t_sinRecDetail t, dict_t_factor d, dict_t_singlRecord s
+		         where t.CTRLID = d.COLUMNID(+)
+		           and s.RECID = t.RECID
+				   and s.TABLEID=#{tableID} 
+		         start with t.SUPERID = '0'
+		        connect by prior t.CTRLID = t.SUPERID
+		         order siblings by t.ORDERID) aa
+		 where exists
+		 (select 1 from dict_t_factor factr where aa.CTRLID = factr.COLUMNID)
+		    or aa.ISGROUPCTRL = '1'
+	</select>
+	
+    <!-- 报表设置表实体保存 -->
+	<insert id="insertSetREC" parameterType="java.lang.String">	    	
+		insert into dict_t_singlRecord 
+			(TABLEID,RECID,SHOWCOLS,TITLEWIDTH,ABSOLUTEPOSITION,LABLETEXTALIGN) 
+    	values 
+    		(#{tableid},sys_guid(),#{showcols},#{titlewidth},#{sinrecPosition},#{lableTextAlign})
+	</insert>
+	
+	<!-- 更新报表设置表 -->
+	<update id="updateSetREC" parameterType="map"> 
+  		update dict_t_singlRecord
+  		set
+			showcols = #{showcols},  
+			titlewidth = #{titlewidth},  
+			ABSOLUTEPOSITION = #{sinrecPosition},
+			lableTextAlign = #{lableTextAlign}
+  		where tableid=#{tableid} 
+	</update>
+	
+    <!-- 单页面明细设置保存 -->
+	<insert id="insertSetRECDetail" parameterType="map">	    	
+		insert into dict_t_sinRecDetail 
+			(RECID,CTRLID,CTRLNAME,SUPERID,ISLEAF,LEVELNO,LEFTCOLS,TOPROWS,TOPGROUPS,BORDER,
+			ORDERID,ISTEXT,COLSPAN,ROWSPAN,ISGROUPCTRL,ISSHOW) 
+    	values 
+    		(#{RECID},#{CTRLID},#{CTRLNAME},#{SUPERID},
+    		#{ISLEAF},#{LEVELNO},#{LEFTCOLS},#{TOPROWS},#{TOPGROUPS},#{BORDER},#{ORDERID},#{ISTEXT},
+    		#{COLSPAN},#{ROWSPAN},#{ISGROUPCTRL},#{ISSHOW})
+	</insert>
+	
+	<!-- 删除单页面明细设置 -->
+	<delete id="deleteSetRECDetail" parameterType="map">
+    	delete from dict_t_sinRecDetail
+    	WHERE RECID = #{RECID} and CTRLID=#{CTRLID}
+    </delete>
+    
+	<!-- 更新单页面明细设置 -->
+	<update id="updateSetRECDetail" parameterType="map"> 
+  		update dict_t_sinRecDetail
+  		<set>
+  			<if test="CTRLNAME !=null">
+  				CTRLNAME = #{CTRLNAME},
+  			</if>
+  			<if test="ORDERID !=null">
+  				ORDERID = #{ORDERID},
+  			</if>
+  			<if test="ISTEXT !=null">
+  				ISTEXT = #{ISTEXT},
+  			</if>
+  			<if test="LEFTCOLS !=null">
+  				LEFTCOLS = #{LEFTCOLS},
+  			</if>
+  			<if test="TOPROWS !=null">
+  				TOPROWS = #{TOPROWS},
+  			</if>
+  			<if test="TOPGROUPS !=null">
+  				TOPGROUPS = #{TOPGROUPS},
+  			</if>
+  			<if test="BORDER !=null">
+  				BORDER = #{BORDER},
+  			</if>
+  			<if test="COLSPAN !=null">
+  				COLSPAN = #{COLSPAN},
+  			</if>
+  			<if test="ISGROUPCTRL !=null">
+  				ISGROUPCTRL = #{ISGROUPCTRL}, 
+  			</if>
+  			<if test="ROWSPAN !=null">
+  				ROWSPAN = #{ROWSPAN},
+  			</if>
+  			<if test="ISSHOW !=null">
+  				ISSHOW = #{ISSHOW}
+  			</if>
+  		
+  		</set>			
+  		where RECID = #{RECID} and CTRLID=#{CTRLID}
+	</update>
+</mapper>
