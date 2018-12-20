@@ -24,8 +24,8 @@ import java.lang.annotation.Target;
  */ 
 @Target({ElementType.TYPE,ElementType.METHOD,ElementType.FIELD,ElementType.CONSTRUCTOR})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TestB {
+public @interface  TestB  {
     String name() ;
     int id() default 0;
-    Class<Long> gid();
+    Class<?> gid() default String.class;
 }
