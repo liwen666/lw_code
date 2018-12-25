@@ -36,7 +36,7 @@
 			<value>execute</value>
         </property>
 	</bean>
-	<bean id="timeTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="timeTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
        <property name="jobDetail" ref="mainJob"></property>
 			<!-- 
 			0 0 10,14,16 * * ? 每天上午10点，下午2点，4点
