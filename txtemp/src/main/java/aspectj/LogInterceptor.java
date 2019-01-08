@@ -12,7 +12,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class LogInterceptor {
     @Pointcut("execution(public * aspectj..*.save(..))")
-    public void myMethod(){};
+    public void myMethod(){
+        System.out.println("执行mymethod");
+
+    };
     
     /*@Before("execution(public void com.oumyye.dao.impl.UserDAOImpl.save(com.oumyye.model.User))")*/
     @Before("myMethod()")
