@@ -1,6 +1,7 @@
 package com.temp.code.sequence;
 
 
+
 /**
  * @author  ���� :lw E-mail:
  * @date ����ʱ�䣺2016��11��28�� ����9:16:55
